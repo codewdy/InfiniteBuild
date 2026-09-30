@@ -10,6 +10,7 @@ export type Config = {
 };
 
 export type UnitDefinition = {
+  kind: string;
   maxHp: number;
 };
 
@@ -18,6 +19,7 @@ export type MapDefinition = {
   spawner: {
     mapSize: number;
     value: number;
+    weight: number;
     enemies: {
       kind: string;
       count: {
