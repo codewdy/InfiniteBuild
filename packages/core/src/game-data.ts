@@ -1,3 +1,7 @@
+/*
+ * 所有跟游戏有关的静态数据
+ */
+
 export type Config = {
   map: {
     spawnMinimumSize: number;
@@ -15,7 +19,7 @@ export type MapDefinition = {
     mapSize: number;
     value: number;
     enemies: {
-      type: string;
+      kind: string;
       count: {
         min: number;
         max: number;
