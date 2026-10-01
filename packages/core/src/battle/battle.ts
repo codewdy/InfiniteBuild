@@ -55,8 +55,8 @@ export class Battle {
   }
   executeFrame(): BattleLog {
     this.ctx.frame += 1;
-    this.ctx.taskScheduler.executeFrame(this.ctx.frame);
     this.spawn();
+    this.ctx.taskScheduler.executeFrame(this.ctx.frame);
     for (let unit of this.ctx.units) {
       unit.onUpdate(this.ctx);
     }
