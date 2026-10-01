@@ -18,6 +18,11 @@ export type BattleStatus = "Running" | "Victory" | "Defeat";
 export type BattleLog = {
   frame: number;
   status: BattleStatus;
+  units: {
+    id: number;
+    kind: string;
+    position: number;
+  }[];
 };
 export type BattleSpec = {
   seed: number;
@@ -70,6 +75,11 @@ export class Battle {
     return {
       frame: this.ctx.frame,
       status: this.ctx.status,
+      units: Array.from(this.ctx.units, (unit) => ({
+        id: unit.id,
+        kind: unit.kind,
+        position: unit.position,
+      })),
     };
   }
   fixPosition(): void {
