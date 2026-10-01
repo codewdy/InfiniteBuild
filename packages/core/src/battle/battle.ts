@@ -69,6 +69,7 @@ export class Battle {
       unit.onUpdate(this.ctx);
     }
     this.fixPosition();
+    this.checkDeath();
     return this.renderLog();
   }
   renderLog(): BattleLog {
@@ -101,5 +102,10 @@ export class Battle {
       }
     }
     this.ctx.pendingSpawns = pendingSpawns;
+  }
+  checkDeath(): void {
+    for (const unit of [...this.ctx.units]) {
+      if (unit.hp <= 0) this.ctx.units.remove(unit);
+    }
   }
 }

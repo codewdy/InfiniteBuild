@@ -5,6 +5,7 @@ export interface Unit {
   kind: string;
   faction: Faction;
   position: number;
+  hp: number;
   move(ctx: BattleContext): void;
   onUpdate(ctx: BattleContext): void;
 }

@@ -5,9 +5,11 @@ export class PlayerUnit implements Unit {
   kind: string;
   faction: Faction = "Ally";
   position: number;
+  hp: number;
   constructor() {
     this.kind = "Player";
     this.position = 0;
+    this.hp = 1; // just mock
   }
   move(ctx: BattleContext): void {
     const { speed, range, count } = ctx.ctx.playerState.move;
@@ -28,6 +30,7 @@ export class PlayerUnit implements Unit {
       this.position += speed;
       return;
     }
+    if (enemyPositions.length === 0) return;
 
     enemyPositions.sort((a, b) => a - b);
     const targetPosition =

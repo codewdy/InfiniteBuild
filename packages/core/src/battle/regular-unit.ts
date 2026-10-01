@@ -6,12 +6,14 @@ export class RegularUnit implements Unit {
   kind: string;
   faction: Faction;
   position: number;
+  hp: number;
   private definition: UnitDefinition;
   constructor(definition: UnitDefinition, position: number, faction: Faction) {
     this.kind = definition.kind;
     this.position = position;
     this.faction = faction;
     this.definition = definition;
+    this.hp = this.definition.maxHp;
   }
   move(ctx: BattleContext): void {
     const direction = this.faction === "Ally" ? 1 : -1;
@@ -31,5 +33,7 @@ export class RegularUnit implements Unit {
     );
     this.position += direction * distanceToMove;
   }
-  onUpdate(ctx: BattleContext): void {}
+  onUpdate(ctx: BattleContext): void {
+    this.definition.onUpdate(this, ctx);
+  }
 }

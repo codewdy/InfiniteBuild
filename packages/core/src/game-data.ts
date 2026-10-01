@@ -2,6 +2,9 @@
  * 所有跟游戏有关的静态数据
  */
 
+import type { Unit } from "./battle/unit.js";
+import type { BattleContext } from "./battle/battle.js";
+
 export type Config = {
   map: {
     spawnMinimumSize: number;
@@ -16,6 +19,7 @@ export type UnitDefinition = {
     speed: number;
     range: number;
   };
+  onUpdate: (self: Unit, ctx: BattleContext) => void;
 };
 
 export type MapDefinition = {

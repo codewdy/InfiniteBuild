@@ -5,8 +5,22 @@ export const gameData: GameData = {
     map: { spawnMinimumSize: 15, visionRange: 20 },
   },
   unitDefinitions: {
-    Slime: { kind: "Slime", maxHp: 10, move: { speed: 0.5, range: 1 } },
-    Goblin: { kind: "Goblin", maxHp: 20, move: { speed: 1, range: 2 } },
+    Slime: {
+      kind: "Slime",
+      maxHp: 10,
+      move: { speed: 0.5, range: 1 },
+      onUpdate(self) {
+        self.hp -= 1;
+      },
+    },
+    Goblin: {
+      kind: "Goblin",
+      maxHp: 20,
+      move: { speed: 1, range: 2 },
+      onUpdate(self) {
+        self.hp -= 1;
+      },
+    },
   },
   mapDefinitions: {
     demo: {
