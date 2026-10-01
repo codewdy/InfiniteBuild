@@ -37,6 +37,34 @@ export class RandomGenerator {
     } while (value >= limit);
     return min + (value % range);
   }
+  /** Returns an equally likely array element, or undefined for an empty array. */
+  choice<T>(items: readonly T[]): T | undefined {
+    if (items.length === 0) return undefined;
+    return items[this.randInt(0, items.length - 1)];
+  }
+
+  /**
+   * Selects up to count elements without replacement, in random order.
+   * Leaves the input unchanged; duplicate values at different indices remain distinct.
+   */
+  choices<T>(items: readonly T[], count: number): T[] {
+    if (!Number.isSafeInteger(count) || count < 0) {
+      throw new RangeError("count must be a non-negative safe integer");
+    }
+    const size = Math.min(count, items.length);
+    if (size === 0) return [];
+
+    const pool = [...items];
+    // Partial Fisher–Yates gives each ordered selection equal probability.
+    for (let i = 0; i < size; i++) {
+      const index = this.randInt(i, pool.length - 1);
+      const selected = pool[index]!;
+      pool[index] = pool[i]!;
+      pool[i] = selected;
+    }
+    return pool.slice(0, size);
+  }
+
   /** Returns a uniformly distributed number between min and max. */
   uniform(min: number, max: number): number {
     this.validateRange(min, max);
