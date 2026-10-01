@@ -56,6 +56,7 @@ export class Battle {
   executeFrame(): BattleLog {
     this.ctx.frame += 1;
     this.ctx.taskScheduler.executeFrame(this.ctx.frame);
+    this.spawn();
     for (let unit of this.ctx.units) {
       unit.onUpdate(this.ctx);
     }
@@ -66,5 +67,18 @@ export class Battle {
       frame: this.ctx.frame,
       status: this.ctx.status,
     };
+  }
+  spawn(): void {
+    const { player, units, ctx } = this.ctx;
+    const visionRange = ctx.gameData.config.map.visionRange;
+    const pendingSpawns: Unit[] = [];
+    for (const unit of this.ctx.pendingSpawns) {
+      if (Math.abs(unit.position - player.position) <= visionRange) {
+        units.add(unit);
+      } else {
+        pendingSpawns.push(unit);
+      }
+    }
+    this.ctx.pendingSpawns = pendingSpawns;
   }
 }
