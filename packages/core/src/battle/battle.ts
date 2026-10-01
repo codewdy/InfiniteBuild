@@ -3,6 +3,7 @@ import { RandomGenerator } from "./random-generator.js";
 import { spawn } from "./spawn.js";
 import { UnitList } from "./unit-list.js";
 import type { Unit } from "./unit.js";
+import { TaskScheduler } from "./task-scheduler.js";
 
 export type Faction = "Ally" | "Enemy";
 export const Faction = {
@@ -29,13 +30,14 @@ export type BattleContext = {
   status: BattleStatus;
   units: UnitList;
   pendingSpawns: Unit[];
+  taskScheduler: TaskScheduler;
 };
 
 export class Battle {
   private ctx: BattleContext;
   constructor(ctx: Context, spec: BattleSpec) {
-    var rng = new RandomGenerator(spec.seed);
-    var spawns = spawn(ctx, spec.map, rng);
+    let rng = new RandomGenerator(spec.seed);
+    let spawns = spawn(ctx, spec.map, rng);
     this.ctx = {
       ctx: ctx,
       spec: spec,
@@ -44,10 +46,15 @@ export class Battle {
       status: "Running",
       units: new UnitList(rng, []),
       pendingSpawns: spawns,
+      taskScheduler: new TaskScheduler(),
     };
   }
   executeFrame(): BattleLog {
     this.ctx.frame += 1;
+    this.ctx.taskScheduler.executeFrame(this.ctx.frame);
+    for (let unit of this.ctx.units) {
+      unit.onUpdate(this.ctx);
+    }
     return this.renderLog();
   }
   renderLog(): BattleLog {
