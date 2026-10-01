@@ -12,7 +12,9 @@ export const Faction = {
   },
 };
 
-export type BattleLog = {};
+export type BattleLog = {
+  frame: number;
+};
 export type BattleSpec = {
   seed: number;
   map: string;
@@ -38,6 +40,15 @@ export class Battle {
       frame: 0,
       units: new UnitList(rng, []),
       pendingSpawns: spawns,
+    };
+  }
+  executeFrame(): BattleLog {
+    this.ctx.frame += 1;
+    return this.renderLog();
+  }
+  renderLog(): BattleLog {
+    return {
+      frame: this.ctx.frame,
     };
   }
 }
