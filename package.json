@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "build": "pnpm -r run build",
-    "mock": "pnpm run build && pnpm --filter @infinite-build/mockapp start"
+    "mock": "pnpm run build && pnpm --filter @infinite-build/mockapp start",
+    "mock:web": "pnpm run build && pnpm --filter @infinite-build/mockapp web"
   },
   "devDependencies": {
     "eslint": "^9.39.4",

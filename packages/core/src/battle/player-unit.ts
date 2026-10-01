@@ -12,7 +12,7 @@ export class PlayerUnit implements Unit {
     this.hp = 1; // just mock
   }
   move(ctx: BattleContext): void {
-    const { speed, range, count } = ctx.ctx.playerState.move;
+    const { speed, range, count, safeRange } = ctx.ctx.playerState.move;
     const visionRange = ctx.ctx.gameData.config.map.visionRange;
     const enemyPositions: number[] = [];
     for (const unit of ctx.units) {
@@ -26,17 +26,22 @@ export class PlayerUnit implements Unit {
       }
     }
 
+    enemyPositions.sort((a, b) => a - b);
+    const nearestPosition = enemyPositions[0];
+    const safeMoveDistance = nearestPosition === undefined
+      ? speed
+      : Math.min(speed, Math.max(0, nearestPosition - this.position - safeRange));
+
     if (enemyPositions.length < count && ctx.pendingSpawns.length > 0) {
-      this.position += speed;
+      this.position += safeMoveDistance;
       return;
     }
-    if (enemyPositions.length === 0) return;
+    if (enemyPositions.length === 0 || count <= 0) return;
 
-    enemyPositions.sort((a, b) => a - b);
     const targetPosition =
       enemyPositions[Math.min(count, enemyPositions.length) - 1]!;
     const distanceToMove = Math.min(
-      speed,
+      safeMoveDistance,
       Math.max(0, targetPosition - this.position - range),
     );
     this.position += distanceToMove;

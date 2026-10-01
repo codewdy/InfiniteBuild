@@ -6,6 +6,7 @@ export type PlayerState = {
   level: number;
   move: {
     speed: number;
+    safeRange: number;
     range: number;
     count: number;
   };

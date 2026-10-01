@@ -2,12 +2,12 @@ import type { BattleSpec, GameData, PlayerState } from "@infinite-build/core";
 
 export const gameData: GameData = {
   config: {
-    map: { spawnMinimumSize: 15, visionRange: 20 },
+    map: { spawnMinimumSize: 5, visionRange: 20 },
   },
   unitDefinitions: {
     Slime: {
       kind: "Slime",
-      maxHp: 10,
+      maxHp: 20,
       move: { speed: 0.5, range: 1 },
       onUpdate(self) {
         self.hp -= 1;
@@ -15,7 +15,7 @@ export const gameData: GameData = {
     },
     Goblin: {
       kind: "Goblin",
-      maxHp: 20,
+      maxHp: 30,
       move: { speed: 1, range: 2 },
       onUpdate(self) {
         self.hp -= 1;
@@ -24,19 +24,19 @@ export const gameData: GameData = {
   },
   mapDefinitions: {
     demo: {
-      totalValue: 6,
+      totalValue: 60,
       spawner: [
         {
-          mapSize: 15,
+          mapSize: 5,
           value: 1,
           weight: 2,
-          enemies: [{ kind: "Slime", count: { min: 1, max: 2 } }],
+          enemies: [{ kind: "Slime", count: { min: 1, max: 3 } }],
         },
         {
-          mapSize: 20,
+          mapSize: 7,
           value: 2,
           weight: 1,
-          enemies: [{ kind: "Goblin", count: { min: 1, max: 2 } }],
+          enemies: [{ kind: "Goblin", count: { min: 2, max: 3 } }],
         },
       ],
     },
@@ -45,7 +45,7 @@ export const gameData: GameData = {
 
 export const playerState: PlayerState = {
   level: 1,
-  move: { speed: 1, range: 5, count: 3 },
+  move: { speed: 1, safeRange: 2, range: 5, count: 2 },
 };
 
 export const battleSpec: BattleSpec = { seed: 42, map: "demo" };
