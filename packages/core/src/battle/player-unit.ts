@@ -9,5 +9,34 @@ export class PlayerUnit implements Unit {
     this.kind = "Player";
     this.position = 0;
   }
+  move(ctx: BattleContext): void {
+    const { speed, range, count } = ctx.ctx.playerState.move;
+    const visionRange = ctx.ctx.gameData.config.map.visionRange;
+    const enemyPositions: number[] = [];
+    for (const unit of ctx.units) {
+      const distance = unit.position - this.position;
+      if (
+        unit.faction !== this.faction &&
+        distance >= 0 &&
+        distance <= visionRange
+      ) {
+        enemyPositions.push(unit.position);
+      }
+    }
+
+    if (enemyPositions.length < count && ctx.pendingSpawns.length > 0) {
+      this.position += speed;
+      return;
+    }
+
+    enemyPositions.sort((a, b) => a - b);
+    const targetPosition =
+      enemyPositions[Math.min(count, enemyPositions.length) - 1]!;
+    const distanceToMove = Math.min(
+      speed,
+      Math.max(0, targetPosition - this.position - range),
+    );
+    this.position += distanceToMove;
+  }
   onUpdate(ctx: BattleContext): void {}
 }

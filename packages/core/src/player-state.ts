@@ -4,4 +4,9 @@
 
 export type PlayerState = {
   level: number;
+  move: {
+    speed: number;
+    range: number;
+    count: number;
+  };
 };

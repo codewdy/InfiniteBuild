@@ -58,8 +58,12 @@ export class Battle {
     this.spawn();
     this.ctx.taskScheduler.executeFrame(this.ctx.frame);
     for (let unit of this.ctx.units) {
+      unit.move(this.ctx);
+    }
+    for (let unit of this.ctx.units) {
       unit.onUpdate(this.ctx);
     }
+    this.fixPosition();
     return this.renderLog();
   }
   renderLog(): BattleLog {
@@ -67,6 +71,13 @@ export class Battle {
       frame: this.ctx.frame,
       status: this.ctx.status,
     };
+  }
+  fixPosition(): void {
+    const min = this.ctx.player.position;
+    const max = min + this.ctx.ctx.gameData.config.map.visionRange;
+    for (const unit of this.ctx.units) {
+      unit.position = Math.max(min, Math.min(max, unit.position));
+    }
   }
   spawn(): void {
     const { player, units, ctx } = this.ctx;

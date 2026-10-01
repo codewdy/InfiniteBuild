@@ -6,10 +6,30 @@ export class RegularUnit implements Unit {
   kind: string;
   faction: Faction;
   position: number;
+  private definition: UnitDefinition;
   constructor(definition: UnitDefinition, position: number, faction: Faction) {
     this.kind = definition.kind;
     this.position = position;
     this.faction = faction;
+    this.definition = definition;
+  }
+  move(ctx: BattleContext): void {
+    const direction = this.faction === "Ally" ? 1 : -1;
+    let nearestDistance = Infinity;
+    for (const unit of ctx.units) {
+      if (unit.faction === this.faction) continue;
+      const distance = (unit.position - this.position) * direction;
+      if (distance >= 0 && distance < nearestDistance) {
+        nearestDistance = distance;
+      }
+    }
+    if (nearestDistance === Infinity) return;
+
+    const distanceToMove = Math.min(
+      this.definition.move.speed,
+      Math.max(0, nearestDistance - this.definition.move.range),
+    );
+    this.position += direction * distanceToMove;
   }
   onUpdate(ctx: BattleContext): void {}
 }

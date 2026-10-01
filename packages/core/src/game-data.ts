@@ -12,6 +12,10 @@ export type Config = {
 export type UnitDefinition = {
   kind: string;
   maxHp: number;
+  move: {
+    speed: number;
+    range: number;
+  };
 };
 
 export type MapDefinition = {
