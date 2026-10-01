@@ -95,7 +95,9 @@ export class RandomGenerator {
 
   private validateRange(min: number, max: number): void {
     if (!Number.isFinite(min) || !Number.isFinite(max) || min > max) {
-      throw new RangeError("min and max must be finite numbers with min <= max");
+      throw new RangeError(
+        "min and max must be finite numbers with min <= max",
+      );
     }
   }
 }

@@ -33,7 +33,11 @@ export function spawn(ctx: Context, map: string, rng: RandomGenerator): Unit[] {
       const unitDefinition = ctx.gameData.unitDefinitions[enemy.kind]!;
       for (let i = 0; i < count; i++) {
         units.push(
-          new RegularUnit(unitDefinition, rng.truncatedNorm(position, end), "Enemy"),
+          new RegularUnit(
+            unitDefinition,
+            rng.truncatedNorm(position, end),
+            "Enemy",
+          ),
         );
       }
     }
