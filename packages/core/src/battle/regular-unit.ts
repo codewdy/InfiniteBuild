@@ -2,6 +2,7 @@ import type { Unit } from "./unit.js";
 import type { UnitDefinition } from "../game-data.js";
 import type { BattleContext, Faction } from "./battle.js";
 export class RegularUnit implements Unit {
+  id: number = -1;
   kind: string;
   faction: Faction;
   position: number;
