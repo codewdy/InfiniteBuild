@@ -1,6 +1,7 @@
 import type { Context } from "../context.js";
 import { RandomGenerator } from "./random-generator.js";
 import { spawn } from "./spawn.js";
+import { UnitList } from "./unit-list.js";
 import type { Unit } from "./unit.js";
 
 export type Faction = "Ally" | "Enemy";
@@ -17,25 +18,26 @@ export type BattleSpec = {
   map: string;
 };
 export type BattleContext = {
-  getUnits: () => Unit[];
-  getRandomUnits: (
-    position?: { min: number; max: number },
-    faction?: Faction,
-    count?: number,
-  ) => Unit[];
+  ctx: Context;
+  spec: BattleSpec;
+  rng: RandomGenerator;
+  frame: number;
+  units: UnitList;
+  pendingSpawns: Unit[];
 };
 
 export class Battle {
-  private context: Context;
-  private spec: BattleSpec;
-  private rng: RandomGenerator;
-  private pendingSpawns: Unit[];
-  private activatedUnits: Unit[];
+  private ctx: BattleContext;
   constructor(ctx: Context, spec: BattleSpec) {
-    this.context = ctx;
-    this.spec = spec;
-    this.rng = new RandomGenerator(spec.seed);
-    this.pendingSpawns = spawn(ctx, spec.map, this.rng);
-    this.activatedUnits = [];
+    var rng = new RandomGenerator(spec.seed);
+    var spawns = spawn(ctx, spec.map, rng);
+    this.ctx = {
+      ctx: ctx,
+      spec: spec,
+      rng: rng,
+      frame: 0,
+      units: new UnitList(rng, []),
+      pendingSpawns: spawns,
+    };
   }
 }

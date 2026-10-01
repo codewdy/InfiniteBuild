@@ -1,7 +1,8 @@
 import type { Unit } from "./unit.js";
-import type { BattleContext } from "./battle.js";
+import type { BattleContext, Faction } from "./battle.js";
 export class PlayerUnit implements Unit {
   kind: string;
+  faction: Faction = "Ally";
   position: number;
   constructor() {
     this.kind = "Player";
