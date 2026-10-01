@@ -23,8 +23,17 @@ importers:
       '@infinite-build/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@infinite-build/mock-data':
+        specifier: workspace:*
+        version: link:../../packages/mock-data
 
   packages/core: {}
+
+  packages/mock-data:
+    dependencies:
+      '@infinite-build/core':
+        specifier: workspace:*
+        version: link:../core
 
 packages:
 

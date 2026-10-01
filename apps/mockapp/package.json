@@ -8,6 +8,7 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@infinite-build/core": "workspace:*"
+    "@infinite-build/core": "workspace:*",
+    "@infinite-build/mock-data": "workspace:*"
   }
 }

@@ -1,3 +1,12 @@
-import { Game } from "@infinite-build/core";
+import { Battle } from "@infinite-build/core";
+import { battleSpec, gameData, playerState } from "@infinite-build/mock-data";
 
-Game.run();
+const battle = new Battle({ gameData, playerState }, battleSpec);
+const maxFrames = 100;
+
+console.log(JSON.stringify(battle.renderLog()));
+for (let frame = 0; frame < maxFrames; frame++) {
+  const log = battle.executeFrame();
+  console.log(JSON.stringify(log));
+  if (log.status !== "Running") break;
+}
