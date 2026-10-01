@@ -12,8 +12,10 @@ export const Faction = {
   },
 };
 
+export type BattleStatus = "Running" | "Victory" | "Defeat";
 export type BattleLog = {
   frame: number;
+  status: BattleStatus;
 };
 export type BattleSpec = {
   seed: number;
@@ -24,6 +26,7 @@ export type BattleContext = {
   spec: BattleSpec;
   rng: RandomGenerator;
   frame: number;
+  status: BattleStatus;
   units: UnitList;
   pendingSpawns: Unit[];
 };
@@ -38,6 +41,7 @@ export class Battle {
       spec: spec,
       rng: rng,
       frame: 0,
+      status: "Running",
       units: new UnitList(rng, []),
       pendingSpawns: spawns,
     };
@@ -49,6 +53,7 @@ export class Battle {
   renderLog(): BattleLog {
     return {
       frame: this.ctx.frame,
+      status: this.ctx.status,
     };
   }
 }
