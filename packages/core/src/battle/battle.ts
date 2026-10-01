@@ -43,9 +43,9 @@ export type BattleContext = {
 export class Battle {
   private ctx: BattleContext;
   constructor(ctx: Context, spec: BattleSpec) {
-    let rng = new RandomGenerator(spec.seed);
-    let spawns = spawn(ctx, spec.map, rng);
-    let player = new PlayerUnit();
+    const rng = new RandomGenerator(spec.seed);
+    const spawns = spawn(ctx, spec.map, rng);
+    const player = new PlayerUnit();
     this.ctx = {
       ctx: ctx,
       spec: spec,
@@ -62,10 +62,10 @@ export class Battle {
     this.ctx.frame += 1;
     this.spawn();
     this.ctx.taskScheduler.executeFrame(this.ctx.frame);
-    for (let unit of this.ctx.units) {
+    for (const unit of this.ctx.units) {
       unit.move(this.ctx);
     }
-    for (let unit of this.ctx.units) {
+    for (const unit of this.ctx.units) {
       unit.onUpdate(this.ctx);
     }
     this.fixPosition();
