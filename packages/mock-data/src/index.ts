@@ -8,7 +8,7 @@ export const gameData: GameData = {
     Slime: {
       kind: "Slime",
       maxHp: 20,
-      move: { speed: 0.5, range: 1 },
+      move: { speed: 0.5, range: 2 },
       onUpdate(self) {
         self.hp -= 1;
       },
@@ -16,7 +16,7 @@ export const gameData: GameData = {
     Goblin: {
       kind: "Goblin",
       maxHp: 30,
-      move: { speed: 1, range: 2 },
+      move: { speed: 1, range: 3 },
       onUpdate(self) {
         self.hp -= 1;
       },
@@ -45,7 +45,7 @@ export const gameData: GameData = {
 
 export const playerState: PlayerState = {
   level: 1,
-  move: { speed: 1, safeRange: 2, range: 5, count: 2 },
+  move: { speed: 1, safeRange: 1, range: 5, count: 2 },
 };
 
 export const battleSpec: BattleSpec = { seed: 42, map: "demo" };
