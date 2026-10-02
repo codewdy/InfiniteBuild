@@ -17,6 +17,9 @@ export type Config = {
       damage: number;
     };
   };
+  skill: {
+    castRateFluctuation: number;
+  };
 };
 
 export type SkillDefinition = {
@@ -31,6 +34,10 @@ export type UnitDefinition = {
     speed: number;
     range: number;
   };
+  skills: {
+    skill: string;
+    castRate: number;
+  }[];
   onUpdate?: (self: Unit, ctx: BattleContext) => void;
   onDeath?: (self: Unit, ctx: BattleContext) => void;
 };

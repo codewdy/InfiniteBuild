@@ -1,9 +1,10 @@
-import type { BattleSpec, GameData, PlayerState } from "@infinite-build/core";
+import type { BattleSpec, GameData, PlayerBuild } from "@infinite-build/core";
 
 export const gameData: GameData = {
   config: {
     map: { spawnMinimumSize: 5, visionRange: 20 },
     event: { maxEventPerUnit: { damage: 10 } },
+    skill: { castRateFluctuation: 0.2 },
   },
   skillDefinitions: {
     SelfDamage: {
@@ -21,24 +22,17 @@ export const gameData: GameData = {
       kind: "Slime",
       status: { maxHp: 20, attack: 5, defense: 0 },
       move: { speed: 0.5, range: 2 },
-      onUpdate(self, ctx) {
-        if (
-          Math.abs(self.position - ctx.player.position) <=
-            ctx.ctx.playerState.move.range &&
-          ctx.rng.rand() < 0.3
-        ) {
-          self.cast(ctx, "SelfDamage");
-        }
-      },
+      skills: [{ skill: "SelfDamage", castRate: 0.3 }],
     },
     Goblin: {
       kind: "Goblin",
       status: { maxHp: 30, attack: 5, defense: 0 },
       move: { speed: 1, range: 3 },
+      skills: [],
       onUpdate(self, ctx) {
         if (
           Math.abs(self.position - ctx.player.position) <=
-            ctx.ctx.playerState.move.range &&
+            ctx.build.move.range &&
           ctx.rng.rand() < 0.3
         ) {
           self.damage(ctx, self.rawStatus.attack);
@@ -67,7 +61,7 @@ export const gameData: GameData = {
   },
 };
 
-export const playerState: PlayerState = {
+export const playerBuild: PlayerBuild = {
   level: 1,
   move: { speed: 1, safeRange: 1, range: 5, count: 2 },
 };

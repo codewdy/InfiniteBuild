@@ -31,7 +31,7 @@ export abstract class Unit {
     ctx.events.addMove({ unit: this.id, direction, distance });
   }
   cast(ctx: BattleContext, skill: string): void {
-    const definition = ctx.ctx.gameData.skillDefinitions[skill];
+    const definition = ctx.gameData.skillDefinitions[skill];
     if (!definition) throw new Error(`Unknown skill: ${skill}`);
     ctx.taskScheduler.start(() => definition.caster(this, ctx));
   }

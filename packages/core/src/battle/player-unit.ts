@@ -12,8 +12,8 @@ export class PlayerUnit extends Unit {
     return Status.createByConfig({ maxHp: 1 });
   }
   onMove(ctx: BattleContext): void {
-    const { speed, range, count, safeRange } = ctx.ctx.playerState.move;
-    const visionRange = ctx.ctx.gameData.config.map.visionRange;
+    const { speed, range, count, safeRange } = ctx.build.move;
+    const visionRange = ctx.gameData.config.map.visionRange;
     const enemyPositions: number[] = [];
     for (const unit of ctx.units) {
       const distance = unit.position - this.position;

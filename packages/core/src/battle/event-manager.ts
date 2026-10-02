@@ -1,10 +1,10 @@
-import type { Context } from "../context.js";
+import type { GameData } from "../game-data.js";
 import type { BattleEvent } from "./battle-log.js";
 export class EventManager {
   private events: BattleEvent.Event[] = [];
   private damageCounts = new Map<number, number>();
 
-  constructor(private ctx: Context) {}
+  constructor(private gameData: GameData) {}
 
   clear(): void {
     this.events = [];
@@ -24,7 +24,7 @@ export class EventManager {
 
   addDamage(event: Omit<BattleEvent.Damage, "kind">): void {
     const count = this.damageCounts.get(event.dst) ?? 0;
-    if (count >= this.ctx.gameData.config.event.maxEventPerUnit.damage) return;
+    if (count >= this.gameData.config.event.maxEventPerUnit.damage) return;
 
     this.events.push({ ...event, kind: "Damage" });
     this.damageCounts.set(event.dst, count + 1);

@@ -1,7 +1,7 @@
 import { Battle } from "@infinite-build/core";
-import { battleSpec, gameData, playerState } from "@infinite-build/mock-data";
+import { battleSpec, gameData, playerBuild } from "@infinite-build/mock-data";
 
-const battle = new Battle({ gameData, playerState }, battleSpec);
+const battle = new Battle(gameData, battleSpec, playerBuild);
 const maxFrames = 100;
 
 console.log(JSON.stringify(battle.renderLog()));

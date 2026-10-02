@@ -1,6 +1,6 @@
 import { Battle } from "@infinite-build/core";
 import type { BattleLog } from "@infinite-build/core";
-import { battleSpec, gameData, playerState } from "@infinite-build/mock-data";
+import { battleSpec, gameData, playerBuild } from "@infinite-build/mock-data";
 
 function element<T extends HTMLElement>(id: string): T {
   const result = document.getElementById(id);
@@ -14,8 +14,8 @@ const step = element<HTMLButtonElement>("step");
 const speed = element<HTMLSelectElement>("speed");
 const logs = element<HTMLPreElement>("logs");
 const vision = gameData.config.map.visionRange;
-const range = playerState.move.range;
-let battle = new Battle({ gameData, playerState }, battleSpec);
+const range = playerBuild.move.range;
+let battle = new Battle(gameData, battleSpec, playerBuild);
 let log = battle.renderLog();
 let history: BattleLog[] = [log];
 let deaths = 0;
@@ -23,7 +23,7 @@ let totalDamage = 0;
 let playerPosition = 0;
 let timer: number | undefined;
 
-element("config").textContent = `Seed ${battleSpec.seed} · 视野 ${vision} · 范围 ${range} · 目标 ${playerState.move.count}`;
+element("config").textContent = `Seed ${battleSpec.seed} · 视野 ${vision} · 范围 ${range} · 目标 ${playerBuild.move.count}`;
 
 function draw(): void {
   const context = canvas.getContext("2d");
@@ -214,7 +214,7 @@ play.addEventListener("click", () => timer === undefined ? start() : pause());
 step.addEventListener("click", advance);
 element("reset").addEventListener("click", () => {
   pause();
-  battle = new Battle({ gameData, playerState }, battleSpec);
+  battle = new Battle(gameData, battleSpec, playerBuild);
   log = battle.renderLog();
   history = [log];
   deaths = 0;

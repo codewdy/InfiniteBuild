@@ -4,12 +4,14 @@ import type { BattleContext, Faction } from "./battle.js";
 import { Status } from "./status.js";
 export class RegularUnit extends Unit {
   private definition: UnitDefinition;
+  private skillProgress: number[];
   constructor(definition: UnitDefinition, position: number, faction: Faction) {
     super();
     this.kind = definition.kind;
     this.position = position;
     this.faction = faction;
     this.definition = definition;
+    this.skillProgress = definition.skills.map(() => 0);
   }
   onUpdateStatus(ctx: BattleContext): Status.Status {
     return Status.createByConfig(this.definition.status);
@@ -33,6 +35,17 @@ export class RegularUnit extends Unit {
     this.move(ctx, direction, distanceToMove);
   }
   onUpdate(ctx: BattleContext): void {
+    const fluctuation = ctx.gameData.config.skill.castRateFluctuation;
+    for (let index = 0; index < this.definition.skills.length; index++) {
+      const { skill, castRate } = this.definition.skills[index]!;
+      const growth =
+        castRate * ctx.rng.uniform(1 - fluctuation, 1 + fluctuation);
+      this.skillProgress[index] = (this.skillProgress[index] ?? 0) + growth;
+      while (this.skillProgress[index]! >= 1) {
+        this.skillProgress[index]! -= 1;
+        this.cast(ctx, skill);
+      }
+    }
     if (this.definition.onUpdate) {
       this.definition.onUpdate(this, ctx);
     }

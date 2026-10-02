@@ -1,4 +1,3 @@
-import type { Context } from "../context.js";
 import { RandomGenerator } from "./random-generator.js";
 import { spawn } from "./spawn.js";
 import { UnitManager } from "./unit-list.js";
@@ -7,6 +6,8 @@ import { TaskScheduler } from "./task-scheduler.js";
 import { PlayerUnit } from "./player-unit.js";
 import type { BattleLog, BattleStatus } from "./battle-log.js";
 import { EventManager } from "./event-manager.js";
+import type { PlayerBuild } from "../player-build.js";
+import type { GameData } from "../game-data.js";
 
 export type Faction = "Ally" | "Enemy";
 export const Faction = {
@@ -21,7 +22,8 @@ export type BattleSpec = {
   map: string;
 };
 export type BattleContext = {
-  ctx: Context;
+  gameData: GameData;
+  build: PlayerBuild;
   spec: BattleSpec;
   rng: RandomGenerator;
   frame: number;
@@ -35,12 +37,22 @@ export type BattleContext = {
 
 export class Battle {
   private ctx: BattleContext;
-  constructor(ctx: Context, spec: BattleSpec) {
+  private buildLog: Record<number, PlayerBuild>;
+  constructor(
+    gameData: GameData,
+    spec: BattleSpec,
+    build: PlayerBuild | Record<number, PlayerBuild>,
+  ) {
+    this.buildLog = structuredClone("level" in build ? { 0: build } : build);
+    const initialBuild = this.buildLog[0];
+    if (!initialBuild)
+      throw new Error("buildLog must include an initial build at frame 0");
     const rng = new RandomGenerator(spec.seed);
-    const spawns = spawn(ctx, spec.map, rng);
+    const spawns = spawn(gameData, spec.map, rng);
     const player = new PlayerUnit();
     this.ctx = {
-      ctx: ctx,
+      gameData: gameData,
+      build: structuredClone(initialBuild),
       spec: spec,
       rng: rng,
       frame: 0,
@@ -49,12 +61,18 @@ export class Battle {
       units: new UnitManager(rng, [player]),
       pendingSpawns: spawns,
       taskScheduler: new TaskScheduler(),
-      events: new EventManager(ctx),
+      events: new EventManager(gameData),
     };
+  }
+  changeBuild(build: PlayerBuild): void {
+    if (this.ctx.status !== "Running") return;
+    this.buildLog[this.ctx.frame + 1] = structuredClone(build);
   }
   executeFrame(): BattleLog {
     if (this.ctx.status !== "Running") return this.renderLog();
     this.ctx.frame += 1;
+    const build = this.buildLog[this.ctx.frame];
+    if (build) this.ctx.build = structuredClone(build);
     this.ctx.events.clear();
     this.spawn();
     for (const unit of this.ctx.units) {
@@ -88,14 +106,14 @@ export class Battle {
   }
   fixPosition(): void {
     const min = this.ctx.player.position;
-    const max = min + this.ctx.ctx.gameData.config.map.visionRange;
+    const max = min + this.ctx.gameData.config.map.visionRange;
     for (const unit of this.ctx.units) {
       unit.position = Math.max(min, Math.min(max, unit.position));
     }
   }
   spawn(): void {
-    const { player, units, ctx } = this.ctx;
-    const visionRange = ctx.gameData.config.map.visionRange;
+    const { player, units, gameData } = this.ctx;
+    const visionRange = gameData.config.map.visionRange;
     const pendingSpawns: Unit[] = [];
     for (const unit of this.ctx.pendingSpawns) {
       if (Math.abs(unit.position - player.position) <= visionRange) {

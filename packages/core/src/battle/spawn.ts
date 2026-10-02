@@ -1,11 +1,15 @@
-import type { Context } from "../context.js";
 import type { Unit } from "./unit.js";
 import type { RandomGenerator } from "./random-generator.js";
 import { RegularUnit } from "./regular-unit.js";
+import type { GameData } from "../game-data.js";
 
-export function spawn(ctx: Context, map: string, rng: RandomGenerator): Unit[] {
-  const definition = ctx.gameData.mapDefinitions[map]!;
-  let position = ctx.gameData.config.map.spawnMinimumSize;
+export function spawn(
+  gameData: GameData,
+  map: string,
+  rng: RandomGenerator,
+): Unit[] {
+  const definition = gameData.mapDefinitions[map]!;
+  let position = gameData.config.map.spawnMinimumSize;
   const spawners = definition.spawner.filter((spawner) => spawner.weight > 0);
   const totalWeight = spawners.reduce(
     (sum, spawner) => sum + spawner.weight,
@@ -30,7 +34,7 @@ export function spawn(ctx: Context, map: string, rng: RandomGenerator): Unit[] {
     const end = position + selected.mapSize;
     for (const enemy of selected.enemies) {
       const count = rng.randInt(enemy.count.min, enemy.count.max);
-      const unitDefinition = ctx.gameData.unitDefinitions[enemy.kind]!;
+      const unitDefinition = gameData.unitDefinitions[enemy.kind]!;
       for (let i = 0; i < count; i++) {
         units.push(
           new RegularUnit(
