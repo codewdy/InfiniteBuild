@@ -8,6 +8,7 @@ export class PlayerUnit extends Unit {
     this.faction = "Ally";
     this.position = 0;
   }
+  onBuildChanged(ctx: BattleContext): void {}
   onUpdateStatus(ctx: BattleContext): Status.Status {
     return Status.createByConfig({ maxHp: 1 });
   }

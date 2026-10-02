@@ -63,6 +63,7 @@ export class Battle {
       taskScheduler: new TaskScheduler(),
       events: new EventManager(gameData),
     };
+    player.onBuildChanged(this.ctx);
   }
   changeBuild(build: PlayerBuild): void {
     if (this.ctx.status !== "Running") return;
@@ -71,9 +72,12 @@ export class Battle {
   executeFrame(): BattleLog {
     if (this.ctx.status !== "Running") return this.renderLog();
     this.ctx.frame += 1;
-    const build = this.buildLog[this.ctx.frame];
-    if (build) this.ctx.build = structuredClone(build);
     this.ctx.events.clear();
+    const build = this.buildLog[this.ctx.frame];
+    if (build) {
+      this.ctx.build = structuredClone(build);
+      this.ctx.player.onBuildChanged(this.ctx);
+    }
     this.spawn();
     for (const unit of this.ctx.units) {
       unit.updateStatus(this.ctx);
