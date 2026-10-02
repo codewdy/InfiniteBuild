@@ -5,6 +5,17 @@ export const gameData: GameData = {
     map: { spawnMinimumSize: 5, visionRange: 20 },
     event: { maxEventPerUnit: { damage: 10 } },
   },
+  skillDefinitions: {
+    SelfDamage: {
+      name: "自伤",
+      *caster(self, ctx) {
+        const attack = self.rawStatus.attack;
+        self.damage(ctx, attack * 0.4);
+        yield* ctx.taskScheduler.waitFrames(1);
+        self.damage(ctx, attack * 0.6);
+      },
+    },
+  },
   unitDefinitions: {
     Slime: {
       kind: "Slime",
@@ -16,7 +27,7 @@ export const gameData: GameData = {
             ctx.ctx.playerState.move.range &&
           ctx.rng.rand() < 0.3
         ) {
-          self.damage(ctx, self.status.attack);
+          self.cast(ctx, "SelfDamage");
         }
       },
     },
@@ -30,7 +41,7 @@ export const gameData: GameData = {
             ctx.ctx.playerState.move.range &&
           ctx.rng.rand() < 0.3
         ) {
-          self.damage(ctx, self.status.attack);
+          self.damage(ctx, self.rawStatus.attack);
         }
       },
     },

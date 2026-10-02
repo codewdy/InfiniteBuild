@@ -5,6 +5,7 @@
 import type { Unit } from "./battle/unit.js";
 import type { BattleContext } from "./battle/battle.js";
 import type { Status } from "./battle/status.js";
+import type { Routine } from "./battle/task-scheduler.js";
 
 export type Config = {
   map: {
@@ -16,6 +17,11 @@ export type Config = {
       damage: number;
     };
   };
+};
+
+export type SkillDefinition = {
+  name: string;
+  caster: (unit: Unit, ctx: BattleContext) => Routine;
 };
 
 export type UnitDefinition = {
@@ -48,5 +54,6 @@ export type MapDefinition = {
 export type GameData = {
   unitDefinitions: Record<string, UnitDefinition>;
   mapDefinitions: Record<string, MapDefinition>;
+  skillDefinitions: Record<string, SkillDefinition>;
   config: Config;
 };

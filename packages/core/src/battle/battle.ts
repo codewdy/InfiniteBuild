@@ -81,7 +81,7 @@ export class Battle {
         kind: unit.kind,
         position: unit.position,
         hp: unit.hp,
-        status: { ...unit.status },
+        status: { ...unit.rawStatus },
       })),
       events: this.ctx.events.getEvents(),
     };
