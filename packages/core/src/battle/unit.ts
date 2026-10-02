@@ -8,6 +8,7 @@ export abstract class Unit {
   position!: number;
   maxHp: number = 1;
   hp: number = 1;
+  isDead: boolean = false;
   rawStatus: Status.RawStatus = Status.resolve(
     Status.createByConfig({ maxHp: 1 }),
   );
