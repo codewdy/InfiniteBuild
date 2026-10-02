@@ -106,7 +106,10 @@ export class Battle {
   }
   checkDeath(): void {
     for (const unit of [...this.ctx.units]) {
-      if (unit.hp <= 0) this.ctx.units.remove(unit);
+      if (unit.hp <= 0) {
+        unit.onDeath(this.ctx);
+        this.ctx.units.remove(unit);
+      }
     }
   }
 }

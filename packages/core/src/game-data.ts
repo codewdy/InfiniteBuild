@@ -25,7 +25,8 @@ export type UnitDefinition = {
     speed: number;
     range: number;
   };
-  onUpdate: (self: Unit, ctx: BattleContext) => void;
+  onUpdate?: (self: Unit, ctx: BattleContext) => void;
+  onDeath?: (self: Unit, ctx: BattleContext) => void;
 };
 
 export type MapDefinition = {

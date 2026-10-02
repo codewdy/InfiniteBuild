@@ -31,4 +31,5 @@ export abstract class Unit {
   abstract onUpdateStatus(ctx: BattleContext): Status.Status;
   abstract onMove(ctx: BattleContext): void;
   abstract onUpdate(ctx: BattleContext): void;
+  abstract onDeath(ctx: BattleContext): void;
 }

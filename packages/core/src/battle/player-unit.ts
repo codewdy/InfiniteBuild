@@ -51,4 +51,5 @@ export class PlayerUnit extends Unit {
     this.move(ctx, 1, distanceToMove);
   }
   onUpdate(ctx: BattleContext): void {}
+  onDeath(ctx: BattleContext): void {}
 }

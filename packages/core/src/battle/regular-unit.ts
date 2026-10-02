@@ -33,6 +33,13 @@ export class RegularUnit extends Unit {
     this.move(ctx, direction, distanceToMove);
   }
   onUpdate(ctx: BattleContext): void {
-    this.definition.onUpdate(this, ctx);
+    if (this.definition.onUpdate) {
+      this.definition.onUpdate(this, ctx);
+    }
+  }
+  onDeath(ctx: BattleContext): void {
+    if (this.definition.onDeath) {
+      this.definition.onDeath(this, ctx);
+    }
   }
 }
