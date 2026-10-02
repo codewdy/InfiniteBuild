@@ -56,6 +56,9 @@ export class Battle {
     this.ctx.frame += 1;
     this.ctx.events.clear();
     this.spawn();
+    for (const unit of this.ctx.units) {
+      unit.updateStatus(this.ctx);
+    }
     this.ctx.taskScheduler.executeFrame(this.ctx.frame);
     for (const unit of this.ctx.units) {
       unit.onMove(this.ctx);
@@ -75,6 +78,8 @@ export class Battle {
         id: unit.id,
         kind: unit.kind,
         position: unit.position,
+        hp: unit.hp,
+        status: { ...unit.status },
       })),
       events: this.ctx.events.getEvents(),
     };

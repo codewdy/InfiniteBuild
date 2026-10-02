@@ -67,6 +67,13 @@ function draw(): void {
     context.fill();
     context.textAlign = "center";
     context.fillText(`${unit.kind} #${unit.id}`, at, y - 16);
+    const healthRatio = unit.status.maxHp > 0
+      ? Math.max(0, Math.min(1, unit.hp / unit.status.maxHp))
+      : 0;
+    context.fillStyle = "#30405a";
+    context.fillRect(at - 16, y - 11, 32, 3);
+    context.fillStyle = healthRatio <= 0.3 ? "#ff7b89" : "#72dab5";
+    context.fillRect(at - 16, y - 11, 32 * healthRatio, 3);
     context.textAlign = "left";
   });
   const previousUnits = history[history.length - 2]?.units ?? [];
@@ -122,7 +129,14 @@ function render(): void {
   element("deaths").textContent = String(deaths);
   const rows = log.units.map((unit) => {
     const row = document.createElement("tr");
-    for (const value of [unit.id, unit.kind, unit.position.toFixed(2)]) {
+    for (const value of [
+      unit.id,
+      unit.kind,
+      unit.position.toFixed(2),
+      `${unit.hp.toFixed(1)} / ${unit.status.maxHp.toFixed(1)}`,
+      unit.status.attack.toFixed(1),
+      unit.status.defense.toFixed(1),
+    ]) {
       const cell = document.createElement("td");
       cell.textContent = String(value);
       row.append(cell);

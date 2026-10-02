@@ -8,7 +8,7 @@ export const gameData: GameData = {
   unitDefinitions: {
     Slime: {
       kind: "Slime",
-      maxHp: 20,
+      status: { maxHp: 20, attack: 5, defense: 0 },
       move: { speed: 0.5, range: 2 },
       onUpdate(self, ctx) {
         if (
@@ -16,13 +16,13 @@ export const gameData: GameData = {
             ctx.ctx.playerState.move.range &&
           ctx.rng.rand() < 0.3
         ) {
-          self.damage(ctx, 5);
+          self.damage(ctx, self.status.attack);
         }
       },
     },
     Goblin: {
       kind: "Goblin",
-      maxHp: 30,
+      status: { maxHp: 30, attack: 5, defense: 0 },
       move: { speed: 1, range: 3 },
       onUpdate(self, ctx) {
         if (
@@ -30,7 +30,7 @@ export const gameData: GameData = {
             ctx.ctx.playerState.move.range &&
           ctx.rng.rand() < 0.3
         ) {
-          self.damage(ctx, 5);
+          self.damage(ctx, self.status.attack);
         }
       },
     },

@@ -1,6 +1,7 @@
 import { Unit } from "./unit.js";
 import type { UnitDefinition } from "../game-data.js";
 import type { BattleContext, Faction } from "./battle.js";
+import { Status } from "./status.js";
 export class RegularUnit extends Unit {
   private definition: UnitDefinition;
   constructor(definition: UnitDefinition, position: number, faction: Faction) {
@@ -9,7 +10,9 @@ export class RegularUnit extends Unit {
     this.position = position;
     this.faction = faction;
     this.definition = definition;
-    this.hp = this.definition.maxHp;
+  }
+  onUpdateStatus(ctx: BattleContext): Status.Status {
+    return Status.createByConfig(this.definition.status);
   }
   onMove(ctx: BattleContext): void {
     const direction = this.faction === "Ally" ? 1 : -1;

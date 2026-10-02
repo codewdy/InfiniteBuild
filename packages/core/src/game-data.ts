@@ -4,6 +4,7 @@
 
 import type { Unit } from "./battle/unit.js";
 import type { BattleContext } from "./battle/battle.js";
+import type { Status } from "./battle/status.js";
 
 export type Config = {
   map: {
@@ -19,7 +20,7 @@ export type Config = {
 
 export type UnitDefinition = {
   kind: string;
-  maxHp: number;
+  status: Status.StatusConfig;
   move: {
     speed: number;
     range: number;

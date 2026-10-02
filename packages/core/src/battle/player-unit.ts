@@ -1,12 +1,15 @@
 import { Unit } from "./unit.js";
 import type { BattleContext } from "./battle.js";
+import { Status } from "./status.js";
 export class PlayerUnit extends Unit {
   constructor() {
     super();
     this.kind = "Player";
     this.faction = "Ally";
     this.position = 0;
-    this.hp = 1; // just mock
+  }
+  onUpdateStatus(ctx: BattleContext): Status.Status {
+    return Status.createByConfig({ maxHp: 1 });
   }
   onMove(ctx: BattleContext): void {
     const { speed, range, count, safeRange } = ctx.ctx.playerState.move;

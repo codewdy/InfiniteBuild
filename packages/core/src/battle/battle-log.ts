@@ -1,3 +1,5 @@
+import type { Status } from "./status.js";
+
 export namespace BattleEvent {
   export type Damage = {
     kind: "Damage";
@@ -20,6 +22,8 @@ export type BattleLog = {
     id: number;
     kind: string;
     position: number;
+    hp: number;
+    status: Status.RawStatus;
   }[];
   events: BattleEvent.Event[];
 };
