@@ -11,7 +11,7 @@ export class RegularUnit extends Unit {
     this.definition = definition;
     this.hp = this.definition.maxHp;
   }
-  move(ctx: BattleContext): void {
+  onMove(ctx: BattleContext): void {
     const direction = this.faction === "Ally" ? 1 : -1;
     let nearestDistance = Infinity;
     for (const unit of ctx.units) {
@@ -27,7 +27,7 @@ export class RegularUnit extends Unit {
       this.definition.move.speed,
       Math.max(0, nearestDistance - this.definition.move.range),
     );
-    this.position += direction * distanceToMove;
+    this.move(ctx, direction, distanceToMove);
   }
   onUpdate(ctx: BattleContext): void {
     this.definition.onUpdate(this, ctx);

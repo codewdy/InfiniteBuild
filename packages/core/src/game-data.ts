@@ -10,6 +10,11 @@ export type Config = {
     spawnMinimumSize: number;
     visionRange: number;
   };
+  event: {
+    maxEventPerUnit: {
+      damage: number;
+    };
+  };
 };
 
 export type UnitDefinition = {

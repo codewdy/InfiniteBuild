@@ -5,6 +5,8 @@ import { UnitManager } from "./unit-list.js";
 import type { Unit } from "./unit.js";
 import { TaskScheduler } from "./task-scheduler.js";
 import { PlayerUnit } from "./player-unit.js";
+import type { BattleLog, BattleStatus } from "./battle-log.js";
+import { EventManager } from "./event-manager.js";
 
 export type Faction = "Ally" | "Enemy";
 export const Faction = {
@@ -14,16 +16,6 @@ export const Faction = {
   },
 };
 
-export type BattleStatus = "Running" | "Victory" | "Defeat";
-export type BattleLog = {
-  frame: number;
-  status: BattleStatus;
-  units: {
-    id: number;
-    kind: string;
-    position: number;
-  }[];
-};
 export type BattleSpec = {
   seed: number;
   map: string;
@@ -38,6 +30,7 @@ export type BattleContext = {
   units: UnitManager;
   pendingSpawns: Unit[];
   taskScheduler: TaskScheduler;
+  events: EventManager;
 };
 
 export class Battle {
@@ -56,14 +49,16 @@ export class Battle {
       units: new UnitManager(rng, [player]),
       pendingSpawns: spawns,
       taskScheduler: new TaskScheduler(),
+      events: new EventManager(ctx),
     };
   }
   executeFrame(): BattleLog {
     this.ctx.frame += 1;
+    this.ctx.events.clear();
     this.spawn();
     this.ctx.taskScheduler.executeFrame(this.ctx.frame);
     for (const unit of this.ctx.units) {
-      unit.move(this.ctx);
+      unit.onMove(this.ctx);
     }
     for (const unit of this.ctx.units) {
       unit.onUpdate(this.ctx);
@@ -81,6 +76,7 @@ export class Battle {
         kind: unit.kind,
         position: unit.position,
       })),
+      events: this.ctx.events.getEvents(),
     };
   }
   fixPosition(): void {

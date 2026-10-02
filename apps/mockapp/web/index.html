@@ -22,9 +22,10 @@
       <section class="panel">
         <div class="panel-title"><h2>战场</h2><span id="config"></span></div>
         <canvas id="battlefield" aria-label="战场：玩家与敌人位置，玩家视野和移动范围"></canvas>
-        <div class="legend"><span><i class="player"></i>Player</span><span><i class="slime"></i>Slime</span><span><i class="goblin"></i>Goblin</span><span>绿色区域 · 移动范围</span><span>蓝色区域 · 视野</span></div>
+        <div class="legend"><span><i class="player"></i>Player</span><span><i class="slime"></i>Slime</span><span><i class="goblin"></i>Goblin</span><span>绿色区域 · 移动范围</span><span>蓝色区域 · 视野</span><span class="move-event">蓝色箭头 · Move</span><span class="damage-event">红色数值 · Damage</span></div>
         <div class="controls"><button id="play" class="primary">播放</button><button id="step">下一帧</button><button id="reset">重置</button><label>播放速度 <select id="speed"><option value="1">1 帧 / 秒</option><option value="5" selected>5 帧 / 秒</option><option value="15">15 帧 / 秒</option><option value="30">30 帧 / 秒</option></select></label></div>
       </section>
+      <section class="panel events-panel"><div class="panel-title"><h2>事件信号</h2><span id="event-count">当前帧无事件</span></div><div class="table-wrap"><table><thead><tr><th>事件</th><th>Unit ID</th><th>详情</th></tr></thead><tbody id="events"></tbody></table></div></section>
       <div class="details">
         <section class="panel"><div class="panel-title"><h2>当前 unit</h2><span>按 ID 排列</span></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>Kind</th><th>位置</th></tr></thead><tbody id="units"></tbody></table></div></section>
         <section class="panel"><div class="panel-title"><h2>执行日志</h2><span>最近 100 帧</span></div><pre id="logs" aria-label="逐帧 JSON 日志"></pre></section>

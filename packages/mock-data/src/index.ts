@@ -3,22 +3,35 @@ import type { BattleSpec, GameData, PlayerState } from "@infinite-build/core";
 export const gameData: GameData = {
   config: {
     map: { spawnMinimumSize: 5, visionRange: 20 },
+    event: { maxEventPerUnit: { damage: 10 } },
   },
   unitDefinitions: {
     Slime: {
       kind: "Slime",
       maxHp: 20,
       move: { speed: 0.5, range: 2 },
-      onUpdate(self) {
-        self.hp -= 1;
+      onUpdate(self, ctx) {
+        if (
+          Math.abs(self.position - ctx.player.position) <=
+            ctx.ctx.playerState.move.range &&
+          ctx.rng.rand() < 0.3
+        ) {
+          self.damage(ctx, 5);
+        }
       },
     },
     Goblin: {
       kind: "Goblin",
       maxHp: 30,
       move: { speed: 1, range: 3 },
-      onUpdate(self) {
-        self.hp -= 1;
+      onUpdate(self, ctx) {
+        if (
+          Math.abs(self.position - ctx.player.position) <=
+            ctx.ctx.playerState.move.range &&
+          ctx.rng.rand() < 0.3
+        ) {
+          self.damage(ctx, 5);
+        }
       },
     },
   },

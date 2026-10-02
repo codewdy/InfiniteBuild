@@ -69,6 +69,49 @@ function draw(): void {
     context.fillText(`${unit.kind} #${unit.id}`, at, y - 16);
     context.textAlign = "left";
   });
+  const previousUnits = history[history.length - 2]?.units ?? [];
+  const damageByUnit = new Map<number, number>();
+  for (const event of log.events) {
+    if (event.kind === "Damage") {
+      damageByUnit.set(event.dst, (damageByUnit.get(event.dst) ?? 0) + event.damage);
+      continue;
+    }
+    if (event.distance === 0 || event.direction === 0) continue;
+    const index = log.units.findIndex((unit) => unit.id === event.unit);
+    const unit = log.units[index] ?? previousUnits.find((unit) => unit.id === event.unit);
+    if (!unit) continue;
+    const y = (unit.kind === "Player" ? 155 : 90 + (Math.max(index, 0) % 4) * 35) + 12;
+    const start = x(unit.position - event.direction * event.distance);
+    const end = x(unit.position);
+    const direction = Math.sign(event.direction * event.distance);
+    context.strokeStyle = "#79b8ff";
+    context.lineWidth = 2;
+    context.beginPath();
+    context.moveTo(start, y);
+    context.lineTo(end, y);
+    context.moveTo(end - direction * 5, y - 4);
+    context.lineTo(end, y);
+    context.lineTo(end - direction * 5, y + 4);
+    context.stroke();
+    context.lineWidth = 1;
+  }
+  for (const [id, damage] of damageByUnit) {
+    const index = log.units.findIndex((unit) => unit.id === id);
+    const previousIndex = previousUnits.findIndex((unit) => unit.id === id);
+    const unit = log.units[index] ?? previousUnits[previousIndex];
+    if (!unit) continue;
+    const displayIndex = index >= 0 ? index : previousIndex;
+    const y = unit.kind === "Player" ? 155 : 90 + (Math.max(displayIndex, 0) % 4) * 35;
+    context.strokeStyle = "#ff7b89";
+    context.beginPath();
+    context.arc(x(unit.position), y, 13, 0, Math.PI * 2);
+    context.stroke();
+    context.fillStyle = "#ff7b89";
+    context.font = "bold 13px system-ui";
+    context.textAlign = "center";
+    context.fillText(`-${damage}${index < 0 ? " · 死亡" : ""}`, x(unit.position), y + 29);
+    context.textAlign = "left";
+  }
 }
 
 function render(): void {
@@ -87,6 +130,21 @@ function render(): void {
     return row;
   });
   element("units").replaceChildren(...rows);
+  const eventRows = log.events.map((event) => {
+    const row = document.createElement("tr");
+    row.className = event.kind === "Damage" ? "damage-event" : "move-event";
+    const values = event.kind === "Damage"
+      ? ["Damage", event.dst, `伤害 ${event.damage}`]
+      : ["Move", event.unit, `${event.direction >= 0 ? "→" : "←"} 距离 ${event.distance.toFixed(2)}`];
+    for (const value of values) {
+      const cell = document.createElement("td");
+      cell.textContent = String(value);
+      row.append(cell);
+    }
+    return row;
+  });
+  element("events").replaceChildren(...eventRows);
+  element("event-count").textContent = eventRows.length === 0 ? "当前帧无事件" : `当前帧 ${eventRows.length} 条`;
   logs.textContent = history.map((entry) => JSON.stringify(entry)).join("\n");
   logs.scrollTop = logs.scrollHeight;
   step.disabled = log.status !== "Running" || timer !== undefined;
