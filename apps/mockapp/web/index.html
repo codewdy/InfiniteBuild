@@ -9,6 +9,14 @@
       { "imports": { "@infinite-build/core": "/core/index.js", "@infinite-build/mock-data": "/mock-data/index.js" } }
     </script>
     <script type="module" src="/app/browser.js"></script>
+    <script type="module">
+      const updates = new EventSource("/__reload");
+      let revision;
+      updates.onmessage = (event) => {
+        if (revision !== undefined && revision !== event.data) location.reload();
+        revision = event.data;
+      };
+    </script>
   </head>
   <body>
     <main>

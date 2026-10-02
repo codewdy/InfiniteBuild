@@ -1,9 +1,80 @@
 import { createServer } from "node:http";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir, stat } from "node:fs/promises";
+import { spawn } from "node:child_process";
 import { resolve, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const base = fileURLToPath(new URL(".", import.meta.url));
+const workspace = resolve(base, "../..");
+const clients = new Set();
+let revision = 0;
+let building = false;
+let pendingBuild = false;
+
+function reload() {
+  revision += 1;
+  for (const client of clients) client.write(`data: ${revision}\n\n`);
+}
+
+function rebuild() {
+  if (building) {
+    pendingBuild = true;
+    return;
+  }
+  building = true;
+  console.log("Rebuilding mock app…");
+  const child = spawn("pnpm", ["run", "build"], { cwd: workspace, stdio: "inherit" });
+  const finish = (success) => {
+    building = false;
+    if (pendingBuild) {
+      pendingBuild = false;
+      rebuild();
+    } else if (success) reload();
+  };
+  child.once("error", (error) => {
+    console.error(error.message);
+    finish(false);
+  });
+  child.once("exit", (code) => finish(code === 0));
+}
+
+async function snapshot(directory) {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const files = await Promise.all(entries.map(async (entry) => {
+    const filename = resolve(directory, entry.name);
+    if (entry.isDirectory()) return snapshot(filename);
+    const info = await stat(filename);
+    return `${filename}:${info.mtimeMs}:${info.size}`;
+  }));
+  return files.sort().join("\n");
+}
+
+const sourceDirectories = ["packages/core/src", "packages/mock-data/src", "apps/mockapp/src"];
+const sourceSnapshot = () => Promise.all(sourceDirectories.map((path) => snapshot(resolve(workspace, path))));
+let sources = (await sourceSnapshot()).join("\n");
+let web = await snapshot(resolve(base, "web"));
+let checking = false;
+const watcher = setInterval(async () => {
+  if (checking) return;
+  checking = true;
+  try {
+    const nextSources = (await sourceSnapshot()).join("\n");
+    const nextWeb = await snapshot(resolve(base, "web"));
+    if (nextSources !== sources) {
+      sources = nextSources;
+      rebuild();
+    }
+    if (nextWeb !== web) {
+      web = nextWeb;
+      if (building) pendingBuild = true;
+      else reload();
+    }
+  } catch (error) {
+    console.error(error.message);
+  } finally {
+    checking = false;
+  }
+}, 500);
 const roots = {
   "/app/": resolve(base, "dist"),
   "/core/": resolve(base, "../../packages/core/dist"),
@@ -18,6 +89,17 @@ const contentTypes = {
 const server = createServer(async (request, response) => {
   try {
     const pathname = decodeURIComponent(new URL(request.url, "http://localhost").pathname);
+    if (pathname === "/__reload") {
+      response.writeHead(200, {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-store",
+        Connection: "keep-alive",
+      });
+      response.write(`data: ${revision}\n\n`);
+      clients.add(response);
+      response.on("close", () => clients.delete(response));
+      return;
+    }
     let filename;
     if (pathname === "/") filename = resolve(base, "web/index.html");
     else if (pathname === "/style.css") filename = resolve(base, "web/style.css");
@@ -46,6 +128,7 @@ server.listen(3000, "0.0.0.0", () => {
   console.log("Battle mock: http://localhost:3000");
 });
 server.on("error", (error) => {
+  clearInterval(watcher);
   console.error(error.message);
   process.exitCode = 1;
 });
