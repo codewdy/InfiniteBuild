@@ -6,13 +6,12 @@ import type { RandomGenerator } from "./random-generator.js";
 export class RegularUnit extends Unit {
   private definition: UnitDefinition;
   private skillProgress: number[];
-  private approachOffset: number;
+  private moveRange: number;
   constructor(
     definition: UnitDefinition,
     position: number,
     faction: Faction,
     rng: RandomGenerator,
-    maxApproachOffset: number,
   ) {
     super();
     this.kind = definition.kind;
@@ -20,7 +19,8 @@ export class RegularUnit extends Unit {
     this.faction = faction;
     this.definition = definition;
     this.skillProgress = definition.skills.map(() => rng.rand());
-    this.approachOffset = rng.uniform(0, maxApproachOffset);
+    const { min, max } = definition.move.range;
+    this.moveRange = rng.uniform(min, max);
   }
   onUpdateStatus(ctx: BattleContext): Status.Status {
     return Status.createByConfig(this.definition.status);
@@ -37,10 +37,9 @@ export class RegularUnit extends Unit {
     }
     if (nearestDistance === Infinity) return;
 
-    const stoppingDistance = Math.max(0, this.definition.move.range - this.approachOffset);
     const distanceToMove = Math.min(
       this.definition.move.speed,
-      Math.max(0, nearestDistance - stoppingDistance),
+      Math.max(0, nearestDistance - this.moveRange),
     );
     this.move(ctx, direction, distanceToMove);
   }

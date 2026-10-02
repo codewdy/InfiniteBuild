@@ -12,9 +12,6 @@ export type Config = {
     spawnMinimumSize: number;
     visionRange: number;
   };
-  unit: {
-    maxApproachOffset: number;
-  };
   event: {
     maxEventPerUnit: {
       damage: number;
@@ -32,7 +29,10 @@ export type UnitDefinition = {
   status: Status.StatusConfig;
   move: {
     speed: number;
-    range: number;
+    range: {
+      min: number;
+      max: number;
+    };
   };
   skills: {
     skill: string;

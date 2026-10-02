@@ -42,7 +42,6 @@ export function spawn(
             rng.truncatedNorm(position, end),
             "Enemy",
             rng,
-            gameData.config.unit.maxApproachOffset,
           ),
         );
       }

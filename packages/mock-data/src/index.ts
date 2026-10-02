@@ -3,7 +3,6 @@ import type { BattleSpec, GameData, PlayerBuild } from "@infinite-build/core";
 export const gameData: GameData = {
   config: {
     map: { spawnMinimumSize: 5, visionRange: 20 },
-    unit: { maxApproachOffset: 0.5 },
     event: { maxEventPerUnit: { damage: 10 } },
   },
   skillDefinitions: {
@@ -21,13 +20,13 @@ export const gameData: GameData = {
     Slime: {
       kind: "Slime",
       status: { maxHp: 20, attack: 5, defense: 0 },
-      move: { speed: 0.5, range: 2 },
+      move: { speed: 0.5, range: { min: 1.5, max: 2 } },
       skills: [{ skill: "SelfDamage", castRate: 0.3 }],
     },
     Goblin: {
       kind: "Goblin",
       status: { maxHp: 30, attack: 5, defense: 0 },
-      move: { speed: 1, range: 3 },
+      move: { speed: 1, range: { min: 2.5, max: 3 } },
       skills: [],
       onUpdate(self, ctx) {
         if (
