@@ -53,6 +53,7 @@ export class Battle {
     };
   }
   executeFrame(): BattleLog {
+    if (this.ctx.status !== "Running") return this.renderLog();
     this.ctx.frame += 1;
     this.ctx.events.clear();
     this.spawn();
@@ -68,6 +69,7 @@ export class Battle {
     }
     this.fixPosition();
     this.checkDeath();
+    this.checkBattleStatus();
     return this.renderLog();
   }
   renderLog(): BattleLog {
@@ -111,5 +113,17 @@ export class Battle {
         this.ctx.units.remove(unit);
       }
     }
+  }
+  checkBattleStatus(): void {
+    if (this.ctx.status !== "Running") return;
+    if (this.ctx.player.hp <= 0) {
+      this.ctx.status = "Defeat";
+      return;
+    }
+    for (const unit of this.ctx.units) {
+      if (unit.faction === "Enemy" && unit.hp > 0) return;
+    }
+    if (this.ctx.pendingSpawns.some((unit) => unit.faction === "Enemy")) return;
+    this.ctx.status = "Victory";
   }
 }

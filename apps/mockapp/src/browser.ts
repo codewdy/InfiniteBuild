@@ -19,6 +19,8 @@ let battle = new Battle({ gameData, playerState }, battleSpec);
 let log = battle.renderLog();
 let history: BattleLog[] = [log];
 let deaths = 0;
+let totalDamage = 0;
+let playerPosition = 0;
 let timer: number | undefined;
 
 element("config").textContent = `Seed ${battleSpec.seed} · 视野 ${vision} · 范围 ${range} · 目标 ${playerState.move.count}`;
@@ -33,7 +35,7 @@ function draw(): void {
   canvas.height = Math.round(height * ratio);
   context.scale(ratio, ratio);
   const player = log.units.find((unit) => unit.kind === "Player");
-  const origin = player?.position ?? 0;
+  const origin = player?.position ?? playerPosition;
   const left = 48;
   const right = width - 38;
   const span = vision + 4;
@@ -122,9 +124,19 @@ function draw(): void {
 }
 
 function render(): void {
+  const finished = log.status !== "Running";
+  const statusLabels = { Running: "战斗中", Victory: "胜利", Defeat: "失败" };
+  const player = log.units.find((unit) => unit.kind === "Player");
+  playerPosition = player?.position ?? playerPosition;
   element("frame").textContent = String(log.frame);
-  element("status").textContent = log.status;
-  element("position").textContent = (log.units.find((unit) => unit.kind === "Player")?.position ?? 0).toFixed(2);
+  element("status").textContent = statusLabels[log.status];
+  element("status").dataset.status = log.status;
+  const result = element("result");
+  result.hidden = !finished;
+  result.dataset.status = log.status;
+  element("result-title").textContent = log.status === "Victory" ? "战斗胜利" : "战斗失败";
+  element("result-detail").textContent = `${log.status === "Victory" ? "所有敌人已清除。" : "玩家已死亡。"}结束于第 ${log.frame} 帧 · 累计死亡 ${deaths} · 累计伤害 ${totalDamage}`;
+  element("position").textContent = playerPosition.toFixed(2);
   element("enemies").textContent = String(log.units.filter((unit) => unit.kind !== "Player").length);
   element("deaths").textContent = String(deaths);
   const rows = log.units.map((unit) => {
@@ -163,6 +175,9 @@ function render(): void {
   logs.scrollTop = logs.scrollHeight;
   step.disabled = log.status !== "Running" || timer !== undefined;
   play.disabled = log.status !== "Running";
+  play.textContent = finished ? "已结束" : timer === undefined ? "播放" : "暂停";
+  speed.disabled = finished;
+  element("reset").textContent = finished ? "重新开始" : "重置";
   draw();
 }
 
@@ -179,6 +194,9 @@ function advance(): void {
   log = battle.executeFrame();
   const ids = new Set(log.units.map((unit) => unit.id));
   deaths += previous.units.filter((unit) => !ids.has(unit.id)).length;
+  for (const event of log.events) {
+    if (event.kind === "Damage") totalDamage += event.damage;
+  }
   history.push(log);
   if (history.length > 100) history.shift();
   if (log.status !== "Running") pause();
@@ -186,6 +204,7 @@ function advance(): void {
 }
 
 function start(): void {
+  if (log.status !== "Running" || timer !== undefined) return;
   timer = window.setInterval(advance, 1000 / Number(speed.value));
   play.textContent = "暂停";
   render();
@@ -199,6 +218,8 @@ element("reset").addEventListener("click", () => {
   log = battle.renderLog();
   history = [log];
   deaths = 0;
+  totalDamage = 0;
+  playerPosition = 0;
   render();
 });
 speed.addEventListener("change", () => {

@@ -8,6 +8,14 @@ header { margin-bottom: 28px; }
 h1 { font-size: 30px; margin: 10px 0; }
 p, .panel-title span, .legend, .stats span { color: #92a3b9; font-size: 13px; }
 .badge { padding: 8px 16px; border: 1px solid #304b62; border-radius: 30px; color: #7de0bb; font-size: 13px; }
+.badge[data-status="Running"] { color: #79b8ff; }
+.badge[data-status="Victory"] { color: #72dab5; border-color: #397a65; }
+.badge[data-status="Defeat"] { color: #ff7b89; border-color: #994a56; }
+.battle-result { margin-bottom: 20px; padding: 20px; border: 1px solid #397a65; border-radius: 12px; background: #17392f; }
+.battle-result h2 { color: #72dab5; font-size: 22px; }
+.battle-result p { margin-bottom: 0; color: #d0e2df; }
+.battle-result[data-status="Defeat"] { border-color: #994a56; background: #3b202c; }
+.battle-result[data-status="Defeat"] h2 { color: #ff7b89; }
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
 .stats > div, .panel { background: #141e2e; border: 1px solid #25334a; border-radius: 12px; padding: 20px; }
 .stats span, .stats strong { display: block; }
