@@ -3,8 +3,8 @@ import type { BattleSpec, GameData, PlayerBuild } from "@infinite-build/core";
 export const gameData: GameData = {
   config: {
     map: { spawnMinimumSize: 5, visionRange: 20 },
+    unit: { maxApproachOffset: 0.5 },
     event: { maxEventPerUnit: { damage: 10 } },
-    skill: { castRateFluctuation: 0.2 },
   },
   skillDefinitions: {
     SelfDamage: {

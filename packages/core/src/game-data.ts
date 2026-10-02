@@ -12,13 +12,13 @@ export type Config = {
     spawnMinimumSize: number;
     visionRange: number;
   };
+  unit: {
+    maxApproachOffset: number;
+  };
   event: {
     maxEventPerUnit: {
       damage: number;
     };
-  };
-  skill: {
-    castRateFluctuation: number;
   };
 };
 
