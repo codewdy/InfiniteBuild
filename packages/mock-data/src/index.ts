@@ -31,7 +31,7 @@ export const gameData: GameData = {
           skill: "fireball",
           payload: {
             from: self.position,
-            to: target.position,
+            to: target.id,
             durationFrames,
           },
         });
@@ -55,33 +55,17 @@ export const gameData: GameData = {
             durationFrames,
           },
         });
-        const hits = [...ctx.units]
-          .filter(
-            (unit) =>
-              unit.faction !== self.faction &&
-              !unit.isDead &&
-              unit.hp > 0 &&
-              Math.abs(unit.position - center) <= radius,
-          )
-          .map((unit) => ({
-            unit,
-            frame: Math.max(
-              1,
-              Math.ceil(
-                radius > 0
-                  ? (Math.abs(unit.position - center) / radius) * durationFrames
-                  : 1,
-              ),
-            ),
-          }))
-          .sort((a, b) => a.frame - b.frame);
-        let elapsedFrames = 0;
-        for (const { unit, frame } of hits) {
-          if (frame > elapsedFrames) {
-            yield* ctx.taskScheduler.waitFrames(frame - elapsedFrames);
-            elapsedFrames = frame;
+        const hitUnits = new Set<number>();
+        for (let frame = 1; frame <= durationFrames; frame++) {
+          yield* ctx.taskScheduler.waitFrames(1);
+          const waveRadius = radius * frame / durationFrames;
+          for (const unit of ctx.units) {
+            if (unit.faction === self.faction || unit.isDead || unit.hp <= 0
+              || hitUnits.has(unit.id)
+              || Math.abs(unit.position - center) > waveRadius) continue;
+            hitUnits.add(unit.id);
+            unit.damage(ctx, 6);
           }
-          if (!unit.isDead && unit.hp > 0) unit.damage(ctx, 6);
         }
       },
     },

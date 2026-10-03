@@ -48,14 +48,20 @@ let totalDamage = 0;
 let playerPosition = 0;
 let timer: number | undefined;
 type VisualEffect = {
-  startedAt: number;
-  durationMs: number;
+  startFrame: number;
+  durationFrames: number;
 } & (
-  | { kind: "fireball"; from: number; to: number; fromY: number; toY: number }
+  | {
+      kind: "fireball";
+      from: number;
+      to: number;
+      fromY: number;
+      targetPosition: number;
+      targetY: number;
+    }
   | { kind: "nova"; center: number; radius: number; y: number }
 );
 let effects: VisualEffect[] = [];
-let animation: number | undefined;
 
 function unitY(unit: BattleLog["units"][number], index: number): number {
   return unit.kind === "Player" ? 155 : 90 + (index % 4) * 35;
@@ -70,8 +76,8 @@ function addVisualEffect(event: BattleEvent.Effect, previous: BattleLog): void {
   )
     return;
   const timing = {
-    startedAt: performance.now(),
-    durationMs: (durationFrames * 1000) / Number(speed.value),
+    startFrame: log.frame,
+    durationFrames,
   };
   const sourceIndex = previous.units.findIndex(
     (unit) => unit.id === event.source,
@@ -83,19 +89,22 @@ function addVisualEffect(event: BattleEvent.Effect, previous: BattleLog): void {
     typeof from === "number" &&
     Number.isFinite(from) &&
     typeof to === "number" &&
-    Number.isFinite(to)
+    Number.isSafeInteger(to)
   ) {
-    const targetIndex = previous.units.findIndex(
-      (unit) => unit.position === to && unit.id !== event.source,
-    );
-    const target = previous.units[targetIndex];
+    const units = log.units.some((unit) => unit.id === to)
+      ? log.units
+      : previous.units;
+    const targetIndex = units.findIndex((unit) => unit.id === to);
+    const target = units[targetIndex];
+    if (!target) return;
     effects.push({
       ...timing,
       kind: "fireball",
       from,
       to,
       fromY: y,
-      toY: target ? unitY(target, targetIndex) : y,
+      targetPosition: target.position,
+      targetY: unitY(target, targetIndex),
     });
   } else if (
     event.effect === "nova" &&
@@ -107,20 +116,6 @@ function addVisualEffect(event: BattleEvent.Effect, previous: BattleLog): void {
   ) {
     effects.push({ ...timing, kind: "nova", center, radius, y });
   }
-  if (effects.length > 0 && animation === undefined) {
-    animation = window.requestAnimationFrame(animateEffects);
-  }
-}
-
-function animateEffects(): void {
-  animation = undefined;
-  const now = performance.now();
-  effects = effects.filter(
-    (effect) => now - effect.startedAt < effect.durationMs,
-  );
-  draw();
-  if (effects.length > 0)
-    animation = window.requestAnimationFrame(animateEffects);
 }
 
 element("config").textContent =
@@ -195,40 +190,65 @@ function draw(): void {
   for (const effect of effects) {
     const progress = Math.max(
       0,
-      Math.min(1, (performance.now() - effect.startedAt) / effect.durationMs),
+      Math.min(1, (log.frame - effect.startFrame) / effect.durationFrames),
     );
-    context.globalAlpha = 1 - progress;
+    context.globalAlpha = 1 - progress * 0.5;
     if (effect.kind === "fireball") {
-      const at = x(effect.from + (effect.to - effect.from) * progress);
-      const y = effect.fromY + (effect.toY - effect.fromY) * progress;
+      const units = log.units.some((unit) => unit.id === effect.to)
+        ? log.units
+        : previousUnits;
+      const targetIndex = units.findIndex((unit) => unit.id === effect.to);
+      const target = units[targetIndex];
+      if (target) {
+        effect.targetPosition = target.position;
+        effect.targetY = unitY(target, targetIndex);
+      }
+      const at = x(
+        effect.from + (effect.targetPosition - effect.from) * progress,
+      );
+      const y = effect.fromY + (effect.targetY - effect.fromY) * progress;
       const tailProgress = Math.max(0, progress - 0.18);
       context.strokeStyle = "#ff963e";
       context.lineWidth = 5;
       context.beginPath();
       context.moveTo(
-        x(effect.from + (effect.to - effect.from) * tailProgress),
-        effect.fromY + (effect.toY - effect.fromY) * tailProgress,
+        x(effect.from + (effect.targetPosition - effect.from) * tailProgress),
+        effect.fromY + (effect.targetY - effect.fromY) * tailProgress,
       );
       context.lineTo(at, y);
       context.stroke();
+      const angle = Math.atan2(
+        effect.targetY - effect.fromY,
+        x(effect.targetPosition) - x(effect.from),
+      );
+      context.save();
+      context.translate(at, y);
+      context.rotate(angle);
       context.shadowColor = "#ff963e";
       context.shadowBlur = 16;
+      context.fillStyle = "#ff963e";
+      context.beginPath();
+      context.moveTo(11, 0);
+      context.bezierCurveTo(7, -9, -3, -9, -15, 0);
+      context.bezierCurveTo(-3, 9, 7, 9, 11, 0);
+      context.closePath();
+      context.fill();
       context.fillStyle = "#ffe6a3";
       context.beginPath();
-      context.arc(at, y, 7, 0, Math.PI * 2);
+      context.ellipse(3, 0, 6, 4, 0, 0, Math.PI * 2);
       context.fill();
-      context.shadowBlur = 0;
+      context.restore();
     } else {
-      const radius = Math.abs(
-        x(effect.center + effect.radius * progress) - x(effect.center),
-      );
+      const waveRadius = effect.radius * progress;
+      const radius = Math.abs(x(effect.center + waveRadius) - x(effect.center));
+      context.globalAlpha = 0.85;
       context.strokeStyle = "#c49bff";
       context.fillStyle = "#b18aff";
       context.lineWidth = 3;
       context.beginPath();
       context.arc(x(effect.center), effect.y, radius, 0, Math.PI * 2);
       context.stroke();
-      context.globalAlpha = (1 - progress) * 0.08;
+      context.globalAlpha = 0.08;
       context.fill();
     }
   }
@@ -418,6 +438,9 @@ function advance(): void {
   if (log.status !== "Running") return;
   const previous = log;
   log = battle.executeFrame();
+  effects = effects.filter(
+    (effect) => log.frame - effect.startFrame <= effect.durationFrames,
+  );
   runningSkills = selectedBuild().skills;
   const ids = new Set(log.units.map((unit) => unit.id));
   deaths += previous.units.filter((unit) => !ids.has(unit.id)).length;
@@ -448,8 +471,6 @@ element("reset").addEventListener("click", () => {
   runningSkills = selectedBuild().skills;
   skillProgress.clear();
   effects = [];
-  if (animation !== undefined) window.cancelAnimationFrame(animation);
-  animation = undefined;
   battle = new Battle(gameData, battleSpec, selectedBuild());
   log = battle.renderLog();
   history = [log];
