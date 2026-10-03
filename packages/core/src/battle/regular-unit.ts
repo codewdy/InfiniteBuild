@@ -44,6 +44,7 @@ export class RegularUnit extends Unit {
     this.move(ctx, direction, distanceToMove);
   }
   onUpdate(ctx: BattleContext): void {
+    super.onUpdate(ctx);
     for (let index = 0; index < this.definition.skills.length; index++) {
       const { skill, castRate } = this.definition.skills[index]!;
       this.skillProgress[index] = (this.skillProgress[index] ?? 0) + castRate;

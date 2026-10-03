@@ -53,6 +53,7 @@ export class PlayerUnit extends Unit {
     this.move(ctx, 1, distanceToMove);
   }
   onUpdate(ctx: BattleContext): void {
+    super.onUpdate(ctx);
     for (const { uuid, skill, castRate } of ctx.build.skills) {
       let progress = (this.skillProgress.get(uuid) ?? 0) + castRate;
       while (progress >= 1) {
