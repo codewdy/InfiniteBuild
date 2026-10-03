@@ -6,13 +6,34 @@ export const gameData: GameData = {
     event: { maxEventPerUnit: { damage: 10 } },
   },
   skillDefinitions: {
-    SelfDamage: {
-      name: "自伤",
+    fireball: {
+      name: "火球",
       *caster(self, ctx) {
-        const attack = self.rawStatus.attack;
-        self.damage(ctx, attack * 0.4);
-        yield* ctx.taskScheduler.waitFrames(1);
-        self.damage(ctx, attack * 0.6);
+        let target: typeof self | undefined;
+        let nearestDistance = Infinity;
+        for (const unit of ctx.units) {
+          if (unit.faction === self.faction || unit.hp <= 0) continue;
+          const distance = Math.abs(unit.position - self.position);
+          if (distance <= ctx.build.move.range && distance < nearestDistance) {
+            target = unit;
+            nearestDistance = distance;
+          }
+        }
+        target?.damage(ctx, 10);
+      },
+    },
+    nova: {
+      name: "新星",
+      *caster(self, ctx) {
+        for (const unit of ctx.units) {
+          if (
+            unit.faction !== self.faction &&
+            unit.hp > 0 &&
+            Math.abs(unit.position - self.position) <= ctx.gameData.config.map.visionRange
+          ) {
+            unit.damage(ctx, 6);
+          }
+        }
       },
     },
   },
@@ -21,22 +42,13 @@ export const gameData: GameData = {
       kind: "Slime",
       status: { maxHp: 20, attack: 5, defense: 0 },
       move: { speed: 0.5, range: { min: 1.5, max: 2 } },
-      skills: [{ skill: "SelfDamage", castRate: 0.3 }],
+      skills: [],
     },
     Goblin: {
       kind: "Goblin",
       status: { maxHp: 30, attack: 5, defense: 0 },
       move: { speed: 1, range: { min: 2.5, max: 3 } },
       skills: [],
-      onUpdate(self, ctx) {
-        if (
-          Math.abs(self.position - ctx.player.position) <=
-            ctx.build.move.range &&
-          ctx.rng.rand() < 0.3
-        ) {
-          self.damage(ctx, self.rawStatus.attack);
-        }
-      },
     },
   },
   mapDefinitions: {
@@ -63,7 +75,10 @@ export const gameData: GameData = {
 export const playerBuild: PlayerBuild = {
   level: 1,
   move: { speed: 1, safeRange: 1, range: 5, count: 2 },
-  skills: [],
+  skills: [
+    { uuid: "mock-player-fireball", skill: "fireball", castRate: 0.5 },
+    { uuid: "mock-player-nova", skill: "nova", castRate: 0.2 },
+  ],
 };
 
 export const battleSpec: BattleSpec = { seed: 42, map: "demo" };

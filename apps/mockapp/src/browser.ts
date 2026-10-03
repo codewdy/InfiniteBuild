@@ -12,10 +12,25 @@ const canvas = element<HTMLCanvasElement>("battlefield");
 const play = element<HTMLButtonElement>("play");
 const step = element<HTMLButtonElement>("step");
 const speed = element<HTMLSelectElement>("speed");
+const skillSelect = element<HTMLSelectElement>("skill");
 const logs = element<HTMLPreElement>("logs");
 const vision = gameData.config.map.visionRange;
 const range = playerBuild.move.range;
-let battle = new Battle(gameData, battleSpec, playerBuild);
+for (const entry of playerBuild.skills) {
+  const option = document.createElement("option");
+  option.value = entry.uuid;
+  option.textContent = `${entry.skill} · ${gameData.skillDefinitions[entry.skill]!.name}`;
+  skillSelect.append(option);
+}
+
+function selectedBuild() {
+  return {
+    ...playerBuild,
+    skills: playerBuild.skills.filter((entry) => entry.uuid === skillSelect.value),
+  };
+}
+
+let battle = new Battle(gameData, battleSpec, selectedBuild());
 let log = battle.renderLog();
 let history: BattleLog[] = [log];
 let deaths = 0;
@@ -125,6 +140,7 @@ function draw(): void {
 }
 
 function render(): void {
+  element("player-build").textContent = JSON.stringify(selectedBuild(), null, 2);
   const finished = log.status !== "Running";
   const statusLabels = { Running: "战斗中", Victory: "胜利", Defeat: "失败" };
   const player = log.units.find((unit) => unit.kind === "Player");
@@ -180,6 +196,7 @@ function render(): void {
   play.disabled = log.status !== "Running";
   play.textContent = finished ? "已结束" : timer === undefined ? "播放" : "暂停";
   speed.disabled = finished;
+  skillSelect.disabled = finished;
   element("reset").textContent = finished ? "重新开始" : "重置";
   draw();
 }
@@ -217,12 +234,16 @@ play.addEventListener("click", () => timer === undefined ? start() : pause());
 step.addEventListener("click", advance);
 element("reset").addEventListener("click", () => {
   pause();
-  battle = new Battle(gameData, battleSpec, playerBuild);
+  battle = new Battle(gameData, battleSpec, selectedBuild());
   log = battle.renderLog();
   history = [log];
   deaths = 0;
   totalDamage = 0;
   playerPosition = 0;
+  render();
+});
+skillSelect.addEventListener("change", () => {
+  battle.changeBuild(selectedBuild());
   render();
 });
 speed.addEventListener("change", () => {
