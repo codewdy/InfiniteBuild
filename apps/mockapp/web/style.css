@@ -31,8 +31,10 @@ button, select { border: 1px solid #3a4a63; background: #202d42; color: #e6edf7;
 button:hover { background: #30415c; }button.primary { background: #78b8ff; color: #0c1220; border-color: #78b8ff; min-width: 80px; }
 button:disabled { opacity: .5; cursor: default; }button:focus-visible, select:focus-visible { outline: 2px solid #72dab5; outline-offset: 3px; }
 .controls label { margin-left: auto; font-size: 13px; color: #92a3b9; }select { margin-left: 8px; }
-.details { display: grid; grid-template-columns: 1fr 1.4fr; gap: 20px; margin-top: 20px; }
-.events-panel, .build-panel { margin-top: 20px; }
+.inspector { margin-top: 20px; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.tabs [aria-selected="true"] { background: #78b8ff; color: #0c1220; border-color: #78b8ff; }
+[role="tabpanel"]:focus-visible { outline: 2px solid #72dab5; outline-offset: 3px; }
 .build-panel pre { height: auto; max-height: 300px; }
 .move-event { color: #79b8ff; }
 .damage-event { color: #ff7b89; }
@@ -40,4 +42,8 @@ button:disabled { opacity: .5; cursor: default; }button:focus-visible, select:fo
 table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; font-variant-numeric: tabular-nums; }
 th { color: #92a3b9; font-weight: normal; }th, td { padding: 10px 8px; border-bottom: 1px solid #25334a; }
 .table-wrap { max-height: 300px; overflow: auto; }pre { height: 300px; margin: 0; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; color: #a3bad6; font-size: 11px; line-height: 1.8; }
-@media (max-width: 700px) { main { padding: 24px 14px; }.stats { grid-template-columns: repeat(2, 1fr); }.details { grid-template-columns: 1fr; }.controls label { margin-left: 0; }header { align-items: flex-start; }.panel-title { flex-wrap: wrap; } }
+@media (max-width: 700px) { main { padding: 24px 14px; }.stats { grid-template-columns: repeat(2, 1fr); }.controls label { margin-left: 0; }header { align-items: flex-start; }.panel-title { flex-wrap: wrap; } }
+
+#skill-progress-list { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin-top: 8px; }
+.skill-progress-row { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; }
+.skill-progress-pie { width: 20px; height: 20px; flex-shrink: 0; border-radius: 50%; background: conic-gradient(#d3b0ff var(--progress), #30405a 0); }

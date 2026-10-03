@@ -31,15 +31,22 @@
       <section class="panel">
         <div class="panel-title"><h2>战场</h2><span id="config"></span></div>
         <canvas id="battlefield" aria-label="战场：玩家与敌人位置，玩家视野和移动范围"></canvas>
+        <div id="skill-progress-list" aria-label="当前技能进度"></div>
         <div class="legend"><span><i class="player"></i>Player</span><span><i class="slime"></i>Slime</span><span><i class="goblin"></i>Goblin</span><span>绿色区域 · 移动范围</span><span>蓝色区域 · 视野</span><span class="move-event">蓝色箭头 · Move</span><span class="damage-event">红色数值 · Damage</span></div>
         <div class="controls"><button id="play" class="primary">播放</button><button id="step">下一帧</button><button id="reset">重置</button><label>当前自动施放 <select id="skill" aria-describedby="skill-help"></select></label><label>播放速度 <select id="speed"><option value="1">1 帧 / 秒</option><option value="5" selected>5 帧 / 秒</option><option value="15">15 帧 / 秒</option><option value="30">30 帧 / 秒</option></select></label></div>
         <p id="skill-help">切换技能下一帧生效，保留各自进度。fireball：范围内最近敌人，10 伤害，每 2 帧施放；nova：视野内所有敌人，6 伤害，每 5 帧施放。</p>
       </section>
-      <section class="panel build-panel"><div class="panel-title"><h2>PlayerBuild</h2><span>当前选择的配置 · 技能切换下一帧生效</span></div><pre id="player-build" aria-label="当前 PlayerBuild 配置"></pre></section>
-      <section class="panel events-panel"><div class="panel-title"><h2>事件信号</h2><span id="event-count">当前帧无事件</span></div><div class="table-wrap"><table><thead><tr><th>事件</th><th>Unit ID / 技能标识</th><th>详情</th></tr></thead><tbody id="events"></tbody></table></div></section>
-      <div class="details">
-        <section class="panel"><div class="panel-title"><h2>当前 unit</h2><span>HP / 最大 HP · 攻击 · 防御</span></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>Kind</th><th>位置</th><th>HP / 最大 HP</th><th>攻击</th><th>防御</th></tr></thead><tbody id="units"></tbody></table></div></section>
-        <section class="panel"><div class="panel-title"><h2>执行日志</h2><span>最近 100 帧</span></div><pre id="logs" aria-label="逐帧 JSON 日志"></pre></section>
+      <div class="inspector">
+        <div class="tabs" role="tablist" aria-label="战斗详情">
+          <button id="tab-events" type="button" role="tab" aria-selected="true" aria-controls="panel-events">事件信号</button>
+          <button id="tab-units" type="button" role="tab" aria-selected="false" aria-controls="panel-units" tabindex="-1">当前 Unit</button>
+          <button id="tab-logs" type="button" role="tab" aria-selected="false" aria-controls="panel-logs" tabindex="-1">执行日志</button>
+          <button id="tab-build" type="button" role="tab" aria-selected="false" aria-controls="panel-build" tabindex="-1">PlayerBuild</button>
+        </div>
+        <section id="panel-build" class="panel build-panel" role="tabpanel" aria-labelledby="tab-build" tabindex="0" hidden><div class="panel-title"><h2>PlayerBuild</h2><span>当前选择的配置 · 技能切换下一帧生效</span></div><pre id="player-build" aria-label="当前 PlayerBuild 配置"></pre></section>
+        <section id="panel-events" class="panel" role="tabpanel" aria-labelledby="tab-events" tabindex="0"><div class="panel-title"><h2>事件信号</h2><span id="event-count">当前帧无事件</span></div><div class="table-wrap"><table><thead><tr><th>事件</th><th>Unit ID / 技能标识</th><th>详情</th></tr></thead><tbody id="events"></tbody></table></div></section>
+        <section id="panel-units" class="panel" role="tabpanel" aria-labelledby="tab-units" tabindex="0" hidden><div class="panel-title"><h2>当前 Unit</h2><span>HP / 最大 HP · 攻击 · 防御</span></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>Kind</th><th>位置</th><th>HP / 最大 HP</th><th>攻击</th><th>防御</th></tr></thead><tbody id="units"></tbody></table></div></section>
+        <section id="panel-logs" class="panel" role="tabpanel" aria-labelledby="tab-logs" tabindex="0" hidden><div class="panel-title"><h2>执行日志</h2><span>最近 100 帧</span></div><pre id="logs" aria-label="逐帧 JSON 日志"></pre></section>
       </div>
     </main>
   </body>

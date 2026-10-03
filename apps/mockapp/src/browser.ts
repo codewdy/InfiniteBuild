@@ -23,13 +23,20 @@ for (const entry of playerBuild.skills) {
   skillSelect.append(option);
 }
 
+const bothSkillsOption = document.createElement("option");
+bothSkillsOption.value = "both";
+bothSkillsOption.textContent = "同时施放 fireball + nova";
+skillSelect.append(bothSkillsOption);
+
 function selectedBuild() {
   return {
     ...playerBuild,
-    skills: playerBuild.skills.filter((entry) => entry.uuid === skillSelect.value),
+    skills: playerBuild.skills.filter((entry) => skillSelect.value === "both" || entry.uuid === skillSelect.value),
   };
 }
 
+let runningSkills = selectedBuild().skills;
+const skillProgress = new Map<string, number>();
 let battle = new Battle(gameData, battleSpec, selectedBuild());
 let log = battle.renderLog();
 let history: BattleLog[] = [log];
@@ -140,6 +147,25 @@ function draw(): void {
 }
 
 function render(): void {
+  const progressRows = runningSkills.map((entry) => {
+    const row = document.createElement("div");
+    row.className = "skill-progress-row";
+    const name = document.createElement("span");
+    const skillName = gameData.skillDefinitions[entry.skill]!.name;
+    name.textContent = skillName;
+    const progress = Math.max(0, Math.min(1, skillProgress.get(entry.uuid) ?? 0));
+    const pie = document.createElement("span");
+    pie.className = "skill-progress-pie";
+    pie.style.setProperty("--progress", `${progress * 360}deg`);
+    pie.setAttribute("role", "progressbar");
+    pie.setAttribute("aria-label", `${skillName}施放进度`);
+    pie.setAttribute("aria-valuemin", "0");
+    pie.setAttribute("aria-valuemax", "100");
+    pie.setAttribute("aria-valuenow", (progress * 100).toFixed(1));
+    row.append(name, pie);
+    return row;
+  });
+  element("skill-progress-list").replaceChildren(...progressRows);
   element("player-build").textContent = JSON.stringify(selectedBuild(), null, 2);
   const finished = log.status !== "Running";
   const statusLabels = { Running: "战斗中", Victory: "胜利", Defeat: "失败" };
@@ -212,10 +238,14 @@ function advance(): void {
   if (log.status !== "Running") return;
   const previous = log;
   log = battle.executeFrame();
+  runningSkills = selectedBuild().skills;
   const ids = new Set(log.units.map((unit) => unit.id));
   deaths += previous.units.filter((unit) => !ids.has(unit.id)).length;
   for (const event of log.events) {
     if (event.kind === "Damage") totalDamage += event.damage;
+    if (event.kind === "PlayerSkillProgress") {
+      skillProgress.set(event.uuid, event.progress);
+    }
   }
   history.push(log);
   if (history.length > 100) history.shift();
@@ -234,6 +264,8 @@ play.addEventListener("click", () => timer === undefined ? start() : pause());
 step.addEventListener("click", advance);
 element("reset").addEventListener("click", () => {
   pause();
+  runningSkills = selectedBuild().skills;
+  skillProgress.clear();
   battle = new Battle(gameData, battleSpec, selectedBuild());
   log = battle.renderLog();
   history = [log];
@@ -252,5 +284,34 @@ speed.addEventListener("change", () => {
     start();
   }
 });
+const tabs = ["events", "units", "logs", "build"];
+function selectTab(selected: string): void {
+  for (const name of tabs) {
+    const active = name === selected;
+    const tab = element<HTMLButtonElement>(`tab-${name}`);
+    tab.setAttribute("aria-selected", String(active));
+    tab.tabIndex = active ? 0 : -1;
+    element(`panel-${name}`).hidden = !active;
+  }
+  if (selected === "logs") logs.scrollTop = logs.scrollHeight;
+}
+for (const [index, name] of tabs.entries()) {
+  const tab = element<HTMLButtonElement>(`tab-${name}`);
+  tab.addEventListener("click", () => selectTab(name));
+  tab.addEventListener("keydown", (event) => {
+    let next: number;
+    switch (event.key) {
+      case "ArrowRight": next = (index + 1) % tabs.length; break;
+      case "ArrowLeft": next = (index + tabs.length - 1) % tabs.length; break;
+      case "Home": next = 0; break;
+      case "End": next = tabs.length - 1; break;
+      default: return;
+    }
+    event.preventDefault();
+    const nextName = tabs[next]!;
+    selectTab(nextName);
+    element<HTMLButtonElement>(`tab-${nextName}`).focus();
+  });
+}
 window.addEventListener("resize", draw);
 render();
