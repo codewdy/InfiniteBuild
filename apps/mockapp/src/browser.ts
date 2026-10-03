@@ -85,6 +85,7 @@ function draw(): void {
       damageByUnit.set(event.dst, (damageByUnit.get(event.dst) ?? 0) + event.damage);
       continue;
     }
+    if (event.kind !== "Move") continue;
     if (event.distance === 0 || event.direction === 0) continue;
     const index = log.units.findIndex((unit) => unit.id === event.unit);
     const unit = log.units[index] ?? previousUnits.find((unit) => unit.id === event.unit);
@@ -158,10 +159,12 @@ function render(): void {
   element("units").replaceChildren(...rows);
   const eventRows = log.events.map((event) => {
     const row = document.createElement("tr");
-    row.className = event.kind === "Damage" ? "damage-event" : "move-event";
+    row.className = event.kind === "Damage" ? "damage-event" : event.kind === "Move" ? "move-event" : "skill-progress-event";
     const values = event.kind === "Damage"
       ? ["Damage", event.dst, `伤害 ${event.damage}`]
-      : ["Move", event.unit, `${event.direction >= 0 ? "→" : "←"} 距离 ${event.distance.toFixed(2)}`];
+      : event.kind === "Move"
+        ? ["Move", event.unit, `${event.direction >= 0 ? "→" : "←"} 距离 ${event.distance.toFixed(2)}`]
+        : ["PlayerSkillProgress", event.uuid, `${event.skill} 进度 ${(event.progress * 100).toFixed(1)}% / 施放速率 ${event.castRate}`];
     for (const value of values) {
       const cell = document.createElement("td");
       cell.textContent = String(value);

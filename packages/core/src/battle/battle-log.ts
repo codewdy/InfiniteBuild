@@ -12,7 +12,14 @@ export namespace BattleEvent {
     direction: number;
     distance: number;
   };
-  export type Event = Damage | Move;
+  export type PlayerSkillProgress = {
+    kind: "PlayerSkillProgress";
+    uuid: string;
+    skill: string;
+    castRate: number;
+    progress: number;
+  };
+  export type Event = Damage | Move | PlayerSkillProgress;
 }
 export type BattleStatus = "Running" | "Victory" | "Defeat";
 export type BattleLog = {

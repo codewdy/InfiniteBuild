@@ -19,6 +19,9 @@ export class EventManager {
       case "Move":
         this.addMove(event);
         break;
+      case "PlayerSkillProgress":
+        this.addPlayerSkillProgress(event);
+        break;
     }
   }
 
@@ -32,6 +35,12 @@ export class EventManager {
 
   addMove(event: Omit<BattleEvent.Move, "kind">): void {
     this.events.push({ ...event, kind: "Move" });
+  }
+
+  addPlayerSkillProgress(
+    event: Omit<BattleEvent.PlayerSkillProgress, "kind">,
+  ): void {
+    this.events.push({ ...event, kind: "PlayerSkillProgress" });
   }
 
   getEvents(): BattleEvent.Event[] {

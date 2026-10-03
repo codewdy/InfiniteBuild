@@ -2,6 +2,7 @@ import { Unit } from "./unit.js";
 import type { BattleContext } from "./battle.js";
 import { Status } from "./status.js";
 export class PlayerUnit extends Unit {
+  private skillProgress = new Map<string, number>();
   constructor() {
     super();
     this.kind = "Player";
@@ -51,6 +52,16 @@ export class PlayerUnit extends Unit {
     );
     this.move(ctx, 1, distanceToMove);
   }
-  onUpdate(ctx: BattleContext): void {}
+  onUpdate(ctx: BattleContext): void {
+    for (const { uuid, skill, castRate } of ctx.build.skills) {
+      let progress = (this.skillProgress.get(uuid) ?? 0) + castRate;
+      while (progress >= 1) {
+        progress -= 1;
+        this.cast(ctx, skill);
+      }
+      this.skillProgress.set(uuid, progress);
+      ctx.events.addPlayerSkillProgress({ uuid, skill, castRate, progress });
+    }
+  }
   onDeath(ctx: BattleContext): void {}
 }

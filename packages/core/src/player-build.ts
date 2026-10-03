@@ -10,4 +10,9 @@ export type PlayerBuild = {
     range: number;
     count: number;
   };
+  skills: {
+    uuid: string;
+    skill: string;
+    castRate: number;
+  }[];
 };

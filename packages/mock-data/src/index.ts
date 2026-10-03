@@ -63,6 +63,7 @@ export const gameData: GameData = {
 export const playerBuild: PlayerBuild = {
   level: 1,
   move: { speed: 1, safeRange: 1, range: 5, count: 2 },
+  skills: [],
 };
 
 export const battleSpec: BattleSpec = { seed: 42, map: "demo" };
