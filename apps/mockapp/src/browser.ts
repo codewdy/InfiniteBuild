@@ -1,5 +1,5 @@
 import { Battle } from "@infinite-build/core";
-import type { BattleLog } from "@infinite-build/core";
+import type { BattleEvent, BattleLog } from "@infinite-build/core";
 import { battleSpec, gameData, playerBuild } from "@infinite-build/mock-data";
 
 function element<T extends HTMLElement>(id: string): T {
@@ -31,7 +31,10 @@ skillSelect.append(bothSkillsOption);
 function selectedBuild() {
   return {
     ...playerBuild,
-    skills: playerBuild.skills.filter((entry) => skillSelect.value === "both" || entry.uuid === skillSelect.value),
+    skills: playerBuild.skills.filter(
+      (entry) =>
+        skillSelect.value === "both" || entry.uuid === skillSelect.value,
+    ),
   };
 }
 
@@ -44,8 +47,84 @@ let deaths = 0;
 let totalDamage = 0;
 let playerPosition = 0;
 let timer: number | undefined;
+type VisualEffect = {
+  startedAt: number;
+  durationMs: number;
+} & (
+  | { kind: "fireball"; from: number; to: number; fromY: number; toY: number }
+  | { kind: "nova"; center: number; radius: number; y: number }
+);
+let effects: VisualEffect[] = [];
+let animation: number | undefined;
 
-element("config").textContent = `Seed ${battleSpec.seed} · 视野 ${vision} · 范围 ${range} · 目标 ${playerBuild.move.count}`;
+function unitY(unit: BattleLog["units"][number], index: number): number {
+  return unit.kind === "Player" ? 155 : 90 + (index % 4) * 35;
+}
+
+function addVisualEffect(event: BattleEvent.Effect, previous: BattleLog): void {
+  const { durationFrames, from, to, center, radius } = event.payload;
+  if (
+    typeof durationFrames !== "number" ||
+    !Number.isFinite(durationFrames) ||
+    durationFrames <= 0
+  )
+    return;
+  const timing = {
+    startedAt: performance.now(),
+    durationMs: (durationFrames * 1000) / Number(speed.value),
+  };
+  const sourceIndex = previous.units.findIndex(
+    (unit) => unit.id === event.source,
+  );
+  const source = previous.units[sourceIndex];
+  const y = source ? unitY(source, sourceIndex) : 155;
+  if (
+    event.effect === "fireball" &&
+    typeof from === "number" &&
+    Number.isFinite(from) &&
+    typeof to === "number" &&
+    Number.isFinite(to)
+  ) {
+    const targetIndex = previous.units.findIndex(
+      (unit) => unit.position === to && unit.id !== event.source,
+    );
+    const target = previous.units[targetIndex];
+    effects.push({
+      ...timing,
+      kind: "fireball",
+      from,
+      to,
+      fromY: y,
+      toY: target ? unitY(target, targetIndex) : y,
+    });
+  } else if (
+    event.effect === "nova" &&
+    typeof center === "number" &&
+    Number.isFinite(center) &&
+    typeof radius === "number" &&
+    Number.isFinite(radius) &&
+    radius >= 0
+  ) {
+    effects.push({ ...timing, kind: "nova", center, radius, y });
+  }
+  if (effects.length > 0 && animation === undefined) {
+    animation = window.requestAnimationFrame(animateEffects);
+  }
+}
+
+function animateEffects(): void {
+  animation = undefined;
+  const now = performance.now();
+  effects = effects.filter(
+    (effect) => now - effect.startedAt < effect.durationMs,
+  );
+  draw();
+  if (effects.length > 0)
+    animation = window.requestAnimationFrame(animateEffects);
+}
+
+element("config").textContent =
+  `Seed ${battleSpec.seed} · 视野 ${vision} · 范围 ${range} · 目标 ${playerBuild.move.count}`;
 
 function draw(): void {
   const context = canvas.getContext("2d");
@@ -61,7 +140,8 @@ function draw(): void {
   const left = 48;
   const right = width - 38;
   const span = vision + 4;
-  const x = (position: number) => left + ((position - origin + 2) / span) * (right - left);
+  const x = (position: number) =>
+    left + ((position - origin + 2) / span) * (right - left);
   context.fillStyle = "#101929";
   context.fillRect(0, 0, width, height);
   context.fillStyle = "#192e47";
@@ -84,16 +164,22 @@ function draw(): void {
   }
   log.units.forEach((unit, index) => {
     const at = x(unit.position);
-    const y = unit.kind === "Player" ? 155 : 90 + (index % 4) * 35;
-    context.fillStyle = unit.kind === "Player" ? "#79b8ff" : unit.kind === "Slime" ? "#72dab5" : "#f5ba79";
+    const y = unitY(unit, index);
+    context.fillStyle =
+      unit.kind === "Player"
+        ? "#79b8ff"
+        : unit.kind === "Slime"
+          ? "#72dab5"
+          : "#f5ba79";
     context.beginPath();
     context.arc(at, y, unit.kind === "Player" ? 10 : 7, 0, Math.PI * 2);
     context.fill();
     context.textAlign = "center";
     context.fillText(`${unit.kind} #${unit.id}`, at, y - 16);
-    const healthRatio = unit.status.maxHp > 0
-      ? Math.max(0, Math.min(1, unit.hp / unit.status.maxHp))
-      : 0;
+    const healthRatio =
+      unit.status.maxHp > 0
+        ? Math.max(0, Math.min(1, unit.hp / unit.status.maxHp))
+        : 0;
     context.fillStyle = "#30405a";
     context.fillRect(at - 16, y - 11, 32, 3);
     context.fillStyle = healthRatio <= 0.3 ? "#ff7b89" : "#72dab5";
@@ -101,18 +187,69 @@ function draw(): void {
     context.textAlign = "left";
   });
   const previousUnits = history[history.length - 2]?.units ?? [];
+  // Effects keep their world positions even as the player's viewport moves.
+  context.save();
+  context.beginPath();
+  context.rect(left, 65, right - left, 180);
+  context.clip();
+  for (const effect of effects) {
+    const progress = Math.max(
+      0,
+      Math.min(1, (performance.now() - effect.startedAt) / effect.durationMs),
+    );
+    context.globalAlpha = 1 - progress;
+    if (effect.kind === "fireball") {
+      const at = x(effect.from + (effect.to - effect.from) * progress);
+      const y = effect.fromY + (effect.toY - effect.fromY) * progress;
+      const tailProgress = Math.max(0, progress - 0.18);
+      context.strokeStyle = "#ff963e";
+      context.lineWidth = 5;
+      context.beginPath();
+      context.moveTo(
+        x(effect.from + (effect.to - effect.from) * tailProgress),
+        effect.fromY + (effect.toY - effect.fromY) * tailProgress,
+      );
+      context.lineTo(at, y);
+      context.stroke();
+      context.shadowColor = "#ff963e";
+      context.shadowBlur = 16;
+      context.fillStyle = "#ffe6a3";
+      context.beginPath();
+      context.arc(at, y, 7, 0, Math.PI * 2);
+      context.fill();
+      context.shadowBlur = 0;
+    } else {
+      const radius = Math.abs(
+        x(effect.center + effect.radius * progress) - x(effect.center),
+      );
+      context.strokeStyle = "#c49bff";
+      context.fillStyle = "#b18aff";
+      context.lineWidth = 3;
+      context.beginPath();
+      context.arc(x(effect.center), effect.y, radius, 0, Math.PI * 2);
+      context.stroke();
+      context.globalAlpha = (1 - progress) * 0.08;
+      context.fill();
+    }
+  }
+  context.restore();
   const damageByUnit = new Map<number, number>();
   for (const event of log.events) {
     if (event.kind === "Damage") {
-      damageByUnit.set(event.dst, (damageByUnit.get(event.dst) ?? 0) + event.damage);
+      damageByUnit.set(
+        event.dst,
+        (damageByUnit.get(event.dst) ?? 0) + event.damage,
+      );
       continue;
     }
     if (event.kind !== "Move") continue;
     if (event.distance === 0 || event.direction === 0) continue;
     const index = log.units.findIndex((unit) => unit.id === event.unit);
-    const unit = log.units[index] ?? previousUnits.find((unit) => unit.id === event.unit);
+    const unit =
+      log.units[index] ?? previousUnits.find((unit) => unit.id === event.unit);
     if (!unit) continue;
-    const y = (unit.kind === "Player" ? 155 : 90 + (Math.max(index, 0) % 4) * 35) + 12;
+    const y =
+      (unit.kind === "Player" ? 155 : 90 + (Math.max(index, 0) % 4) * 35) + 12;
     const start = x(unit.position - event.direction * event.distance);
     const end = x(unit.position);
     const direction = Math.sign(event.direction * event.distance);
@@ -133,7 +270,8 @@ function draw(): void {
     const unit = log.units[index] ?? previousUnits[previousIndex];
     if (!unit) continue;
     const displayIndex = index >= 0 ? index : previousIndex;
-    const y = unit.kind === "Player" ? 155 : 90 + (Math.max(displayIndex, 0) % 4) * 35;
+    const y =
+      unit.kind === "Player" ? 155 : 90 + (Math.max(displayIndex, 0) % 4) * 35;
     context.strokeStyle = "#ff7b89";
     context.beginPath();
     context.arc(x(unit.position), y, 13, 0, Math.PI * 2);
@@ -141,7 +279,11 @@ function draw(): void {
     context.fillStyle = "#ff7b89";
     context.font = "bold 13px system-ui";
     context.textAlign = "center";
-    context.fillText(`-${damage}${index < 0 ? " · 死亡" : ""}`, x(unit.position), y + 29);
+    context.fillText(
+      `-${damage}${index < 0 ? " · 死亡" : ""}`,
+      x(unit.position),
+      y + 29,
+    );
     context.textAlign = "left";
   }
 }
@@ -153,7 +295,10 @@ function render(): void {
     const name = document.createElement("span");
     const skillName = gameData.skillDefinitions[entry.skill]!.name;
     name.textContent = skillName;
-    const progress = Math.max(0, Math.min(1, skillProgress.get(entry.uuid) ?? 0));
+    const progress = Math.max(
+      0,
+      Math.min(1, skillProgress.get(entry.uuid) ?? 0),
+    );
     const pie = document.createElement("span");
     pie.className = "skill-progress-pie";
     pie.style.setProperty("--progress", `${progress * 360}deg`);
@@ -166,7 +311,11 @@ function render(): void {
     return row;
   });
   element("skill-progress-list").replaceChildren(...progressRows);
-  element("player-build").textContent = JSON.stringify(selectedBuild(), null, 2);
+  element("player-build").textContent = JSON.stringify(
+    selectedBuild(),
+    null,
+    2,
+  );
   const finished = log.status !== "Running";
   const statusLabels = { Running: "战斗中", Victory: "胜利", Defeat: "失败" };
   const player = log.units.find((unit) => unit.kind === "Player");
@@ -177,10 +326,14 @@ function render(): void {
   const result = element("result");
   result.hidden = !finished;
   result.dataset.status = log.status;
-  element("result-title").textContent = log.status === "Victory" ? "战斗胜利" : "战斗失败";
-  element("result-detail").textContent = `${log.status === "Victory" ? "所有敌人已清除。" : "玩家已死亡。"}结束于第 ${log.frame} 帧 · 累计死亡 ${deaths} · 累计伤害 ${totalDamage}`;
+  element("result-title").textContent =
+    log.status === "Victory" ? "战斗胜利" : "战斗失败";
+  element("result-detail").textContent =
+    `${log.status === "Victory" ? "所有敌人已清除。" : "玩家已死亡。"}结束于第 ${log.frame} 帧 · 累计死亡 ${deaths} · 累计伤害 ${totalDamage}`;
   element("position").textContent = playerPosition.toFixed(2);
-  element("enemies").textContent = String(log.units.filter((unit) => unit.kind !== "Player").length);
+  element("enemies").textContent = String(
+    log.units.filter((unit) => unit.kind !== "Player").length,
+  );
   element("deaths").textContent = String(deaths);
   const rows = log.units.map((unit) => {
     const row = document.createElement("tr");
@@ -201,12 +354,34 @@ function render(): void {
   element("units").replaceChildren(...rows);
   const eventRows = log.events.map((event) => {
     const row = document.createElement("tr");
-    row.className = event.kind === "Damage" ? "damage-event" : event.kind === "Move" ? "move-event" : "skill-progress-event";
-    const values = event.kind === "Damage"
-      ? ["Damage", event.dst, `伤害 ${event.damage}`]
-      : event.kind === "Move"
-        ? ["Move", event.unit, `${event.direction >= 0 ? "→" : "←"} 距离 ${event.distance.toFixed(2)}`]
-        : ["PlayerSkillProgress", event.uuid, `${event.skill} 进度 ${(event.progress * 100).toFixed(1)}% / 施放速率 ${event.castRate}`];
+    row.className =
+      event.kind === "Damage"
+        ? "damage-event"
+        : event.kind === "Move"
+          ? "move-event"
+          : event.kind === "PlayerSkillProgress"
+            ? "skill-progress-event"
+            : "effect-event";
+    const values =
+      event.kind === "Damage"
+        ? ["Damage", event.dst, `伤害 ${event.damage}`]
+        : event.kind === "Move"
+          ? [
+              "Move",
+              event.unit,
+              `${event.direction >= 0 ? "→" : "←"} 距离 ${event.distance.toFixed(2)}`,
+            ]
+          : event.kind === "PlayerSkillProgress"
+            ? [
+                "PlayerSkillProgress",
+                event.uuid,
+                `${event.skill} 进度 ${(event.progress * 100).toFixed(1)}% / 施放速率 ${event.castRate}`,
+              ]
+            : [
+                "Effect",
+                event.source,
+                `${event.skill} / ${event.effect} ${JSON.stringify(event.payload)}`,
+              ];
     for (const value of values) {
       const cell = document.createElement("td");
       cell.textContent = String(value);
@@ -215,12 +390,17 @@ function render(): void {
     return row;
   });
   element("events").replaceChildren(...eventRows);
-  element("event-count").textContent = eventRows.length === 0 ? "当前帧无事件" : `当前帧 ${eventRows.length} 条`;
+  element("event-count").textContent =
+    eventRows.length === 0 ? "当前帧无事件" : `当前帧 ${eventRows.length} 条`;
   logs.textContent = history.map((entry) => JSON.stringify(entry)).join("\n");
   logs.scrollTop = logs.scrollHeight;
   step.disabled = log.status !== "Running" || timer !== undefined;
   play.disabled = log.status !== "Running";
-  play.textContent = finished ? "已结束" : timer === undefined ? "播放" : "暂停";
+  play.textContent = finished
+    ? "已结束"
+    : timer === undefined
+      ? "播放"
+      : "暂停";
   speed.disabled = finished;
   skillSelect.disabled = finished;
   element("reset").textContent = finished ? "重新开始" : "重置";
@@ -243,6 +423,7 @@ function advance(): void {
   deaths += previous.units.filter((unit) => !ids.has(unit.id)).length;
   for (const event of log.events) {
     if (event.kind === "Damage") totalDamage += event.damage;
+    if (event.kind === "Effect") addVisualEffect(event, previous);
     if (event.kind === "PlayerSkillProgress") {
       skillProgress.set(event.uuid, event.progress);
     }
@@ -260,12 +441,15 @@ function start(): void {
   render();
 }
 
-play.addEventListener("click", () => timer === undefined ? start() : pause());
+play.addEventListener("click", () => (timer === undefined ? start() : pause()));
 step.addEventListener("click", advance);
 element("reset").addEventListener("click", () => {
   pause();
   runningSkills = selectedBuild().skills;
   skillProgress.clear();
+  effects = [];
+  if (animation !== undefined) window.cancelAnimationFrame(animation);
+  animation = undefined;
   battle = new Battle(gameData, battleSpec, selectedBuild());
   log = battle.renderLog();
   history = [log];
@@ -301,11 +485,20 @@ for (const [index, name] of tabs.entries()) {
   tab.addEventListener("keydown", (event) => {
     let next: number;
     switch (event.key) {
-      case "ArrowRight": next = (index + 1) % tabs.length; break;
-      case "ArrowLeft": next = (index + tabs.length - 1) % tabs.length; break;
-      case "Home": next = 0; break;
-      case "End": next = tabs.length - 1; break;
-      default: return;
+      case "ArrowRight":
+        next = (index + 1) % tabs.length;
+        break;
+      case "ArrowLeft":
+        next = (index + tabs.length - 1) % tabs.length;
+        break;
+      case "Home":
+        next = 0;
+        break;
+      case "End":
+        next = tabs.length - 1;
+        break;
+      default:
+        return;
     }
     event.preventDefault();
     const nextName = tabs[next]!;

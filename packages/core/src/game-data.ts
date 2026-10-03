@@ -15,6 +15,7 @@ export type Config = {
   event: {
     maxEventPerUnit: {
       damage: number;
+      effect: number;
     };
   };
 };

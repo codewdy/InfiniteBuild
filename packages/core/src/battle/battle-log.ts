@@ -19,7 +19,14 @@ export namespace BattleEvent {
     castRate: number;
     progress: number;
   };
-  export type Event = Damage | Move | PlayerSkillProgress;
+  export type Effect = {
+    kind: "Effect";
+    effect: string;
+    source: number;
+    skill: string;
+    payload: Record<string, unknown>;
+  };
+  export type Event = Damage | Move | PlayerSkillProgress | Effect;
 }
 export type BattleStatus = "Running" | "Victory" | "Defeat";
 export type BattleLog = {

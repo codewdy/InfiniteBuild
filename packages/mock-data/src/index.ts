@@ -3,7 +3,7 @@ import type { BattleSpec, GameData, PlayerBuild } from "@infinite-build/core";
 export const gameData: GameData = {
   config: {
     map: { spawnMinimumSize: 5, visionRange: 20 },
-    event: { maxEventPerUnit: { damage: 10 } },
+    event: { maxEventPerUnit: { damage: 10, effect: 10 } },
   },
   skillDefinitions: {
     fireball: {
@@ -19,20 +19,69 @@ export const gameData: GameData = {
             nearestDistance = distance;
           }
         }
-        target?.damage(ctx, 10);
+        if (!target) return;
+        const projectileSpeed = 1; // Distance units per frame.
+        const durationFrames = Math.max(
+          1,
+          Math.ceil(nearestDistance / projectileSpeed),
+        );
+        ctx.events.addEffect({
+          effect: "fireball",
+          source: self.id,
+          skill: "fireball",
+          payload: {
+            from: self.position,
+            to: target.position,
+            durationFrames,
+          },
+        });
+        yield* ctx.taskScheduler.waitFrames(durationFrames);
+        if (!target.isDead && target.hp > 0) target.damage(ctx, 10);
       },
     },
     nova: {
       name: "新星",
       *caster(self, ctx) {
-        for (const unit of ctx.units) {
-          if (
-            unit.faction !== self.faction &&
-            unit.hp > 0 &&
-            Math.abs(unit.position - self.position) <= ctx.gameData.config.map.visionRange
-          ) {
-            unit.damage(ctx, 6);
+        const radius = ctx.gameData.config.map.visionRange;
+        const center = self.position;
+        const durationFrames = 10;
+        ctx.events.addEffect({
+          effect: "nova",
+          source: self.id,
+          skill: "nova",
+          payload: {
+            center,
+            radius,
+            durationFrames,
+          },
+        });
+        const hits = [...ctx.units]
+          .filter(
+            (unit) =>
+              unit.faction !== self.faction &&
+              !unit.isDead &&
+              unit.hp > 0 &&
+              Math.abs(unit.position - center) <= radius,
+          )
+          .map((unit) => ({
+            unit,
+            frame: Math.max(
+              1,
+              Math.ceil(
+                radius > 0
+                  ? (Math.abs(unit.position - center) / radius) * durationFrames
+                  : 1,
+              ),
+            ),
+          }))
+          .sort((a, b) => a.frame - b.frame);
+        let elapsedFrames = 0;
+        for (const { unit, frame } of hits) {
+          if (frame > elapsedFrames) {
+            yield* ctx.taskScheduler.waitFrames(frame - elapsedFrames);
+            elapsedFrames = frame;
           }
+          if (!unit.isDead && unit.hp > 0) unit.damage(ctx, 6);
         }
       },
     },

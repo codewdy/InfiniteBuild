@@ -39,6 +39,8 @@ button:disabled { opacity: .5; cursor: default; }button:focus-visible, select:fo
 .move-event { color: #79b8ff; }
 .damage-event { color: #ff7b89; }
 .skill-progress-event { color: #d3b0ff; }
+.effect-event, .nova-effect { color: #c49bff; }
+.fireball-effect { color: #ff963e; }
 table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; font-variant-numeric: tabular-nums; }
 th { color: #92a3b9; font-weight: normal; }th, td { padding: 10px 8px; border-bottom: 1px solid #25334a; }
 .table-wrap { max-height: 300px; overflow: auto; }pre { height: 300px; margin: 0; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; color: #a3bad6; font-size: 11px; line-height: 1.8; }

@@ -3,12 +3,14 @@ import type { BattleEvent } from "./battle-log.js";
 export class EventManager {
   private events: BattleEvent.Event[] = [];
   private damageCounts = new Map<number, number>();
+  private effectCounts = new Map<number, number>();
 
   constructor(private gameData: GameData) {}
 
   clear(): void {
     this.events = [];
     this.damageCounts.clear();
+    this.effectCounts.clear();
   }
 
   addEvent(event: BattleEvent.Event): void {
@@ -21,6 +23,9 @@ export class EventManager {
         break;
       case "PlayerSkillProgress":
         this.addPlayerSkillProgress(event);
+        break;
+      case "Effect":
+        this.addEffect(event);
         break;
     }
   }
@@ -41,6 +46,14 @@ export class EventManager {
     event: Omit<BattleEvent.PlayerSkillProgress, "kind">,
   ): void {
     this.events.push({ ...event, kind: "PlayerSkillProgress" });
+  }
+
+  addEffect(event: Omit<BattleEvent.Effect, "kind">): void {
+    const count = this.effectCounts.get(event.source) ?? 0;
+    if (count >= this.gameData.config.event.maxEventPerUnit.effect) return;
+
+    this.events.push({ ...event, kind: "Effect" });
+    this.effectCounts.set(event.source, count + 1);
   }
 
   getEvents(): BattleEvent.Event[] {
