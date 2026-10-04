@@ -23,10 +23,10 @@ export class RegularUnit extends Unit {
     const { min, max } = definition.move.range;
     this.moveRange = rng.uniform(min, max);
   }
-  calcBaseStatus(ctx: BattleContext): Status.Status {
+  override calcBaseStatus(ctx: BattleContext): Status.Status {
     return Status.createByConfig(this.definition.status);
   }
-  onMove(ctx: BattleContext): void {
+  override onMove(ctx: BattleContext): void {
     const direction = this.faction === "Ally" ? 1 : -1;
     let nearestDistance = Infinity;
     for (const unit of ctx.units) {
@@ -44,7 +44,7 @@ export class RegularUnit extends Unit {
     );
     CombatResolver.move(ctx, this, direction, distanceToMove);
   }
-  onUpdate(ctx: BattleContext): void {
+  override onUpdate(ctx: BattleContext): void {
     for (let index = 0; index < this.definition.skills.length; index++) {
       const { skill, castRate } = this.definition.skills[index]!;
       this.skillProgress[index] = (this.skillProgress[index] ?? 0) + castRate;
@@ -58,28 +58,32 @@ export class RegularUnit extends Unit {
     }
   }
 
-  onDeath(ctx: BattleContext): void {
+  override onDeath(ctx: BattleContext): void {
     if (this.definition.onDeath) {
       this.definition.onDeath(this, ctx);
     }
   }
 
-  onHitDealt(ctx: BattleContext, dst: Unit, amount: number): void {
+  override onHitDealt(ctx: BattleContext, dst: Unit, amount: number): void {
     this.definition.onHitDealt?.(this, ctx, dst, amount);
   }
-  onHitReceived(ctx: BattleContext, src: Unit, amount: number): void {
+  override onHitReceived(ctx: BattleContext, src: Unit, amount: number): void {
     this.definition.onHitReceived?.(this, ctx, src, amount);
   }
-  onDamageDealt(ctx: BattleContext, dst: Unit, amount: number): void {
+  override onDamageDealt(ctx: BattleContext, dst: Unit, amount: number): void {
     this.definition.onDamageDealt?.(this, ctx, dst, amount);
   }
-  onDamageReceived(ctx: BattleContext, src: Unit | null, amount: number): void {
+  override onDamageReceived(
+    ctx: BattleContext,
+    src: Unit | null,
+    amount: number,
+  ): void {
     this.definition.onDamageReceived?.(this, ctx, src, amount);
   }
-  onHeal(ctx: BattleContext, src: Unit | null, amount: number): void {
+  override onHeal(ctx: BattleContext, src: Unit | null, amount: number): void {
     this.definition.onHeal?.(this, ctx, src, amount);
   }
-  onKill(ctx: BattleContext, dst: Unit): void {
+  override onKill(ctx: BattleContext, dst: Unit): void {
     this.definition.onKill?.(this, ctx, dst);
   }
 }

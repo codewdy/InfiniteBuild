@@ -11,10 +11,10 @@ export class PlayerUnit extends Unit {
     this.position = 0;
   }
   onBuildChanged(ctx: BattleContext): void {}
-  calcBaseStatus(ctx: BattleContext): Status.Status {
+  override calcBaseStatus(ctx: BattleContext): Status.Status {
     return Status.createByConfig({ maxHp: 1 });
   }
-  onMove(ctx: BattleContext): void {
+  override onMove(ctx: BattleContext): void {
     const { speed, range, count, safeRange } = ctx.build.move;
     const visionRange = ctx.gameData.config.map.visionRange;
     const enemyPositions: number[] = [];
@@ -53,7 +53,7 @@ export class PlayerUnit extends Unit {
     );
     CombatResolver.move(ctx, this, 1, distanceToMove);
   }
-  onUpdate(ctx: BattleContext): void {
+  override onUpdate(ctx: BattleContext): void {
     for (const { uuid, skill, castRate } of ctx.build.skills) {
       let progress = (this.skillProgress.get(uuid) ?? 0) + castRate;
       while (progress >= 1) {
@@ -64,15 +64,15 @@ export class PlayerUnit extends Unit {
       ctx.events.addPlayerSkillProgress({ uuid, skill, castRate, progress });
     }
   }
-  onDeath(ctx: BattleContext): void {}
-  onHitDealt(ctx: BattleContext, dst: Unit, amount: number): void {}
-  onHitReceived(ctx: BattleContext, src: Unit, amount: number): void {}
-  onDamageDealt(ctx: BattleContext, dst: Unit, amount: number): void {}
-  onDamageReceived(
+  override onDeath(ctx: BattleContext): void {}
+  override onHitDealt(ctx: BattleContext, dst: Unit, amount: number): void {}
+  override onHitReceived(ctx: BattleContext, src: Unit, amount: number): void {}
+  override onDamageDealt(ctx: BattleContext, dst: Unit, amount: number): void {}
+  override onDamageReceived(
     ctx: BattleContext,
     src: Unit | null,
     amount: number,
   ): void {}
-  onHeal(ctx: BattleContext, src: Unit | null, amount: number): void {}
-  onKill(ctx: BattleContext, dst: Unit): void {}
+  override onHeal(ctx: BattleContext, src: Unit | null, amount: number): void {}
+  override onKill(ctx: BattleContext, dst: Unit): void {}
 }
