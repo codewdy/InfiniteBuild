@@ -143,8 +143,8 @@ export const gameData: GameData = {
         onUpdate: [{
           uuid: "goblin-fireball",
           skill: "fireball",
-          castRate: 0.5,
-          params: { damage: 10, range: 5, projectileSpeed: 1 },
+          castRate: 0.1,
+          params: { damage: 0.1, range: 5, projectileSpeed: 1 },
         }],
       },
     },

@@ -43,7 +43,10 @@ export abstract class Unit {
   rawStatus: Status.RawStatus = Status.resolve(
     Status.createByConfig({ attributes: { maxHp: 1 }, tags: [] }),
   );
-  status: Status.Status = Status.createByConfig({ attributes: { maxHp: 1 }, tags: [] });
+  status: Status.Status = Status.createByConfig({
+    attributes: { maxHp: 1 },
+    tags: [],
+  });
 
   protected updateSkills(ctx: BattleContext): void {
     for (const { uuid, skill, castRate, params } of this.skills.onUpdate ??
@@ -53,8 +56,8 @@ export abstract class Unit {
       }
       let progress = (this.skillProgress.get(uuid) ?? 0) + castRate;
       this.skillProgress.set(uuid, progress);
-      while (progress >= 1) {
-        progress -= 1;
+      while (progress >= 1 - 1e-6) {
+        progress = Math.max(0, progress - 1);
         this.skillProgress.set(uuid, progress);
         cast(ctx, this, skill, params);
       }
