@@ -7,6 +7,8 @@ export type { PlayerBuild } from "./player-build.js";
 export type {
   Config,
   GameData,
+  SkillDefinition,
+  SkillParams,
   MapDefinition,
   UnitDefinition,
 } from "./game-data.js";

@@ -1,3 +1,4 @@
+import type { SkillParams } from "../../game-data.js";
 import type { BattleContext } from "../battle.js";
 import type { Unit } from "../unit.js";
 import { Status } from "../status.js";
@@ -28,10 +29,11 @@ export namespace CombatResolver {
       unit.position = Math.max(min, Math.min(max, unit.position));
     }
   }
-  export function cast(ctx: BattleContext, unit: Unit, skill: string): void {
+  export function cast(ctx: BattleContext, unit: Unit, skill: string, params: SkillParams): void {
     const definition = ctx.gameData.skillDefinitions[skill];
     if (!definition) throw new Error(`Unknown skill: ${skill}`);
-    ctx.taskScheduler.start(() => definition.caster(unit, ctx));
+    const castParams = structuredClone(params);
+    ctx.taskScheduler.start(() => definition.caster(unit, ctx, castParams));
   }
   export function hit(
     ctx: BattleContext,

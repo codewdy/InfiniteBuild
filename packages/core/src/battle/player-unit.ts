@@ -54,11 +54,11 @@ export class PlayerUnit extends Unit {
     CombatResolver.move(ctx, this, 1, distanceToMove);
   }
   override onUpdate(ctx: BattleContext): void {
-    for (const { uuid, skill, castRate } of ctx.build.skills) {
+    for (const { uuid, skill, castRate, params } of ctx.build.skills) {
       let progress = (this.skillProgress.get(uuid) ?? 0) + castRate;
       while (progress >= 1) {
         progress -= 1;
-        CombatResolver.cast(ctx, this, skill);
+        CombatResolver.cast(ctx, this, skill, params);
       }
       this.skillProgress.set(uuid, progress);
       ctx.events.addPlayerSkillProgress({ uuid, skill, castRate, progress });

@@ -20,9 +20,11 @@ export type Config = {
   };
 };
 
+export type SkillParams = Record<string, unknown>;
+
 export type SkillDefinition = {
   name: string;
-  caster: (unit: Unit, ctx: BattleContext) => Routine;
+  caster: (unit: Unit, ctx: BattleContext, params: SkillParams) => Routine;
 };
 
 export type UnitDefinition = {
@@ -37,6 +39,7 @@ export type UnitDefinition = {
   };
   skills: {
     skill: string;
+    params: SkillParams;
     castRate: number;
   }[];
   onUpdate?: (self: Unit, ctx: BattleContext) => void;

@@ -46,11 +46,11 @@ export class RegularUnit extends Unit {
   }
   override onUpdate(ctx: BattleContext): void {
     for (let index = 0; index < this.definition.skills.length; index++) {
-      const { skill, castRate } = this.definition.skills[index]!;
+      const { skill, castRate, params } = this.definition.skills[index]!;
       this.skillProgress[index] = (this.skillProgress[index] ?? 0) + castRate;
       while (this.skillProgress[index]! >= 1) {
         this.skillProgress[index]! -= 1;
-        CombatResolver.cast(ctx, this, skill);
+        CombatResolver.cast(ctx, this, skill, params);
       }
     }
     if (this.definition.onUpdate) {

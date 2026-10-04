@@ -1,5 +1,26 @@
 import { CombatResolver } from "@infinite-build/core";
-import type { BattleSpec, GameData, PlayerBuild } from "@infinite-build/core";
+import type {
+  BattleSpec,
+  GameData,
+  PlayerBuild,
+  SkillParams,
+} from "@infinite-build/core";
+
+function numberParam(
+  params: SkillParams,
+  key: string,
+  positive = false,
+): number {
+  const value = params[key];
+  if (
+    typeof value !== "number" ||
+    !Number.isFinite(value) ||
+    (positive ? value <= 0 : value < 0)
+  ) {
+    throw new Error(`Invalid skill parameter: ${key}`);
+  }
+  return value;
+}
 
 export const gameData: GameData = {
   config: {
@@ -9,30 +30,38 @@ export const gameData: GameData = {
   skillDefinitions: {
     selfDestruct: {
       name: "自爆",
-      *caster(self, ctx) {
-        const radius = 2;
+      *caster(self, ctx, params) {
+        const radius = numberParam(params, "radius");
+        const damage = numberParam(params, "damage");
         for (const unit of ctx.units) {
-          if (unit.faction === self.faction || unit.isDead || unit.hp <= 0
-            || Math.abs(unit.position - self.position) > radius) continue;
-          CombatResolver.hit(ctx, self, unit, 1);
+          if (
+            unit.faction === self.faction ||
+            unit.isDead ||
+            unit.hp <= 0 ||
+            Math.abs(unit.position - self.position) > radius
+          )
+            continue;
+          CombatResolver.hit(ctx, self, unit, damage);
         }
       },
     },
     fireball: {
       name: "火球",
-      *caster(self, ctx) {
+      *caster(self, ctx, params) {
+        const damage = numberParam(params, "damage");
+        const range = numberParam(params, "range");
+        const projectileSpeed = numberParam(params, "projectileSpeed", true);
         let target: typeof self | undefined;
         let nearestDistance = Infinity;
         for (const unit of ctx.units) {
           if (unit.faction === self.faction || unit.hp <= 0) continue;
           const distance = Math.abs(unit.position - self.position);
-          if (distance <= ctx.build.move.range && distance < nearestDistance) {
+          if (distance <= range && distance < nearestDistance) {
             target = unit;
             nearestDistance = distance;
           }
         }
         if (!target) return;
-        const projectileSpeed = 1; // Distance units per frame.
         const durationFrames = Math.max(
           1,
           Math.ceil(nearestDistance / projectileSpeed),
@@ -48,15 +77,20 @@ export const gameData: GameData = {
           },
         });
         yield* ctx.taskScheduler.waitFrames(durationFrames);
-        if (!target.isDead && target.hp > 0) CombatResolver.hit(ctx, self, target, 10);
+        if (!target.isDead && target.hp > 0)
+          CombatResolver.hit(ctx, self, target, damage);
       },
     },
     nova: {
       name: "新星",
-      *caster(self, ctx) {
-        const radius = ctx.gameData.config.map.visionRange;
+      *caster(self, ctx, params) {
+        const radius = numberParam(params, "radius");
+        const damage = numberParam(params, "damage");
         const center = self.position;
-        const durationFrames = 10;
+        const durationFrames = numberParam(params, "durationFrames", true);
+        if (!Number.isSafeInteger(durationFrames)) {
+          throw new Error("durationFrames must be a positive safe integer");
+        }
         ctx.events.addEffect({
           effect: "nova",
           source: self.id,
@@ -70,13 +104,18 @@ export const gameData: GameData = {
         const hitUnits = new Set<number>();
         for (let frame = 1; frame <= durationFrames; frame++) {
           yield* ctx.taskScheduler.waitFrames(1);
-          const waveRadius = radius * frame / durationFrames;
+          const waveRadius = (radius * frame) / durationFrames;
           for (const unit of ctx.units) {
-            if (unit.faction === self.faction || unit.isDead || unit.hp <= 0
-              || hitUnits.has(unit.id)
-              || Math.abs(unit.position - center) > waveRadius) continue;
+            if (
+              unit.faction === self.faction ||
+              unit.isDead ||
+              unit.hp <= 0 ||
+              hitUnits.has(unit.id) ||
+              Math.abs(unit.position - center) > waveRadius
+            )
+              continue;
             hitUnits.add(unit.id);
-            CombatResolver.hit(ctx, self, unit, 6);
+            CombatResolver.hit(ctx, self, unit, damage);
           }
         }
       },
@@ -89,7 +128,10 @@ export const gameData: GameData = {
       move: { speed: 0.5, range: { min: 1.5, max: 2 } },
       skills: [],
       onDeath(self, ctx) {
-        CombatResolver.cast(ctx, self, "selfDestruct");
+        CombatResolver.cast(ctx, self, "selfDestruct", {
+          damage: 1,
+          radius: 2,
+        });
       },
     },
     Goblin: {
@@ -124,8 +166,18 @@ export const playerBuild: PlayerBuild = {
   level: 1,
   move: { speed: 1, safeRange: 1, range: 5, count: 2 },
   skills: [
-    { uuid: "mock-player-fireball", skill: "fireball", castRate: 0.5 },
-    { uuid: "mock-player-nova", skill: "nova", castRate: 0.2 },
+    {
+      uuid: "mock-player-fireball",
+      skill: "fireball",
+      castRate: 0.5,
+      params: { damage: 10, range: 5, projectileSpeed: 1 },
+    },
+    {
+      uuid: "mock-player-nova",
+      skill: "nova",
+      castRate: 0.2,
+      params: { damage: 6, radius: 20, durationFrames: 10 },
+    },
   ],
 };
 
