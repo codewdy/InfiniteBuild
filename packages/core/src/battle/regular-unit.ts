@@ -1,4 +1,5 @@
 import { Unit } from "./unit.js";
+import { CombatResolver } from "./combat/combat-resolver.js";
 import type { UnitDefinition } from "../game-data.js";
 import type { BattleContext, Faction } from "./battle.js";
 import { Status } from "./status.js";
@@ -22,7 +23,7 @@ export class RegularUnit extends Unit {
     const { min, max } = definition.move.range;
     this.moveRange = rng.uniform(min, max);
   }
-  onUpdateStatus(ctx: BattleContext): Status.Status {
+  calcBaseStatus(ctx: BattleContext): Status.Status {
     return Status.createByConfig(this.definition.status);
   }
   onMove(ctx: BattleContext): void {
@@ -41,16 +42,15 @@ export class RegularUnit extends Unit {
       this.definition.move.speed,
       Math.max(0, nearestDistance - this.moveRange),
     );
-    this.move(ctx, direction, distanceToMove);
+    CombatResolver.move(ctx, this, direction, distanceToMove);
   }
   onUpdate(ctx: BattleContext): void {
-    super.onUpdate(ctx);
     for (let index = 0; index < this.definition.skills.length; index++) {
       const { skill, castRate } = this.definition.skills[index]!;
       this.skillProgress[index] = (this.skillProgress[index] ?? 0) + castRate;
       while (this.skillProgress[index]! >= 1) {
         this.skillProgress[index]! -= 1;
-        this.cast(ctx, skill);
+        CombatResolver.cast(ctx, this, skill);
       }
     }
     if (this.definition.onUpdate) {

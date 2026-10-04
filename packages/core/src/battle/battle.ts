@@ -6,6 +6,7 @@ import { TaskScheduler } from "./task-scheduler.js";
 import { PlayerUnit } from "./player-unit.js";
 import type { BattleLog, BattleStatus } from "./battle-log.js";
 import { EventManager } from "./event-manager.js";
+import { CombatResolver } from "./combat/combat-resolver.js";
 import type { PlayerBuild } from "../player-build.js";
 import type { GameData } from "../game-data.js";
 
@@ -80,7 +81,7 @@ export class Battle {
     }
     this.spawn();
     for (const unit of this.ctx.units) {
-      unit.updateStatus(this.ctx);
+      CombatResolver.updateStatus(this.ctx, unit);
     }
     this.ctx.taskScheduler.executeFrame(this.ctx.frame);
     for (const unit of this.ctx.units) {

@@ -1,3 +1,4 @@
+import { CombatResolver } from "@infinite-build/core";
 import type { BattleSpec, GameData, PlayerBuild } from "@infinite-build/core";
 
 export const gameData: GameData = {
@@ -36,7 +37,7 @@ export const gameData: GameData = {
           },
         });
         yield* ctx.taskScheduler.waitFrames(durationFrames);
-        if (!target.isDead && target.hp > 0) target.damage(ctx, 10);
+        if (!target.isDead && target.hp > 0) CombatResolver.hit(ctx, self, target, 10);
       },
     },
     nova: {
@@ -64,7 +65,7 @@ export const gameData: GameData = {
               || hitUnits.has(unit.id)
               || Math.abs(unit.position - center) > waveRadius) continue;
             hitUnits.add(unit.id);
-            unit.damage(ctx, 6);
+            CombatResolver.hit(ctx, self, unit, 6);
           }
         }
       },

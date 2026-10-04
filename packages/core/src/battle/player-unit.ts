@@ -1,4 +1,5 @@
 import { Unit } from "./unit.js";
+import { CombatResolver } from "./combat/combat-resolver.js";
 import type { BattleContext } from "./battle.js";
 import { Status } from "./status.js";
 export class PlayerUnit extends Unit {
@@ -10,7 +11,7 @@ export class PlayerUnit extends Unit {
     this.position = 0;
   }
   onBuildChanged(ctx: BattleContext): void {}
-  onUpdateStatus(ctx: BattleContext): Status.Status {
+  calcBaseStatus(ctx: BattleContext): Status.Status {
     return Status.createByConfig({ maxHp: 1 });
   }
   onMove(ctx: BattleContext): void {
@@ -39,7 +40,7 @@ export class PlayerUnit extends Unit {
           );
 
     if (enemyPositions.length < count && ctx.pendingSpawns.length > 0) {
-      this.move(ctx, 1, safeMoveDistance);
+      CombatResolver.move(ctx, this, 1, safeMoveDistance);
       return;
     }
     if (enemyPositions.length === 0 || count <= 0) return;
@@ -50,15 +51,14 @@ export class PlayerUnit extends Unit {
       safeMoveDistance,
       Math.max(0, targetPosition - this.position - range),
     );
-    this.move(ctx, 1, distanceToMove);
+    CombatResolver.move(ctx, this, 1, distanceToMove);
   }
   onUpdate(ctx: BattleContext): void {
-    super.onUpdate(ctx);
     for (const { uuid, skill, castRate } of ctx.build.skills) {
       let progress = (this.skillProgress.get(uuid) ?? 0) + castRate;
       while (progress >= 1) {
         progress -= 1;
-        this.cast(ctx, skill);
+        CombatResolver.cast(ctx, this, skill);
       }
       this.skillProgress.set(uuid, progress);
       ctx.events.addPlayerSkillProgress({ uuid, skill, castRate, progress });
