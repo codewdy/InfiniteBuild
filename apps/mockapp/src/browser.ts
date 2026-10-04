@@ -174,8 +174,8 @@ function draw(): void {
     context.textAlign = "center";
     context.fillText(`${unit.kind} #${unit.id}`, at, y - 16);
     const healthRatio =
-      unit.status.maxHp > 0
-        ? Math.max(0, Math.min(1, unit.hp / unit.status.maxHp))
+      unit.status.attributes.maxHp > 0
+        ? Math.max(0, Math.min(1, unit.hp / unit.status.attributes.maxHp))
         : 0;
     context.fillStyle = "#30405a";
     context.fillRect(at - 16, y - 11, 32, 3);
@@ -363,9 +363,9 @@ function render(): void {
       unit.id,
       unit.kind,
       unit.position.toFixed(2),
-      `${unit.hp.toFixed(1)} / ${unit.status.maxHp.toFixed(1)}`,
-      unit.status.attack.toFixed(1),
-      unit.status.defense.toFixed(1),
+      `${unit.hp.toFixed(1)} / ${unit.status.attributes.maxHp.toFixed(1)}`,
+      unit.status.attributes.attack.toFixed(1),
+      unit.status.attributes.defense.toFixed(1),
     ]) {
       const cell = document.createElement("td");
       cell.textContent = String(value);

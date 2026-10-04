@@ -124,7 +124,7 @@ export const gameData: GameData = {
   unitDefinitions: {
     Slime: {
       kind: "Slime",
-      status: { maxHp: 20, attack: 5, defense: 0 },
+      status: { attributes: { maxHp: 20, attack: 5, defense: 0 }, tags: [] },
       move: { speed: 0.5, range: { min: 1.5, max: 2 } },
       skills: {
         onDeath: [{
@@ -137,7 +137,7 @@ export const gameData: GameData = {
     },
     Goblin: {
       kind: "Goblin",
-      status: { maxHp: 30, attack: 5, defense: 0 },
+      status: { attributes: { maxHp: 30, attack: 5, defense: 0 }, tags: [] },
       move: { speed: 1, range: { min: 2.5, max: 3 } },
       skills: {
         onUpdate: [{

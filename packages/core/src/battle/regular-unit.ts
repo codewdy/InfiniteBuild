@@ -46,46 +46,4 @@ export class RegularUnit extends Unit {
     );
     CombatResolver.move(ctx, this, direction, distanceToMove);
   }
-  override onUpdate(ctx: BattleContext): void {
-    super.onUpdate(ctx);
-    if (this.definition.onUpdate) {
-      this.definition.onUpdate(this, ctx);
-    }
-  }
-
-  override onDeath(ctx: BattleContext): void {
-    super.onDeath(ctx);
-    if (this.definition.onDeath) {
-      this.definition.onDeath(this, ctx);
-    }
-  }
-
-  override onHitDealt(ctx: BattleContext, dst: Unit, amount: number): void {
-    super.onHitDealt(ctx, dst, amount);
-    this.definition.onHitDealt?.(this, ctx, dst, amount);
-  }
-  override onHitReceived(ctx: BattleContext, src: Unit, amount: number): void {
-    super.onHitReceived(ctx, src, amount);
-    this.definition.onHitReceived?.(this, ctx, src, amount);
-  }
-  override onDamageDealt(ctx: BattleContext, dst: Unit, amount: number): void {
-    super.onDamageDealt(ctx, dst, amount);
-    this.definition.onDamageDealt?.(this, ctx, dst, amount);
-  }
-  override onDamageReceived(
-    ctx: BattleContext,
-    src: Unit | null,
-    amount: number,
-  ): void {
-    super.onDamageReceived(ctx, src, amount);
-    this.definition.onDamageReceived?.(this, ctx, src, amount);
-  }
-  override onHeal(ctx: BattleContext, src: Unit | null, amount: number): void {
-    super.onHeal(ctx, src, amount);
-    this.definition.onHeal?.(this, ctx, src, amount);
-  }
-  override onKill(ctx: BattleContext, dst: Unit): void {
-    super.onKill(ctx, dst);
-    this.definition.onKill?.(this, ctx, dst);
-  }
 }

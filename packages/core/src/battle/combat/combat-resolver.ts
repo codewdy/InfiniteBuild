@@ -8,9 +8,9 @@ export namespace CombatResolver {
     const status = unit.calcBaseStatus(ctx);
     unit.status = status;
     unit.rawStatus = Status.resolve(unit.status);
-    if (unit.rawStatus.maxHp != unit.maxHp) {
-      unit.hp = (unit.hp * unit.rawStatus.maxHp) / unit.maxHp;
-      unit.maxHp = unit.rawStatus.maxHp;
+    if (unit.rawStatus.attributes.maxHp != unit.maxHp) {
+      unit.hp = (unit.hp * unit.rawStatus.attributes.maxHp) / unit.maxHp;
+      unit.maxHp = unit.rawStatus.attributes.maxHp;
     }
   }
   export function move(
@@ -57,6 +57,8 @@ export namespace CombatResolver {
   ): void {
     dst.hp -= amount;
     ctx.events.addDamage({ dst: dst.id, damage: amount });
+    src?.onDamageDealt(ctx, dst, amount);
+    dst.onDamageReceived(ctx, src, amount);
   }
   export function resolveDeath(ctx: BattleContext): void {
     while (true) {

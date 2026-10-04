@@ -34,9 +34,9 @@ export abstract class Unit {
   lastHitUnit: Unit | null = null;
   isDead: boolean = false;
   rawStatus: Status.RawStatus = Status.resolve(
-    Status.createByConfig({ maxHp: 1 }),
+    Status.createByConfig({ attributes: { maxHp: 1 }, tags: [] }),
   );
-  status: Status.Status = Status.createByConfig({ maxHp: 1 });
+  status: Status.Status = Status.createByConfig({ attributes: { maxHp: 1 }, tags: [] });
 
   protected updateSkills(ctx: BattleContext): void {
     for (const { uuid, skill, castRate, params } of this.skills.onUpdate ??
@@ -75,26 +75,50 @@ export abstract class Unit {
   abstract onMove(ctx: BattleContext): void;
   onUpdate(ctx: BattleContext): void {
     this.updateSkills(ctx);
+    for (const callback of [...(this.status.triggers.onUpdate ?? [])]) {
+      callback(this, ctx);
+    }
   }
   onDeath(ctx: BattleContext): void {
     this.triggerSkills(ctx, "onDeath");
+    for (const callback of [...(this.status.triggers.onDeath ?? [])]) {
+      callback(this, ctx);
+    }
   }
   onHitDealt(ctx: BattleContext, dst: Unit, amount: number): void {
     this.triggerSkills(ctx, "onHitDealt");
+    for (const callback of [...(this.status.triggers.onHitDealt ?? [])]) {
+      callback(this, ctx, dst, amount);
+    }
   }
   onHitReceived(ctx: BattleContext, src: Unit, amount: number): void {
     this.triggerSkills(ctx, "onHitReceived");
+    for (const callback of [...(this.status.triggers.onHitReceived ?? [])]) {
+      callback(this, ctx, src, amount);
+    }
   }
   onDamageDealt(ctx: BattleContext, dst: Unit, amount: number): void {
     this.triggerSkills(ctx, "onDamageDealt");
+    for (const callback of [...(this.status.triggers.onDamageDealt ?? [])]) {
+      callback(this, ctx, dst, amount);
+    }
   }
   onDamageReceived(ctx: BattleContext, src: Unit | null, amount: number): void {
     this.triggerSkills(ctx, "onDamageReceived");
+    for (const callback of [...(this.status.triggers.onDamageReceived ?? [])]) {
+      callback(this, ctx, src, amount);
+    }
   }
   onHeal(ctx: BattleContext, src: Unit | null, amount: number): void {
     this.triggerSkills(ctx, "onHeal");
+    for (const callback of [...(this.status.triggers.onHeal ?? [])]) {
+      callback(this, ctx, src, amount);
+    }
   }
   onKill(ctx: BattleContext, dst: Unit): void {
     this.triggerSkills(ctx, "onKill");
+    for (const callback of [...(this.status.triggers.onKill ?? [])]) {
+      callback(this, ctx, dst);
+    }
   }
 }
