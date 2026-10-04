@@ -139,7 +139,14 @@ export const gameData: GameData = {
       kind: "Goblin",
       status: { maxHp: 30, attack: 5, defense: 0 },
       move: { speed: 1, range: { min: 2.5, max: 3 } },
-      skills: {},
+      skills: {
+        onUpdate: [{
+          uuid: "goblin-fireball",
+          skill: "fireball",
+          castRate: 0.5,
+          params: { damage: 10, range: 5, projectileSpeed: 1 },
+        }],
+      },
     },
   },
   mapDefinitions: {
