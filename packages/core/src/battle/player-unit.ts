@@ -65,4 +65,14 @@ export class PlayerUnit extends Unit {
     }
   }
   onDeath(ctx: BattleContext): void {}
+  onHitDealt(ctx: BattleContext, dst: Unit, amount: number): void {}
+  onHitReceived(ctx: BattleContext, src: Unit, amount: number): void {}
+  onDamageDealt(ctx: BattleContext, dst: Unit, amount: number): void {}
+  onDamageReceived(
+    ctx: BattleContext,
+    src: Unit | null,
+    amount: number,
+  ): void {}
+  onHeal(ctx: BattleContext, src: Unit | null, amount: number): void {}
+  onKill(ctx: BattleContext, dst: Unit): void {}
 }

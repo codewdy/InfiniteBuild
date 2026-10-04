@@ -90,8 +90,8 @@ export class Battle {
     for (const unit of this.ctx.units) {
       unit.onUpdate(this.ctx);
     }
-    this.fixPosition();
-    this.checkDeath();
+    CombatResolver.fixPosition(this.ctx);
+    CombatResolver.resolveDeath(this.ctx);
     this.checkBattleStatus();
     return this.renderLog();
   }
@@ -109,13 +109,6 @@ export class Battle {
       events: this.ctx.events.getEvents(),
     };
   }
-  fixPosition(): void {
-    const min = this.ctx.player.position;
-    const max = min + this.ctx.gameData.config.map.visionRange;
-    for (const unit of this.ctx.units) {
-      unit.position = Math.max(min, Math.min(max, unit.position));
-    }
-  }
   spawn(): void {
     const { player, units, gameData } = this.ctx;
     const visionRange = gameData.config.map.visionRange;
@@ -128,17 +121,6 @@ export class Battle {
       }
     }
     this.ctx.pendingSpawns = pendingSpawns;
-  }
-  checkDeath(): void {
-    for (const unit of [...this.ctx.units]) {
-      if (unit.hp <= 0) {
-        if (!unit.isDead) {
-          unit.isDead = true;
-          unit.onDeath(this.ctx);
-        }
-        this.ctx.units.remove(unit);
-      }
-    }
   }
   checkBattleStatus(): void {
     if (this.ctx.status !== "Running") return;

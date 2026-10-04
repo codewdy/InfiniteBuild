@@ -8,6 +8,7 @@ export abstract class Unit {
   position!: number;
   maxHp: number = 1;
   hp: number = 1;
+  lastHitUnit: Unit | null = null;
   isDead: boolean = false;
   rawStatus: Status.RawStatus = Status.resolve(
     Status.createByConfig({ maxHp: 1 }),
@@ -18,4 +19,14 @@ export abstract class Unit {
   abstract onMove(ctx: BattleContext): void;
   abstract onUpdate(ctx: BattleContext): void;
   abstract onDeath(ctx: BattleContext): void;
+  abstract onHitDealt(ctx: BattleContext, dst: Unit, amount: number): void;
+  abstract onHitReceived(ctx: BattleContext, src: Unit, amount: number): void;
+  abstract onDamageDealt(ctx: BattleContext, dst: Unit, amount: number): void;
+  abstract onDamageReceived(
+    ctx: BattleContext,
+    src: Unit | null,
+    amount: number,
+  ): void;
+  abstract onHeal(ctx: BattleContext, src: Unit | null, amount: number): void;
+  abstract onKill(ctx: BattleContext, dst: Unit): void;
 }

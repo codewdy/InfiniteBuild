@@ -57,9 +57,29 @@ export class RegularUnit extends Unit {
       this.definition.onUpdate(this, ctx);
     }
   }
+
   onDeath(ctx: BattleContext): void {
     if (this.definition.onDeath) {
       this.definition.onDeath(this, ctx);
     }
+  }
+
+  onHitDealt(ctx: BattleContext, dst: Unit, amount: number): void {
+    this.definition.onHitDealt?.(this, ctx, dst, amount);
+  }
+  onHitReceived(ctx: BattleContext, src: Unit, amount: number): void {
+    this.definition.onHitReceived?.(this, ctx, src, amount);
+  }
+  onDamageDealt(ctx: BattleContext, dst: Unit, amount: number): void {
+    this.definition.onDamageDealt?.(this, ctx, dst, amount);
+  }
+  onDamageReceived(ctx: BattleContext, src: Unit | null, amount: number): void {
+    this.definition.onDamageReceived?.(this, ctx, src, amount);
+  }
+  onHeal(ctx: BattleContext, src: Unit | null, amount: number): void {
+    this.definition.onHeal?.(this, ctx, src, amount);
+  }
+  onKill(ctx: BattleContext, dst: Unit): void {
+    this.definition.onKill?.(this, ctx, dst);
   }
 }
