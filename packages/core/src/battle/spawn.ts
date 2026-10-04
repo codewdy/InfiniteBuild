@@ -3,6 +3,22 @@ import type { RandomGenerator } from "./random-generator.js";
 import { RegularUnit } from "./combat/regular-unit.js";
 import type { GameData } from "../game-data.js";
 
+export type MapDefinition = {
+  totalValue: number;
+  spawner: {
+    mapSize: number;
+    value: number;
+    weight: number;
+    enemies: {
+      kind: string;
+      count: {
+        min: number;
+        max: number;
+      };
+    }[];
+  }[];
+};
+
 export function spawn(
   gameData: GameData,
   map: string,

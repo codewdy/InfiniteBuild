@@ -10,8 +10,6 @@ export { cast } from "./battle/combat/skill.js";
 export type { SkillDefinition, SkillParams } from "./battle/combat/skill.js";
 export type { UnitDefinition } from "./battle/combat/regular-unit.js";
 export type { PlayerBuild } from "./player-build.js";
-export type {
-  Config,
-  GameData,
-  MapDefinition,
-} from "./game-data.js";
+export type { Config } from "./config.js";
+export type { GameData } from "./game-data.js";
+export type { MapDefinition } from "./battle/spawn.js";
