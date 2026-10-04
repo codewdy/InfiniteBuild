@@ -7,6 +7,17 @@ export const gameData: GameData = {
     event: { maxEventPerUnit: { damage: 10, effect: 10 } },
   },
   skillDefinitions: {
+    selfDestruct: {
+      name: "自爆",
+      *caster(self, ctx) {
+        const radius = 2;
+        for (const unit of ctx.units) {
+          if (unit.faction === self.faction || unit.isDead || unit.hp <= 0
+            || Math.abs(unit.position - self.position) > radius) continue;
+          CombatResolver.hit(ctx, self, unit, 1);
+        }
+      },
+    },
     fireball: {
       name: "火球",
       *caster(self, ctx) {
@@ -77,6 +88,9 @@ export const gameData: GameData = {
       status: { maxHp: 20, attack: 5, defense: 0 },
       move: { speed: 0.5, range: { min: 1.5, max: 2 } },
       skills: [],
+      onDeath(self, ctx) {
+        CombatResolver.cast(ctx, self, "selfDestruct");
+      },
     },
     Goblin: {
       kind: "Goblin",

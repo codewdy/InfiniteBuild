@@ -12,7 +12,7 @@ export class PlayerUnit extends Unit {
   }
   onBuildChanged(ctx: BattleContext): void {}
   override calcBaseStatus(ctx: BattleContext): Status.Status {
-    return Status.createByConfig({ maxHp: 1 });
+    return Status.createByConfig({ maxHp: 10 });
   }
   override onMove(ctx: BattleContext): void {
     const { speed, range, count, safeRange } = ctx.build.move;
