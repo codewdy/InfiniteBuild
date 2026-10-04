@@ -2,10 +2,11 @@
  * 所有跟游戏有关的静态数据
  */
 
-import type { Unit, UnitSkills } from "./battle/unit.js";
-import type { BattleContext } from "./battle/battle.js";
-import type { Status } from "./battle/status.js";
-import type { Routine } from "./battle/task-scheduler.js";
+import type { UnitDefinition } from "./battle/combat/regular-unit.js";
+import type { SkillDefinition } from "./battle/combat/skill.js";
+
+export type { UnitDefinition } from "./battle/combat/regular-unit.js";
+export type { SkillDefinition, SkillParams } from "./battle/combat/skill.js";
 
 export type Config = {
   map: {
@@ -18,26 +19,6 @@ export type Config = {
       effect: number;
     };
   };
-};
-
-export type SkillParams = Record<string, unknown>;
-
-export type SkillDefinition = {
-  name: string;
-  caster: (unit: Unit, ctx: BattleContext, params: SkillParams) => Routine;
-};
-
-export type UnitDefinition = {
-  kind: string;
-  status: Status.StatusConfig;
-  move: {
-    speed: number;
-    range: {
-      min: number;
-      max: number;
-    };
-  };
-  skills: UnitSkills;
 };
 
 export type MapDefinition = {

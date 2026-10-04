@@ -1,6 +1,6 @@
-import type { Unit } from "./unit.js";
+import type { Unit } from "./combat/unit.js";
 import type { RandomGenerator } from "./random-generator.js";
-import { RegularUnit } from "./regular-unit.js";
+import { RegularUnit } from "./combat/regular-unit.js";
 import type { GameData } from "../game-data.js";
 
 export function spawn(

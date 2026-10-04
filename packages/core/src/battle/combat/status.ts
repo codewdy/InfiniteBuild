@@ -1,5 +1,5 @@
 import type { Unit } from "./unit.js";
-import type { BattleContext } from "./battle.js";
+import type { BattleContext } from "../battle.js";
 
 export namespace Status {
   export const FieldName = ["maxHp", "attack", "defense"] as const;

@@ -1,4 +1,4 @@
-import { CombatResolver } from "@infinite-build/core";
+import { hit } from "@infinite-build/core";
 import type {
   BattleSpec,
   GameData,
@@ -41,7 +41,7 @@ export const gameData: GameData = {
             Math.abs(unit.position - self.position) > radius
           )
             continue;
-          CombatResolver.hit(ctx, self, unit, damage);
+          hit(ctx, self, unit, damage);
         }
       },
     },
@@ -78,7 +78,7 @@ export const gameData: GameData = {
         });
         yield* ctx.taskScheduler.waitFrames(durationFrames);
         if (!target.isDead && target.hp > 0)
-          CombatResolver.hit(ctx, self, target, damage);
+          hit(ctx, self, target, damage);
       },
     },
     nova: {
@@ -115,7 +115,7 @@ export const gameData: GameData = {
             )
               continue;
             hitUnits.add(unit.id);
-            CombatResolver.hit(ctx, self, unit, damage);
+            hit(ctx, self, unit, damage);
           }
         }
       },

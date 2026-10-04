@@ -1,4 +1,4 @@
-import type { Status } from "./status.js";
+import type { Status } from "./combat/status.js";
 
 export namespace BattleEvent {
   export type Damage = {

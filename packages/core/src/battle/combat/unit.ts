@@ -1,7 +1,14 @@
-import type { SkillParams } from "../game-data.js";
-import type { BattleContext, Faction } from "./battle.js";
-import { CombatResolver } from "./combat/combat-resolver.js";
+import { cast, type SkillParams } from "./skill.js";
+import type { BattleContext } from "../battle.js";
 import { Status } from "./status.js";
+
+export type Faction = "Ally" | "Enemy";
+export const Faction = {
+  opponent: { Ally: "Enemy", Enemy: "Ally" } satisfies Record<Faction, Faction>,
+  getOpponent(faction: Faction): Faction {
+    return Faction.opponent[faction];
+  },
+};
 
 export type UnitSkill = {
   skill: string;
@@ -49,7 +56,7 @@ export abstract class Unit {
       while (progress >= 1) {
         progress -= 1;
         this.skillProgress.set(uuid, progress);
-        CombatResolver.cast(ctx, this, skill, params);
+        cast(ctx, this, skill, params);
       }
     }
   }
@@ -66,7 +73,7 @@ export abstract class Unit {
       const chance = castRate - casts;
       if (chance > 0 && ctx.rng.rand() < chance) casts += 1;
       for (let index = 0; index < casts; index++) {
-        CombatResolver.cast(ctx, this, skill, params);
+        cast(ctx, this, skill, params);
       }
     }
   }

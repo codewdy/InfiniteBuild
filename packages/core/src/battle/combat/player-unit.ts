@@ -1,6 +1,6 @@
 import { Unit } from "./unit.js";
-import { CombatResolver } from "./combat/combat-resolver.js";
-import type { BattleContext } from "./battle.js";
+import { move } from "./movement.js";
+import type { BattleContext } from "../battle.js";
 import { Status } from "./status.js";
 export class PlayerUnit extends Unit {
   constructor() {
@@ -41,7 +41,7 @@ export class PlayerUnit extends Unit {
           );
 
     if (enemyPositions.length < count && ctx.pendingSpawns.length > 0) {
-      CombatResolver.move(ctx, this, 1, safeMoveDistance);
+      move(ctx, this, 1, safeMoveDistance);
       return;
     }
     if (enemyPositions.length === 0 || count <= 0) return;
@@ -52,7 +52,7 @@ export class PlayerUnit extends Unit {
       safeMoveDistance,
       Math.max(0, targetPosition - this.position - range),
     );
-    CombatResolver.move(ctx, this, 1, distanceToMove);
+    move(ctx, this, 1, distanceToMove);
   }
   override onUpdate(ctx: BattleContext): void {
     super.onUpdate(ctx);

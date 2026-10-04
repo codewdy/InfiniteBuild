@@ -1,22 +1,15 @@
 import { RandomGenerator } from "./random-generator.js";
 import { spawn } from "./spawn.js";
 import { UnitManager } from "./unit-list.js";
-import type { Unit } from "./unit.js";
+import type { Unit } from "./combat/unit.js";
 import { TaskScheduler } from "./task-scheduler.js";
-import { PlayerUnit } from "./player-unit.js";
+import { PlayerUnit } from "./combat/player-unit.js";
 import type { BattleLog, BattleStatus } from "./battle-log.js";
 import { EventManager } from "./event-manager.js";
-import { CombatResolver } from "./combat/combat-resolver.js";
+import { spawnUnits, fixPosition } from "./combat/movement.js";
+import { updateStatus, resolveDeath } from "./combat/unit-status.js";
 import type { PlayerBuild } from "../player-build.js";
 import type { GameData } from "../game-data.js";
-
-export type Faction = "Ally" | "Enemy";
-export const Faction = {
-  opponent: { Ally: "Enemy", Enemy: "Ally" } satisfies Record<Faction, Faction>,
-  getOpponent(faction: Faction): Faction {
-    return Faction.opponent[faction];
-  },
-};
 
 export type BattleSpec = {
   seed: number;
@@ -79,9 +72,9 @@ export class Battle {
       this.ctx.build = structuredClone(build);
       this.ctx.player.onBuildChanged(this.ctx);
     }
-    this.spawn();
+    spawnUnits(this.ctx);
     for (const unit of this.ctx.units) {
-      CombatResolver.updateStatus(this.ctx, unit);
+      updateStatus(this.ctx, unit);
     }
     this.ctx.taskScheduler.executeFrame(this.ctx.frame);
     for (const unit of this.ctx.units) {
@@ -90,8 +83,8 @@ export class Battle {
     for (const unit of this.ctx.units) {
       unit.onUpdate(this.ctx);
     }
-    CombatResolver.fixPosition(this.ctx);
-    CombatResolver.resolveDeath(this.ctx);
+    fixPosition(this.ctx);
+    resolveDeath(this.ctx);
     this.checkBattleStatus();
     return this.renderLog();
   }
@@ -111,19 +104,6 @@ export class Battle {
       })),
       events: this.ctx.events.getEvents(),
     };
-  }
-  spawn(): void {
-    const { player, units, gameData } = this.ctx;
-    const visionRange = gameData.config.map.visionRange;
-    const pendingSpawns: Unit[] = [];
-    for (const unit of this.ctx.pendingSpawns) {
-      if (Math.abs(unit.position - player.position) <= visionRange) {
-        units.add(unit);
-      } else {
-        pendingSpawns.push(unit);
-      }
-    }
-    this.ctx.pendingSpawns = pendingSpawns;
   }
   checkBattleStatus(): void {
     if (this.ctx.status !== "Running") return;

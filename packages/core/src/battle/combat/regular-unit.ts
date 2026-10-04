@@ -1,9 +1,22 @@
-import { Unit } from "./unit.js";
-import { CombatResolver } from "./combat/combat-resolver.js";
-import type { UnitDefinition } from "../game-data.js";
-import type { BattleContext, Faction } from "./battle.js";
+import { Unit, type Faction, type UnitSkills } from "./unit.js";
+import { move } from "./movement.js";
+import type { BattleContext } from "../battle.js";
 import { Status } from "./status.js";
-import type { RandomGenerator } from "./random-generator.js";
+import type { RandomGenerator } from "../random-generator.js";
+
+export type UnitDefinition = {
+  kind: string;
+  status: Status.StatusConfig;
+  move: {
+    speed: number;
+    range: {
+      min: number;
+      max: number;
+    };
+  };
+  skills: UnitSkills;
+};
+
 export class RegularUnit extends Unit {
   private definition: UnitDefinition;
   private moveRange: number;
@@ -44,6 +57,6 @@ export class RegularUnit extends Unit {
       this.definition.move.speed,
       Math.max(0, nearestDistance - this.moveRange),
     );
-    CombatResolver.move(ctx, this, direction, distanceToMove);
+    move(ctx, this, direction, distanceToMove);
   }
 }
