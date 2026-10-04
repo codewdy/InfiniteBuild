@@ -32,8 +32,14 @@ export class RegularUnit extends Unit {
     this.faction = faction;
     this.definition = definition;
     this.skills = structuredClone(definition.skills);
-    for (const { uuid } of this.skills.onUpdate ?? []) {
-      this.skillProgress.set(uuid, rng.rand());
+    for (const type of [
+      "onUpdate",
+      "onDamageDealt",
+      "onDamageReceived",
+    ] as const) {
+      for (const { uuid } of this.skills[type] ?? []) {
+        this.skillProgress.set(uuid, rng.rand());
+      }
     }
     const { min, max } = definition.move.range;
     this.moveRange = rng.uniform(min, max);

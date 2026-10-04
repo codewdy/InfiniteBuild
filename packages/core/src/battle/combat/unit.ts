@@ -15,8 +15,10 @@ export type UnitSkill = {
   skill: string;
   uuid: string;
   params: SkillParams;
-  /** Progress per update, or guaranteed casts plus fractional trigger chance. */
-  castRate: number;
+  /** Progress per frame for onUpdate, per damage point for onDamage*,
+   * otherwise guaranteed casts plus fractional trigger chance.
+   * Omit to cast once per event, regardless of damage amount. */
+  castRate?: number;
 };
 
 export type UnitSkills = {
@@ -50,20 +52,42 @@ export abstract class Unit {
     tags: [],
   });
 
-  protected updateSkills(ctx: BattleContext): void {
-    for (const { uuid, skill, castRate, params } of this.skills.onUpdate ??
-      []) {
+  private accumulateSkills(
+    ctx: BattleContext,
+    type: "onUpdate" | "onDamageDealt" | "onDamageReceived",
+    amount: number,
+  ): void {
+    if (!Number.isFinite(amount) || amount < 0) {
+      throw new RangeError(
+        "progress amount must be a finite non-negative number",
+      );
+    }
+    for (const { uuid, skill, castRate, params } of this.skills[type] ?? []) {
+      if (castRate === undefined) {
+        cast(ctx, this, skill, params);
+        continue;
+      }
       if (!Number.isFinite(castRate) || castRate < 0) {
         throw new RangeError("castRate must be a finite non-negative number");
       }
-      let progress = (this.skillProgress.get(uuid) ?? 0) + castRate;
+      const progress = (this.skillProgress.get(uuid) ?? 0) + castRate * amount;
+      if (!Number.isFinite(progress)) {
+        throw new RangeError("skill progress must be finite");
+      }
       this.skillProgress.set(uuid, progress);
-      while (progress >= 1 - 1e-6) {
-        progress = Math.max(0, progress - 1);
-        this.skillProgress.set(uuid, progress);
+      // Read back progress after each cast, since casting can trigger more damage.
+      while ((this.skillProgress.get(uuid) ?? 0) >= 1 - 1e-6) {
+        this.skillProgress.set(
+          uuid,
+          Math.max(0, (this.skillProgress.get(uuid) ?? 0) - 1),
+        );
         cast(ctx, this, skill, params);
       }
     }
+  }
+
+  protected updateSkills(ctx: BattleContext): void {
+    this.accumulateSkills(ctx, "onUpdate", 1);
   }
 
   protected triggerSkills(
@@ -71,6 +95,10 @@ export abstract class Unit {
     type: Exclude<keyof UnitSkills, "onUpdate">,
   ): void {
     for (const { skill, castRate, params } of this.skills[type] ?? []) {
+      if (castRate === undefined) {
+        cast(ctx, this, skill, params);
+        continue;
+      }
       if (!Number.isFinite(castRate) || castRate < 0) {
         throw new RangeError("castRate must be a finite non-negative number");
       }
@@ -110,13 +138,13 @@ export abstract class Unit {
     }
   }
   onDamageDealt(ctx: BattleContext, dst: Unit, amount: number): void {
-    this.triggerSkills(ctx, "onDamageDealt");
+    this.accumulateSkills(ctx, "onDamageDealt", amount);
     for (const callback of [...(this.status.triggers.onDamageDealt ?? [])]) {
       callback(this, ctx, dst, amount);
     }
   }
   onDamageReceived(ctx: BattleContext, src: Unit | null, amount: number): void {
-    this.triggerSkills(ctx, "onDamageReceived");
+    this.accumulateSkills(ctx, "onDamageReceived", amount);
     for (const callback of [...(this.status.triggers.onDamageReceived ?? [])]) {
       callback(this, ctx, src, amount);
     }
