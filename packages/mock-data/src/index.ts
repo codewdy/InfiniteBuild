@@ -126,19 +126,20 @@ export const gameData: GameData = {
       kind: "Slime",
       status: { maxHp: 20, attack: 5, defense: 0 },
       move: { speed: 0.5, range: { min: 1.5, max: 2 } },
-      skills: [],
-      onDeath(self, ctx) {
-        CombatResolver.cast(ctx, self, "selfDestruct", {
-          damage: 1,
-          radius: 2,
-        });
+      skills: {
+        onDeath: [{
+          uuid: "slime-self-destruct",
+          skill: "selfDestruct",
+          castRate: 1,
+          params: { damage: 1, radius: 2 },
+        }],
       },
     },
     Goblin: {
       kind: "Goblin",
       status: { maxHp: 30, attack: 5, defense: 0 },
       move: { speed: 1, range: { min: 2.5, max: 3 } },
-      skills: [],
+      skills: {},
     },
   },
   mapDefinitions: {
@@ -165,7 +166,8 @@ export const gameData: GameData = {
 export const playerBuild: PlayerBuild = {
   level: 1,
   move: { speed: 1, safeRange: 1, range: 5, count: 2 },
-  skills: [
+  skills: {
+    onUpdate: [
     {
       uuid: "mock-player-fireball",
       skill: "fireball",
@@ -178,7 +180,8 @@ export const playerBuild: PlayerBuild = {
       castRate: 0.2,
       params: { damage: 6, radius: 20, durationFrames: 10 },
     },
-  ],
+    ],
+  },
 };
 
 export const battleSpec: BattleSpec = { seed: 42, map: "demo" };

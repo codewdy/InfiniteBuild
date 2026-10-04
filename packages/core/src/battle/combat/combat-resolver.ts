@@ -45,6 +45,8 @@ export namespace CombatResolver {
       damage(ctx, src, dst, amount);
     }
     dst.lastHitUnit = src;
+    src.onHitDealt(ctx, dst, amount ?? 0);
+    dst.onHitReceived(ctx, src, amount ?? 0);
     return true;
   }
   export function damage(

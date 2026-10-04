@@ -1,11 +1,34 @@
+import type { SkillParams } from "../game-data.js";
 import type { BattleContext, Faction } from "./battle.js";
+import { CombatResolver } from "./combat/combat-resolver.js";
 import { Status } from "./status.js";
+
+export type UnitSkill = {
+  skill: string;
+  uuid: string;
+  params: SkillParams;
+  /** Progress per update, or guaranteed casts plus fractional trigger chance. */
+  castRate: number;
+};
+
+export type UnitSkills = {
+  onUpdate?: UnitSkill[];
+  onHitDealt?: UnitSkill[];
+  onHitReceived?: UnitSkill[];
+  onDamageDealt?: UnitSkill[];
+  onDamageReceived?: UnitSkill[];
+  onHeal?: UnitSkill[];
+  onKill?: UnitSkill[];
+  onDeath?: UnitSkill[];
+};
 
 export abstract class Unit {
   id: number = -1;
   kind!: string;
   faction!: Faction;
   position!: number;
+  skills: UnitSkills = {};
+  protected skillProgress = new Map<string, number>();
   maxHp: number = 1;
   hp: number = 1;
   lastHitUnit: Unit | null = null;
@@ -15,18 +38,63 @@ export abstract class Unit {
   );
   status: Status.Status = Status.createByConfig({ maxHp: 1 });
 
+  protected updateSkills(ctx: BattleContext): void {
+    for (const { uuid, skill, castRate, params } of this.skills.onUpdate ??
+      []) {
+      if (!Number.isFinite(castRate) || castRate < 0) {
+        throw new RangeError("castRate must be a finite non-negative number");
+      }
+      let progress = (this.skillProgress.get(uuid) ?? 0) + castRate;
+      this.skillProgress.set(uuid, progress);
+      while (progress >= 1) {
+        progress -= 1;
+        this.skillProgress.set(uuid, progress);
+        CombatResolver.cast(ctx, this, skill, params);
+      }
+    }
+  }
+
+  protected triggerSkills(
+    ctx: BattleContext,
+    type: Exclude<keyof UnitSkills, "onUpdate">,
+  ): void {
+    for (const { skill, castRate, params } of this.skills[type] ?? []) {
+      if (!Number.isFinite(castRate) || castRate < 0) {
+        throw new RangeError("castRate must be a finite non-negative number");
+      }
+      let casts = Math.floor(castRate);
+      const chance = castRate - casts;
+      if (chance > 0 && ctx.rng.rand() < chance) casts += 1;
+      for (let index = 0; index < casts; index++) {
+        CombatResolver.cast(ctx, this, skill, params);
+      }
+    }
+  }
+
   abstract calcBaseStatus(ctx: BattleContext): Status.Status;
   abstract onMove(ctx: BattleContext): void;
-  abstract onUpdate(ctx: BattleContext): void;
-  abstract onDeath(ctx: BattleContext): void;
-  abstract onHitDealt(ctx: BattleContext, dst: Unit, amount: number): void;
-  abstract onHitReceived(ctx: BattleContext, src: Unit, amount: number): void;
-  abstract onDamageDealt(ctx: BattleContext, dst: Unit, amount: number): void;
-  abstract onDamageReceived(
-    ctx: BattleContext,
-    src: Unit | null,
-    amount: number,
-  ): void;
-  abstract onHeal(ctx: BattleContext, src: Unit | null, amount: number): void;
-  abstract onKill(ctx: BattleContext, dst: Unit): void;
+  onUpdate(ctx: BattleContext): void {
+    this.updateSkills(ctx);
+  }
+  onDeath(ctx: BattleContext): void {
+    this.triggerSkills(ctx, "onDeath");
+  }
+  onHitDealt(ctx: BattleContext, dst: Unit, amount: number): void {
+    this.triggerSkills(ctx, "onHitDealt");
+  }
+  onHitReceived(ctx: BattleContext, src: Unit, amount: number): void {
+    this.triggerSkills(ctx, "onHitReceived");
+  }
+  onDamageDealt(ctx: BattleContext, dst: Unit, amount: number): void {
+    this.triggerSkills(ctx, "onDamageDealt");
+  }
+  onDamageReceived(ctx: BattleContext, src: Unit | null, amount: number): void {
+    this.triggerSkills(ctx, "onDamageReceived");
+  }
+  onHeal(ctx: BattleContext, src: Unit | null, amount: number): void {
+    this.triggerSkills(ctx, "onHeal");
+  }
+  onKill(ctx: BattleContext, dst: Unit): void {
+    this.triggerSkills(ctx, "onKill");
+  }
 }

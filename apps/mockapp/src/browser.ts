@@ -16,7 +16,7 @@ const skillSelect = element<HTMLSelectElement>("skill");
 const logs = element<HTMLPreElement>("logs");
 const vision = gameData.config.map.visionRange;
 const range = playerBuild.move.range;
-for (const entry of playerBuild.skills) {
+for (const entry of playerBuild.skills.onUpdate ?? []) {
   const option = document.createElement("option");
   option.value = entry.uuid;
   option.textContent = `${entry.skill} · ${gameData.skillDefinitions[entry.skill]!.name}`;
@@ -31,14 +31,16 @@ skillSelect.append(bothSkillsOption);
 function selectedBuild() {
   return {
     ...playerBuild,
-    skills: playerBuild.skills.filter(
-      (entry) =>
-        skillSelect.value === "both" || entry.uuid === skillSelect.value,
-    ),
+    skills: {
+      ...playerBuild.skills,
+      onUpdate: (playerBuild.skills.onUpdate ?? []).filter(
+        (entry) => skillSelect.value === "both" || entry.uuid === skillSelect.value,
+      ),
+    },
   };
 }
 
-let runningSkills = selectedBuild().skills;
+let runningSkills = selectedBuild().skills.onUpdate ?? [];
 const skillProgress = new Map<string, number>();
 let battle = new Battle(gameData, battleSpec, selectedBuild());
 let log = battle.renderLog();
@@ -441,7 +443,7 @@ function advance(): void {
   effects = effects.filter(
     (effect) => log.frame - effect.startFrame <= effect.durationFrames,
   );
-  runningSkills = selectedBuild().skills;
+  runningSkills = selectedBuild().skills.onUpdate ?? [];
   const ids = new Set(log.units.map((unit) => unit.id));
   deaths += previous.units.filter((unit) => !ids.has(unit.id)).length;
   for (const event of log.events) {
@@ -468,7 +470,7 @@ play.addEventListener("click", () => (timer === undefined ? start() : pause()));
 step.addEventListener("click", advance);
 element("reset").addEventListener("click", () => {
   pause();
-  runningSkills = selectedBuild().skills;
+  runningSkills = selectedBuild().skills.onUpdate ?? [];
   skillProgress.clear();
   effects = [];
   battle = new Battle(gameData, battleSpec, selectedBuild());

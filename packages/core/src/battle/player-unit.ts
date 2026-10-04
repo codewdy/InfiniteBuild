@@ -3,14 +3,15 @@ import { CombatResolver } from "./combat/combat-resolver.js";
 import type { BattleContext } from "./battle.js";
 import { Status } from "./status.js";
 export class PlayerUnit extends Unit {
-  private skillProgress = new Map<string, number>();
   constructor() {
     super();
     this.kind = "Player";
     this.faction = "Ally";
     this.position = 0;
   }
-  onBuildChanged(ctx: BattleContext): void {}
+  onBuildChanged(ctx: BattleContext): void {
+    this.skills = ctx.build.skills;
+  }
   override calcBaseStatus(ctx: BattleContext): Status.Status {
     return Status.createByConfig({ maxHp: 10 });
   }
@@ -54,25 +55,10 @@ export class PlayerUnit extends Unit {
     CombatResolver.move(ctx, this, 1, distanceToMove);
   }
   override onUpdate(ctx: BattleContext): void {
-    for (const { uuid, skill, castRate, params } of ctx.build.skills) {
-      let progress = (this.skillProgress.get(uuid) ?? 0) + castRate;
-      while (progress >= 1) {
-        progress -= 1;
-        CombatResolver.cast(ctx, this, skill, params);
-      }
-      this.skillProgress.set(uuid, progress);
+    super.onUpdate(ctx);
+    for (const { uuid, skill, castRate } of this.skills.onUpdate ?? []) {
+      const progress = this.skillProgress.get(uuid) ?? 0;
       ctx.events.addPlayerSkillProgress({ uuid, skill, castRate, progress });
     }
   }
-  override onDeath(ctx: BattleContext): void {}
-  override onHitDealt(ctx: BattleContext, dst: Unit, amount: number): void {}
-  override onHitReceived(ctx: BattleContext, src: Unit, amount: number): void {}
-  override onDamageDealt(ctx: BattleContext, dst: Unit, amount: number): void {}
-  override onDamageReceived(
-    ctx: BattleContext,
-    src: Unit | null,
-    amount: number,
-  ): void {}
-  override onHeal(ctx: BattleContext, src: Unit | null, amount: number): void {}
-  override onKill(ctx: BattleContext, dst: Unit): void {}
 }
