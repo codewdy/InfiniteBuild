@@ -61,7 +61,7 @@ export namespace Status {
   };
 
   export function mergeTags(
-    ...sources: (ReadonlySet<string> | undefined)[]
+    ...sources: (ReadonlySet<string> | readonly string[] | undefined)[]
   ): Set<string> {
     const tags = new Set<string>();
     for (const source of sources) {
@@ -84,7 +84,7 @@ export namespace Status {
   export type FieldModifier = Partial<FieldStatus>;
   export type Modifier = {
     attributes?: Partial<Record<Field, FieldModifier>>;
-    tags?: Set<string>;
+    tags?: Set<string> | string[];
     triggers?: Triggers;
   };
   export type Attributes = Record<Field, FieldModifier>;

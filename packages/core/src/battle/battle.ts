@@ -1,3 +1,4 @@
+import { BuffManager } from "./combat/buff.js";
 import { RandomGenerator } from "./random-generator.js";
 import { spawn } from "./spawn.js";
 import { UnitManager } from "./unit-list.js";
@@ -44,6 +45,9 @@ export class Battle {
     const rng = new RandomGenerator(spec.seed);
     const spawns = spawn(gameData, spec.map, rng);
     const player = new PlayerUnit();
+    for (const unit of [player, ...spawns]) {
+      unit.buffs = new BuffManager(gameData.buffDefinitions);
+    }
     this.ctx = {
       gameData: gameData,
       build: structuredClone(initialBuild),

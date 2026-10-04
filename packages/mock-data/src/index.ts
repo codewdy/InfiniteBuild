@@ -1,4 +1,4 @@
-import { hit } from "@infinite-build/core";
+import { hit, damage as dealDamage } from "@infinite-build/core";
 import type {
   BattleSpec,
   GameData,
@@ -77,8 +77,10 @@ export const gameData: GameData = {
           },
         });
         yield* ctx.taskScheduler.waitFrames(durationFrames);
-        if (!target.isDead && target.hp > 0)
+        if (!target.isDead) {
           hit(ctx, self, target, damage);
+          target.buffs.stack("ignite", damage * 0.01, 20);
+        }
       },
     },
     nova: {
@@ -121,18 +123,39 @@ export const gameData: GameData = {
       },
     },
   },
+  buffDefinitions: {
+    ignite: {
+      stack: "Independent",
+      threshold: 1,
+      modifier(level, params) {
+        return {
+          tags: ["ignite"],
+          triggers: {
+            onUpdate: [
+              (self, ctx) => {
+                if (self.isDead) return;
+                dealDamage(ctx, null, self, level);
+              },
+            ],
+          },
+        };
+      },
+    },
+  },
   unitDefinitions: {
     Slime: {
       kind: "Slime",
       status: { attributes: { maxHp: 20, attack: 5, defense: 0 }, tags: [] },
       move: { speed: 0.5, range: { min: 1.5, max: 2 } },
       skills: {
-        onDeath: [{
-          uuid: "slime-self-destruct",
-          skill: "selfDestruct",
-          castRate: 1,
-          params: { damage: 1, radius: 2 },
-        }],
+        onDeath: [
+          {
+            uuid: "slime-self-destruct",
+            skill: "selfDestruct",
+            castRate: 1,
+            params: { damage: 1, radius: 2 },
+          },
+        ],
       },
     },
     Goblin: {
@@ -140,12 +163,14 @@ export const gameData: GameData = {
       status: { attributes: { maxHp: 30, attack: 5, defense: 0 }, tags: [] },
       move: { speed: 1, range: { min: 2.5, max: 3 } },
       skills: {
-        onUpdate: [{
-          uuid: "goblin-fireball",
-          skill: "fireball",
-          castRate: 0.1,
-          params: { damage: 0.1, range: 5, projectileSpeed: 1 },
-        }],
+        onUpdate: [
+          {
+            uuid: "goblin-fireball",
+            skill: "fireball",
+            castRate: 0.1,
+            params: { damage: 0.1, range: 5, projectileSpeed: 1 },
+          },
+        ],
       },
     },
   },
@@ -175,18 +200,18 @@ export const playerBuild: PlayerBuild = {
   move: { speed: 1, safeRange: 1, range: 5, count: 2 },
   skills: {
     onUpdate: [
-    {
-      uuid: "mock-player-fireball",
-      skill: "fireball",
-      castRate: 0.5,
-      params: { damage: 10, range: 5, projectileSpeed: 1 },
-    },
-    {
-      uuid: "mock-player-nova",
-      skill: "nova",
-      castRate: 0.2,
-      params: { damage: 6, radius: 20, durationFrames: 10 },
-    },
+      {
+        uuid: "mock-player-fireball",
+        skill: "fireball",
+        castRate: 0.5,
+        params: { damage: 10, range: 5, projectileSpeed: 1 },
+      },
+      {
+        uuid: "mock-player-nova",
+        skill: "nova",
+        castRate: 0.2,
+        params: { damage: 6, radius: 20, durationFrames: 10 },
+      },
     ],
   },
 };

@@ -1,6 +1,7 @@
 import { cast, type SkillParams } from "./skill.js";
 import type { BattleContext } from "../battle.js";
 import { Status } from "./status.js";
+import { BuffManager } from "./buff.js";
 
 export type Faction = "Ally" | "Enemy";
 export const Faction = {
@@ -35,6 +36,7 @@ export abstract class Unit {
   faction!: Faction;
   position!: number;
   skills: UnitSkills = {};
+  buffs: BuffManager = new BuffManager();
   protected skillProgress = new Map<string, number>();
   maxHp: number = 1;
   hp: number = 1;

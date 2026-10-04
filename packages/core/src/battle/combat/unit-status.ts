@@ -3,7 +3,10 @@ import type { Unit } from "./unit.js";
 import { Status } from "./status.js";
 
 export function updateStatus(ctx: BattleContext, unit: Unit): void {
-  const status = unit.calcBaseStatus(ctx);
+  // stack reserves one extra frame so advancing first preserves the requested duration.
+  unit.buffs.update();
+  const modifiers = unit.buffs.getModifiers();
+  const status = Status.apply(unit.calcBaseStatus(ctx), modifiers);
   unit.status = status;
   unit.rawStatus = Status.resolve(unit.status);
   if (unit.rawStatus.attributes.maxHp != unit.maxHp) {
