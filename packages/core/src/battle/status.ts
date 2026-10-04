@@ -161,7 +161,10 @@ export namespace Status {
   export function resolve(status: Status): RawStatus {
     return {
       attributes: Object.fromEntries(
-        FieldName.map((field) => [field, resolveField(status.attributes[field])]),
+        FieldName.map((field) => [
+          field,
+          resolveField(status.attributes[field]),
+        ]),
       ) as RawStatus["attributes"],
       tags: mergeTags(status.tags),
       triggers: mergeTriggers(status.triggers),
