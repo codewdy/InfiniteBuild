@@ -1,6 +1,6 @@
 import { SkillTrigger } from "../../battle/combat/skill-trigger.js";
 import type { Attribute } from "../../battle/combat/attribute.js";
-import type { PlayerStatus } from "../build.js";
+import type { PlayerCombatProfile } from "../state.js";
 
 export namespace Tablet {
   export const ModifierFieldName = [
@@ -20,6 +20,6 @@ export interface Tablet {
   applyPlayer(
     tablets: (Tablet | undefined)[],
     modifier: Tablet.Modifier,
-    player: PlayerStatus,
+    player: PlayerCombatProfile,
   ): void;
 }

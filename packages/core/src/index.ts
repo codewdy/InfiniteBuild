@@ -12,8 +12,8 @@ export type { SkillDefinition, SkillParams, SkillContext, SkillCaster } from "./
 export type { UnitDefinition } from "./battle/combat/regular-unit.js";
 export type { PlayerDefinition } from "./player/definition.js";
 export { SkillTablet } from "./player/tablet/skill.js";
-export type { PlayerBuild, PlayerStatus } from "./player/build.js";
-export { inferPlayerStatus } from "./player/build.js";
+export type { PlayerState, PlayerCombatProfile } from "./player/state.js";
+export { derivePlayerCombatProfile } from "./player/state.js";
 export { Tablet } from "./player/tablet/tablet.js";
 export { TabletSpec } from "./player/tablet/spec.js";
 export { TabletMap } from "./player/tablet/map.js";

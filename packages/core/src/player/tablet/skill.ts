@@ -1,7 +1,7 @@
 import { Attribute } from "../../battle/combat/attribute.js";
 import { SkillTrigger } from "../../battle/combat/skill-trigger.js";
 import type { UnitSkill } from "../../battle/combat/skill-trigger.js";
-import type { PlayerStatus } from "../build.js";
+import type { PlayerCombatProfile } from "../state.js";
 import type { Tablet } from "./tablet.js";
 
 export class SkillTablet implements Tablet {
@@ -21,7 +21,7 @@ export class SkillTablet implements Tablet {
   applyPlayer(
     tablets: (Tablet | undefined)[],
     modifier: Tablet.Modifier,
-    player: PlayerStatus,
+    player: PlayerCombatProfile,
   ): void {
     for (const type of SkillTrigger.eventTypes) {
       const multiplier = Attribute.resolve(modifier[`skill.${type}`]);

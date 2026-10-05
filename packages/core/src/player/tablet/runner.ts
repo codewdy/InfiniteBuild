@@ -1,5 +1,5 @@
 import { Attribute } from "../../battle/combat/attribute.js";
-import type { PlayerStatus } from "../build.js";
+import type { PlayerCombatProfile } from "../state.js";
 import { Tablet } from "./tablet.js";
 
 function defaultModifier(): Tablet.Modifier {
@@ -8,7 +8,7 @@ function defaultModifier(): Tablet.Modifier {
 
 export function tabletRun(
   slots: (Tablet | undefined)[],
-  player: PlayerStatus,
+  player: PlayerCombatProfile,
 ): void {
   const modifiers = Array.from({ length: slots.length }, () =>
     defaultModifier(),

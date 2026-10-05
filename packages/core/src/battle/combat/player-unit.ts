@@ -2,11 +2,11 @@ import { Unit } from "./unit.js";
 import { move } from "./movement.js";
 import type { BattleContext } from "../battle.js";
 import type { Status } from "./status.js";
-import { inferPlayerStatus } from "../../player/build.js";
-import type { PlayerStatus } from "../../player/build.js";
+import { derivePlayerCombatProfile } from "../../player/state.js";
+import type { PlayerCombatProfile } from "../../player/state.js";
 
 export class PlayerUnit extends Unit {
-  playerStatus?: PlayerStatus;
+  combatProfile?: PlayerCombatProfile;
   constructor() {
     super();
     this.kind = "Player";
@@ -14,14 +14,14 @@ export class PlayerUnit extends Unit {
     this.position = 0;
   }
   onBuildChanged(ctx: BattleContext): void {
-    this.playerStatus = inferPlayerStatus(ctx.gameData, ctx.build);
-    this.skills = this.playerStatus.skills;
+    this.combatProfile = derivePlayerCombatProfile(ctx.gameData, ctx.playerState);
+    this.skills = this.combatProfile.skills;
   }
   override calcBaseStatus(ctx: BattleContext): Status {
-    return this.playerStatus!.status;
+    return this.combatProfile!.status;
   }
   override onMove(ctx: BattleContext): void {
-    const { speed, range, count, safeRange } = ctx.build.move;
+    const { speed, range, count, safeRange } = ctx.playerState.build.move;
     const visionRange = ctx.gameData.config.map.visionRange;
     const enemyPositions: number[] = [];
     for (const unit of ctx.units) {

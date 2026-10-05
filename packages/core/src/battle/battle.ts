@@ -9,7 +9,7 @@ import type { BattleLog, BattleStatus } from "./battle-log.js";
 import { EventManager } from "./event-manager.js";
 import { spawnUnits, fixPosition } from "./combat/movement.js";
 import { updateStatus, resolveDeath } from "./combat/unit-status.js";
-import type { PlayerBuild } from "../player/build.js";
+import type { PlayerState } from "../player/state.js";
 import type { GameData } from "../game-data.js";
 
 export type BattleSpec = {
@@ -18,7 +18,7 @@ export type BattleSpec = {
 };
 export type BattleContext = {
   gameData: GameData;
-  build: PlayerBuild;
+  playerState: PlayerState;
   spec: BattleSpec;
   rng: RandomGenerator;
   frame: number;
@@ -32,22 +32,22 @@ export type BattleContext = {
 
 export class Battle {
   private ctx: BattleContext;
-  private buildLog: Record<number, PlayerBuild>;
+  private stateLog: Record<number, PlayerState>;
   constructor(
     gameData: GameData,
     spec: BattleSpec,
-    build: PlayerBuild | Record<number, PlayerBuild>,
+    state: PlayerState | Record<number, PlayerState>,
   ) {
-    const buildLog = "level" in build ? { 0: build } : build;
-    this.buildLog = Object.fromEntries(
-      Object.entries(buildLog).map(([frame, entry]) => [
+    const stateLog = "build" in state ? { 0: state } : state;
+    this.stateLog = Object.fromEntries(
+      Object.entries(stateLog).map(([frame, entry]) => [
         frame,
         structuredClone(entry),
       ]),
     );
-    const initialBuild = this.buildLog[0];
-    if (!initialBuild)
-      throw new Error("buildLog must include an initial build at frame 0");
+    const initialState = this.stateLog[0];
+    if (!initialState)
+      throw new Error("stateLog must include an initial state at frame 0");
     const rng = new RandomGenerator(spec.seed);
     const spawns = spawn(gameData, spec.map, rng);
     const player = new PlayerUnit();
@@ -56,7 +56,7 @@ export class Battle {
     }
     this.ctx = {
       gameData: gameData,
-      build: structuredClone(initialBuild),
+      playerState: structuredClone(initialState),
       spec: spec,
       rng: rng,
       frame: 0,
@@ -69,17 +69,17 @@ export class Battle {
     };
     player.onBuildChanged(this.ctx);
   }
-  changeBuild(build: PlayerBuild): void {
+  changeState(state: PlayerState): void {
     if (this.ctx.status !== "Running") return;
-    this.buildLog[this.ctx.frame + 1] = structuredClone(build);
+    this.stateLog[this.ctx.frame + 1] = structuredClone(state);
   }
   executeFrame(): BattleLog {
     if (this.ctx.status !== "Running") return this.renderLog();
     this.ctx.frame += 1;
     this.ctx.events.clear();
-    const build = this.buildLog[this.ctx.frame];
-    if (build) {
-      this.ctx.build = structuredClone(build);
+    const state = this.stateLog[this.ctx.frame];
+    if (state) {
+      this.ctx.playerState = structuredClone(state);
       this.ctx.player.onBuildChanged(this.ctx);
     }
     spawnUnits(this.ctx);

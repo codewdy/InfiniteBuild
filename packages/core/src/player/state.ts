@@ -4,31 +4,33 @@ import type { UnitSkills } from "../battle/combat/skill-trigger.js";
 import { Status } from "../battle/combat/status.js";
 import { tabletRun } from "./tablet/runner.js";
 
-export type PlayerStatus = {
+export type PlayerCombatProfile = {
   skills: UnitSkills;
   status: Status;
 };
 
-export type PlayerBuild = {
+export type PlayerState = {
   level: number;
-  move: {
-    speed: number;
-    safeRange: number;
-    range: number;
-    count: number;
+  build: {
+    move: {
+      speed: number;
+      safeRange: number;
+      range: number;
+      count: number;
+    };
+    tablets: TabletSpec.Slot[];
   };
-  tablets: TabletSpec.Slot[];
 };
 
-export function inferPlayerStatus(
+export function derivePlayerCombatProfile(
   game: GameData,
-  build: PlayerBuild,
-): PlayerStatus {
-  const player: PlayerStatus = {
+  state: PlayerState,
+): PlayerCombatProfile {
+  const player: PlayerCombatProfile = {
     skills: {},
     status: Status.apply(game.playerDefinition.baseStatus, []),
   };
-  const tablets = build.tablets.map((tablet) =>
+  const tablets = state.build.tablets.map((tablet) =>
     TabletSpec.buildTablet(game, tablet),
   );
   tabletRun(tablets, player);

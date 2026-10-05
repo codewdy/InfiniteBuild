@@ -1,9 +1,9 @@
-import { Battle, TabletMap, inferPlayerStatus } from "@infinite-build/core";
+import { Battle, TabletMap, derivePlayerCombatProfile } from "@infinite-build/core";
 import type { BattleEvent, BattleLog } from "@infinite-build/core";
 import {
   battleSpec,
   gameData,
-  playerBuild,
+  playerState,
   createTablet,
   tabletOptions,
 } from "@infinite-build/mock-data";
@@ -23,8 +23,8 @@ const tabletBoard = element<HTMLDivElement>("tablet-board");
 const tabletMessage = element<HTMLParagraphElement>("tablet-message");
 const logs = element<HTMLPreElement>("logs");
 const vision = gameData.config.map.visionRange;
-const range = playerBuild.move.range;
-const selectedTablets = structuredClone(playerBuild.tablets);
+const range = playerState.build.move.range;
+const selectedTablets = structuredClone(playerState.build.tablets);
 for (const row of TabletMap.pos2Id) {
   for (const id of row) {
     const label = document.createElement("label");
@@ -52,7 +52,7 @@ for (const row of TabletMap.pos2Id) {
       const kind = select.value as TabletKind | "";
       selectedTablets[id] = kind ? createTablet(kind, id) : null;
       if (log.status === "Running") {
-        battle.changeBuild(selectedBuild());
+        battle.changeState(selectedState());
         tabletMessage.textContent = "石板已修改，下一帧生效。";
       } else {
         tabletMessage.textContent = "石板已修改，点击重新开始使用新构筑。";
@@ -62,14 +62,14 @@ for (const row of TabletMap.pos2Id) {
   }
 }
 
-function selectedBuild() {
-  return { ...playerBuild, tablets: [...selectedTablets] };
+function selectedState() {
+  return { ...playerState, build: { ...playerState.build, tablets: [...selectedTablets] } };
 }
 
 let runningSkills =
-  inferPlayerStatus(gameData, selectedBuild()).skills.onUpdate ?? [];
+  derivePlayerCombatProfile(gameData, selectedState()).skills.onUpdate ?? [];
 const skillProgress = new Map<string, number>();
-let battle = new Battle(gameData, battleSpec, selectedBuild());
+let battle = new Battle(gameData, battleSpec, selectedState());
 let log = battle.renderLog();
 let history: BattleLog[] = [log];
 let deaths = 0;
@@ -148,7 +148,7 @@ function addVisualEffect(event: BattleEvent.Effect, previous: BattleLog): void {
 }
 
 element("config").textContent =
-  `Seed ${battleSpec.seed} · 视野 ${vision} · 范围 ${range} · 目标 ${playerBuild.move.count}`;
+  `Seed ${battleSpec.seed} · 视野 ${vision} · 范围 ${range} · 目标 ${playerState.build.move.count}`;
 
 function draw(): void {
   const context = canvas.getContext("2d");
@@ -362,8 +362,8 @@ function render(): void {
     return row;
   });
   element("skill-progress-list").replaceChildren(...progressRows);
-  element("player-build").textContent = JSON.stringify(
-    selectedBuild(),
+  element("player-state").textContent = JSON.stringify(
+    selectedState(),
     null,
     2,
   );
@@ -472,7 +472,7 @@ function advance(): void {
     (effect) => log.frame - effect.startFrame <= effect.durationFrames,
   );
   runningSkills =
-    inferPlayerStatus(gameData, selectedBuild()).skills.onUpdate ?? [];
+    derivePlayerCombatProfile(gameData, selectedState()).skills.onUpdate ?? [];
   tabletMessage.textContent = "当前石板已生效，可继续修改。";
   const ids = new Set(log.units.map((unit) => unit.id));
   deaths += previous.units.filter((unit) => !ids.has(unit.id)).length;
@@ -501,11 +501,11 @@ step.addEventListener("click", advance);
 element("reset").addEventListener("click", () => {
   pause();
   runningSkills =
-    inferPlayerStatus(gameData, selectedBuild()).skills.onUpdate ?? [];
+    derivePlayerCombatProfile(gameData, selectedState()).skills.onUpdate ?? [];
   tabletMessage.textContent = "当前石板已生效，可继续修改。";
   skillProgress.clear();
   effects = [];
-  battle = new Battle(gameData, battleSpec, selectedBuild());
+  battle = new Battle(gameData, battleSpec, selectedState());
   log = battle.renderLog();
   history = [log];
   deaths = 0;
