@@ -1,7 +1,7 @@
-import type { PlayerBuild } from "@infinite-build/core";
+import type { TabletSpec } from "@infinite-build/core";
 
 export type TabletKind = "fireball" | "nova";
-export type MockTablet = PlayerBuild.SkillTablet;
+export type MockTablet = TabletSpec.Skill;
 
 export const tabletOptions = [
   { kind: "fireball", name: "火球石板", description: "10 伤害 · 每 2 帧施放 · 射程 5" },

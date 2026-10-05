@@ -1,19 +1,8 @@
 import type { GameData } from "../game-data.js";
-import { SkillTablet } from "./tablet/skill-tablet.js";
+import { TabletSpec } from "./tablet/spec.js";
 import type { UnitSkills } from "../battle/combat/skill-trigger.js";
 import { Status } from "../battle/combat/status.js";
-import { tabletRun } from "./tablet/tablet-runner.js";
-import type { Tablet } from "./tablet/tablet.js";
-
-export namespace PlayerBuild {
-  export type SkillTablet = {
-    kind: "skill";
-    uuid: string;
-    skill: string;
-  };
-  export type Tablet = SkillTablet;
-  export type TabletSlot = Tablet | null;
-}
+import { tabletRun } from "./tablet/runner.js";
 
 export type PlayerStatus = {
   skills: UnitSkills;
@@ -28,26 +17,8 @@ export type PlayerBuild = {
     range: number;
     count: number;
   };
-  tablets: PlayerBuild.TabletSlot[];
+  tablets: TabletSpec.Slot[];
 };
-
-function buildTablet(
-  game: GameData,
-  tablet: PlayerBuild.TabletSlot,
-): Tablet | undefined {
-  if (tablet === null) return undefined;
-  switch (tablet.kind) {
-    case "skill": {
-      const skill = game.playerDefinition.skills[tablet.skill];
-      if (!skill) throw new Error(`Unknown player skill: ${tablet.skill}`);
-      return new SkillTablet(tablet.uuid, skill);
-    }
-    default:
-      throw new Error(
-        `Unknown tablet kind: ${(tablet as { kind: string }).kind}`,
-      );
-  }
-}
 
 export function inferPlayerStatus(
   game: GameData,
@@ -57,7 +28,9 @@ export function inferPlayerStatus(
     skills: {},
     status: Status.apply(game.playerDefinition.baseStatus, []),
   };
-  const tablets = build.tablets.map((tablet) => buildTablet(game, tablet));
+  const tablets = build.tablets.map((tablet) =>
+    TabletSpec.buildTablet(game, tablet),
+  );
   tabletRun(tablets, player);
   return player;
 }
