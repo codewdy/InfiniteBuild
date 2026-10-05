@@ -93,7 +93,7 @@ export const playerBuild: PlayerBuild = {
   tablets: Array.from({ length: TabletMap.idSize }, (_, id) =>
     id === 0 ? createTablet("fireball", id)
       : id === 1 ? createTablet("nova", id)
-      : { kind: "empty" },
+      : null,
   ),
 };
 

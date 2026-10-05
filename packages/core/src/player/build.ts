@@ -6,15 +6,13 @@ import { tabletRun } from "./tablet/tablet-runner.js";
 import type { Tablet } from "./tablet/tablet.js";
 
 export namespace PlayerBuild {
-  export type EmptyTablet = {
-    kind: "empty";
-  };
   export type SkillTablet = {
     kind: "skill";
     uuid: string;
     skill: string;
   };
-  export type Tablet = EmptyTablet | SkillTablet;
+  export type Tablet = SkillTablet;
+  export type TabletSlot = Tablet | null;
 }
 
 export type PlayerStatus = {
@@ -30,16 +28,15 @@ export type PlayerBuild = {
     range: number;
     count: number;
   };
-  tablets: PlayerBuild.Tablet[];
+  tablets: PlayerBuild.TabletSlot[];
 };
 
 function buildTablet(
   game: GameData,
-  tablet: PlayerBuild.Tablet,
+  tablet: PlayerBuild.TabletSlot,
 ): Tablet | undefined {
+  if (tablet === null) return undefined;
   switch (tablet.kind) {
-    case "empty":
-      return undefined;
     case "skill": {
       const skill = game.playerDefinition.skills[tablet.skill];
       if (!skill) throw new Error(`Unknown player skill: ${tablet.skill}`);

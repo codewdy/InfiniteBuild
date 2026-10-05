@@ -50,7 +50,7 @@ for (const row of TabletMap.pos2Id) {
     tabletBoard.append(label);
     select.addEventListener("change", () => {
       const kind = select.value as TabletKind | "";
-      selectedTablets[id] = kind ? createTablet(kind, id) : { kind: "empty" };
+      selectedTablets[id] = kind ? createTablet(kind, id) : null;
       if (log.status === "Running") {
         battle.changeBuild(selectedBuild());
         tabletMessage.textContent = "石板已修改，下一帧生效。";
@@ -363,19 +363,7 @@ function render(): void {
   });
   element("skill-progress-list").replaceChildren(...progressRows);
   element("player-build").textContent = JSON.stringify(
-    {
-      ...selectedBuild(),
-      skills: {
-        onUpdate: (
-          inferPlayerStatus(gameData, selectedBuild()).skills.onUpdate ?? []
-        ).map((entry) => ({
-          ...entry,
-          description: gameData.skillDefinitions[entry.skill]!.description(
-            entry.params,
-          ),
-        })),
-      },
-    },
+    selectedBuild(),
     null,
     2,
   );
