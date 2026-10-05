@@ -41,18 +41,13 @@ export function defineSkill<Schema extends z.ZodObject>(
     id,
     definition: {
       ...fields,
-      caster(ctx, unit, skill) {
-        return caster(ctx, unit, {
-          ...skill,
-          params: params.parse(skill.params),
-        });
-      },
+      caster: caster as SkillCaster,
     },
     skill(unitSkill) {
       return {
         ...unitSkill,
         skill: id,
-        params: structuredClone(unitSkill.params),
+        params: params.parse(unitSkill.params),
       };
     },
   };
