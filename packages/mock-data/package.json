@@ -13,6 +13,7 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@infinite-build/core": "workspace:*"
+    "@infinite-build/core": "workspace:*",
+    "zod": "^4.6.5"
   }
 }
