@@ -337,8 +337,7 @@ function render(): void {
     const definition = gameData.skillDefinitions[entry.skill]!;
     const skillName = definition.name;
     name.textContent = skillName;
-    const description = definition.description?.(entry.params);
-    if (description) row.title = description;
+    row.title = definition.description(entry.params);
     const progress = Math.max(
       0,
       Math.min(1, skillProgress.get(entry.uuid) ?? 0),
@@ -364,7 +363,7 @@ function render(): void {
       skills: {
         onUpdate: (inferPlayerStatus(selectedBuild()).skills.onUpdate ?? []).map((entry) => ({
           ...entry,
-          description: gameData.skillDefinitions[entry.skill]!.description?.(entry.params),
+          description: gameData.skillDefinitions[entry.skill]!.description(entry.params),
         })),
       },
     },
