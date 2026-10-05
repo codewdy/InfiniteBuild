@@ -24,7 +24,7 @@ type TypedUnitSkill<Schema extends z.ZodObject> = Omit<
   UnitSkill,
   "params" | "skill"
 > & {
-  params: z.output<Schema>;
+  params: z.input<Schema>;
 };
 
 type ResolvedSkillDefinition<Schema extends z.ZodObject> = {
@@ -36,17 +36,23 @@ type ResolvedSkillDefinition<Schema extends z.ZodObject> = {
 export function defineSkill<Schema extends z.ZodObject>(
   definition: TypedSkillDefinition<Schema>,
 ): ResolvedSkillDefinition<Schema> {
+  const { id, params, caster, ...fields } = definition;
   return {
-    id: definition.id,
+    id,
     definition: {
-      name: definition.name,
-      caster: definition.caster as SkillCaster,
+      ...fields,
+      caster(ctx, unit, skill) {
+        return caster(ctx, unit, {
+          ...skill,
+          params: params.parse(skill.params),
+        });
+      },
     },
     skill(unitSkill) {
       return {
         ...unitSkill,
-        skill: definition.id,
-        params: definition.params.parse(unitSkill.params),
+        skill: id,
+        params: structuredClone(unitSkill.params),
       };
     },
   };

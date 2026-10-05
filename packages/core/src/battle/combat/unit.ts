@@ -1,7 +1,7 @@
 import { SkillTrigger, type UnitSkills } from "./skill-trigger.js";
 import type { BattleContext } from "../battle.js";
 import { Status } from "./status.js";
-import { BuffManager } from "./buff.js";
+import { BuffManager, type BuffParams } from "./buff.js";
 
 export type Faction = "Ally" | "Enemy";
 export const Faction = {
@@ -30,6 +30,15 @@ export abstract class Unit {
     attributes: { maxHp: 1 },
     tags: [],
   });
+
+  applyBuff(
+    buff: string,
+    level: number,
+    duration: number,
+    params: BuffParams = {},
+  ): void {
+    this.buffs.stack(buff, level, duration, params);
+  }
 
   abstract calcBaseStatus(ctx: BattleContext): Status.Status;
   abstract onMove(ctx: BattleContext): void;

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { GameData, hit } from "@infinite-build/core";
+import { ignite } from "./buffs.js";
 
 export const selfDestruct = GameData.defineSkill({
   id: "selfDestruct",
@@ -61,7 +62,7 @@ export const fireball = GameData.defineSkill({
     yield* ctx.taskScheduler.waitFrames(durationFrames);
     if (!target.isDead) {
       hit(ctx, self, target, damage);
-      target.buffs.stack("ignite", damage * 0.01, 20);
+      target.applyBuff(ignite.id, damage * 0.01, 20);
     }
   },
 });

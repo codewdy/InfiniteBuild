@@ -14,3 +14,4 @@ export type { PlayerBuild } from "./player-build.js";
 export type { Config } from "./config.js";
 export { GameData } from "./game-data.js";
 export type { MapDefinition } from "./battle/spawn.js";
+export type { BuffDefinition } from "./battle/combat/buff.js";

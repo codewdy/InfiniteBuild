@@ -9,6 +9,11 @@ import {
   skills as skillsImpl,
 } from "./game-data/skill.js";
 
+import {
+  defineBuff as defineBuffImpl,
+  buffs as buffsImpl,
+} from "./game-data/buff.js";
+
 export type { UnitDefinition } from "./battle/combat/regular-unit.js";
 export type {
   SkillDefinition,
@@ -26,6 +31,8 @@ export type GameData = {
 };
 
 export namespace GameData {
+  export const defineBuff: typeof defineBuffImpl = defineBuffImpl;
+  export const buffs: typeof buffsImpl = buffsImpl;
   export const defineSkill: typeof defineSkillImpl = defineSkillImpl;
   export const skills: typeof skillsImpl = skillsImpl;
 }

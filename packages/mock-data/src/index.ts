@@ -1,4 +1,3 @@
-import { damage as dealDamage } from "@infinite-build/core";
 import type {
   BattleSpec,
   GameData,
@@ -6,6 +5,7 @@ import type {
 } from "@infinite-build/core";
 
 import { fireball, nova, selfDestruct, skillDefinitions } from "./skills.js";
+import { buffDefinitions } from "./buffs.js";
 
 export const gameData: GameData = {
   config: {
@@ -13,25 +13,7 @@ export const gameData: GameData = {
     event: { maxEventPerUnit: { damage: 10, effect: 10 } },
   },
   skillDefinitions,
-  buffDefinitions: {
-    ignite: {
-      stack: "Independent",
-      threshold: 1,
-      modifier(level, params) {
-        return {
-          tags: ["ignite"],
-          triggers: {
-            onUpdate: [
-              (self, ctx) => {
-                if (self.isDead) return;
-                dealDamage(ctx, null, self, level);
-              },
-            ],
-          },
-        };
-      },
-    },
-  },
+  buffDefinitions,
   unitDefinitions: {
     Slime: {
       kind: "Slime",
