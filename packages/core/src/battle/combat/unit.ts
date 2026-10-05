@@ -26,7 +26,7 @@ export abstract class Unit {
   rawStatus: Status.RawStatus = Status.resolve(
     Status.createByConfig({ attributes: { maxHp: 1 }, tags: [] }),
   );
-  status: Status.Status = Status.createByConfig({
+  status: Status = Status.createByConfig({
     attributes: { maxHp: 1 },
     tags: [],
   });
@@ -40,7 +40,7 @@ export abstract class Unit {
     this.buffs.stack(buff, level, duration, params);
   }
 
-  abstract calcBaseStatus(ctx: BattleContext): Status.Status;
+  abstract calcBaseStatus(ctx: BattleContext): Status;
   abstract onMove(ctx: BattleContext): void;
   onUpdate(ctx: BattleContext): void {
     this.skillTrigger.trigger(ctx, this, "onUpdate");

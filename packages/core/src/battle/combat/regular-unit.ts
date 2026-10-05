@@ -37,7 +37,7 @@ export class RegularUnit extends Unit {
     const { min, max } = definition.move.range;
     this.moveRange = rng.uniform(min, max);
   }
-  override calcBaseStatus(ctx: BattleContext): Status.Status {
+  override calcBaseStatus(ctx: BattleContext): Status {
     return Status.createByConfig(this.definition.status);
   }
   override onMove(ctx: BattleContext): void {

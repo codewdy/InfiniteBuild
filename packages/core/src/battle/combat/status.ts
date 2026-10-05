@@ -1,6 +1,12 @@
 import { Attribute } from "./attribute.js";
 import { Trigger } from "./trigger.js";
 
+export type Status = {
+  attributes: Status.Attributes;
+  tags: Set<string>;
+  triggers: Trigger;
+};
+
 export namespace Status {
   export const FieldName = ["maxHp", "attack", "defense"] as const;
   export type Field = (typeof FieldName)[number];
@@ -23,11 +29,6 @@ export namespace Status {
     triggers?: Trigger;
   };
   export type Attributes = Attribute.Dict<Field>;
-  export type Status = {
-    attributes: Attributes;
-    tags: Set<string>;
-    triggers: Trigger;
-  };
   export type RawStatus = {
     attributes: Record<Field, number>;
     tags: Set<string>;

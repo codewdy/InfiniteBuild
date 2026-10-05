@@ -12,7 +12,7 @@ export class PlayerUnit extends Unit {
   onBuildChanged(ctx: BattleContext): void {
     this.skills = ctx.build.skills;
   }
-  override calcBaseStatus(ctx: BattleContext): Status.Status {
+  override calcBaseStatus(ctx: BattleContext): Status {
     return Status.createByConfig({ attributes: { maxHp: 10 } });
   }
   override onMove(ctx: BattleContext): void {

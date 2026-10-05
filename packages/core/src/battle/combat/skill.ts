@@ -22,7 +22,7 @@ export type SkillContext = {
   castRate?: number;
   battleContext: BattleContext;
   params: SkillParams;
-  status: Status.Status;
+  status: Status;
   rawStatus: Status.RawStatus;
 };
 
