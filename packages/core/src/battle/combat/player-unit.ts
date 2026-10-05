@@ -14,7 +14,7 @@ export class PlayerUnit extends Unit {
     this.position = 0;
   }
   onBuildChanged(ctx: BattleContext): void {
-    this.playerStatus = inferPlayerStatus(ctx.build);
+    this.playerStatus = inferPlayerStatus(ctx.gameData, ctx.build);
     this.skills = this.playerStatus.skills;
   }
   override calcBaseStatus(ctx: BattleContext): Status {

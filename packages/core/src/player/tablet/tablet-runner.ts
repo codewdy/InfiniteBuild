@@ -15,10 +15,10 @@ export function tabletRun(
   );
 
   slots.forEach((tablet, id) => {
-    tablet?.applyModifier(modifiers, id);
+    tablet?.applyModifier(slots, modifiers, id);
   });
 
   slots.forEach((tablet, id) => {
-    tablet?.applyPlayer(modifiers[id]!, player);
+    tablet?.applyPlayer(slots, modifiers[id]!, player);
   });
 }

@@ -1,7 +1,13 @@
 import { Battle, TabletMap, inferPlayerStatus } from "@infinite-build/core";
 import type { BattleEvent, BattleLog } from "@infinite-build/core";
-import { battleSpec, gameData, playerBuild, createTablet, tabletOptions } from "@infinite-build/mock-data";
-import type { MockTablet, TabletKind } from "@infinite-build/mock-data";
+import {
+  battleSpec,
+  gameData,
+  playerBuild,
+  createTablet,
+  tabletOptions,
+} from "@infinite-build/mock-data";
+import type { TabletKind } from "@infinite-build/mock-data";
 
 function element<T extends HTMLElement>(id: string): T {
   const result = document.getElementById(id);
@@ -18,7 +24,7 @@ const tabletMessage = element<HTMLParagraphElement>("tablet-message");
 const logs = element<HTMLPreElement>("logs");
 const vision = gameData.config.map.visionRange;
 const range = playerBuild.move.range;
-const selectedTablets = playerBuild.tablets.map((tablet) => tablet as MockTablet | undefined);
+const selectedTablets = structuredClone(playerBuild.tablets);
 for (const row of TabletMap.pos2Id) {
   for (const id of row) {
     const label = document.createElement("label");
@@ -38,12 +44,13 @@ for (const row of TabletMap.pos2Id) {
       entry.textContent = option.name;
       select.append(entry);
     }
-    select.value = selectedTablets[id]?.kind ?? "";
+    const tablet = selectedTablets[id];
+    select.value = tablet?.kind === "skill" ? tablet.skill : "";
     label.append(title, select);
     tabletBoard.append(label);
     select.addEventListener("change", () => {
       const kind = select.value as TabletKind | "";
-      selectedTablets[id] = kind ? createTablet(kind, id) : undefined;
+      selectedTablets[id] = kind ? createTablet(kind, id) : { kind: "empty" };
       if (log.status === "Running") {
         battle.changeBuild(selectedBuild());
         tabletMessage.textContent = "石板已修改，下一帧生效。";
@@ -59,7 +66,8 @@ function selectedBuild() {
   return { ...playerBuild, tablets: [...selectedTablets] };
 }
 
-let runningSkills = inferPlayerStatus(selectedBuild()).skills.onUpdate ?? [];
+let runningSkills =
+  inferPlayerStatus(gameData, selectedBuild()).skills.onUpdate ?? [];
 const skillProgress = new Map<string, number>();
 let battle = new Battle(gameData, battleSpec, selectedBuild());
 let log = battle.renderLog();
@@ -357,13 +365,14 @@ function render(): void {
   element("player-build").textContent = JSON.stringify(
     {
       ...selectedBuild(),
-      tablets: selectedTablets.map((tablet) => tablet
-        ? { kind: tablet.kind, slot: tablet.slot, name: tablet.name }
-        : null),
       skills: {
-        onUpdate: (inferPlayerStatus(selectedBuild()).skills.onUpdate ?? []).map((entry) => ({
+        onUpdate: (
+          inferPlayerStatus(gameData, selectedBuild()).skills.onUpdate ?? []
+        ).map((entry) => ({
           ...entry,
-          description: gameData.skillDefinitions[entry.skill]!.description(entry.params),
+          description: gameData.skillDefinitions[entry.skill]!.description(
+            entry.params,
+          ),
         })),
       },
     },
@@ -474,7 +483,8 @@ function advance(): void {
   effects = effects.filter(
     (effect) => log.frame - effect.startFrame <= effect.durationFrames,
   );
-  runningSkills = inferPlayerStatus(selectedBuild()).skills.onUpdate ?? [];
+  runningSkills =
+    inferPlayerStatus(gameData, selectedBuild()).skills.onUpdate ?? [];
   tabletMessage.textContent = "当前石板已生效，可继续修改。";
   const ids = new Set(log.units.map((unit) => unit.id));
   deaths += previous.units.filter((unit) => !ids.has(unit.id)).length;
@@ -502,7 +512,8 @@ play.addEventListener("click", () => (timer === undefined ? start() : pause()));
 step.addEventListener("click", advance);
 element("reset").addEventListener("click", () => {
   pause();
-  runningSkills = inferPlayerStatus(selectedBuild()).skills.onUpdate ?? [];
+  runningSkills =
+    inferPlayerStatus(gameData, selectedBuild()).skills.onUpdate ?? [];
   tabletMessage.textContent = "当前石板已生效，可继续修改。";
   skillProgress.clear();
   effects = [];

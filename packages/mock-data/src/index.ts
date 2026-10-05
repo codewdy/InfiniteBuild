@@ -1,4 +1,4 @@
-import { TabletMap } from "@infinite-build/core";
+import { Attribute, TabletMap } from "@infinite-build/core";
 import { createTablet } from "./tablets.js";
 export { createTablet, tabletOptions } from "./tablets.js";
 export type { MockTablet, TabletKind } from "./tablets.js";
@@ -8,10 +8,29 @@ import type {
   PlayerBuild,
 } from "@infinite-build/core";
 
-import { fireball, selfDestruct, skillDefinitions } from "./skills.js";
+import { fireball, nova, selfDestruct, skillDefinitions } from "./skills.js";
 import { buffDefinitions } from "./buffs.js";
 
 export const gameData: GameData = {
+  playerDefinition: {
+    baseStatus: {
+      attributes: Attribute.createDictByRaw(["maxHp", "attack", "defense"], { maxHp: 10 }),
+      tags: new Set(),
+      triggers: {},
+    },
+    skills: {
+      fireball: fireball.skill({
+        uuid: "player-fireball-template",
+        castRate: 0.5,
+        params: { damage: 10, range: 5, projectileSpeed: 1 },
+      }),
+      nova: nova.skill({
+        uuid: "player-nova-template",
+        castRate: 0.2,
+        params: { damage: 6, radius: 20, durationFrames: 10 },
+      }),
+    },
+  },
   config: {
     map: { spawnMinimumSize: 5, visionRange: 20 },
     event: { maxEventPerUnit: { damage: 10, effect: 10 } },
@@ -74,7 +93,7 @@ export const playerBuild: PlayerBuild = {
   tablets: Array.from({ length: TabletMap.idSize }, (_, id) =>
     id === 0 ? createTablet("fireball", id)
       : id === 1 ? createTablet("nova", id)
-      : undefined,
+      : { kind: "empty" },
   ),
 };
 

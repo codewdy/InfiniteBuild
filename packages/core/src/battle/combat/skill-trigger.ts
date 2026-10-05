@@ -10,38 +10,24 @@ export type UnitSkill = {
   params: SkillParams;
   castRate?: number;
 };
+export type UnitSkills = Partial<Record<SkillTrigger.EventType, UnitSkill[]>>;
 
-const accumulateTypes = [
-  "onUpdate",
-  "onDamageDealt",
-  "onDamageReceived",
-] as const;
-const chanceTypes = [
-  "onHitDealt",
-  "onHitReceived",
-  "onHeal",
-  "onKill",
-  "onDeath",
-] as const;
-
-type AccumulateType = (typeof accumulateTypes)[number];
-type ChanceType = (typeof chanceTypes)[number];
-type EventType = AccumulateType | ChanceType;
-
-export type UnitSkills = Partial<Record<EventType, UnitSkill[]>>;
-
-function isAccumulateType(type: EventType): type is AccumulateType {
-  return accumulateTypes.some((accumulateType) => accumulateType === type);
+function isAccumulateType(
+  type: SkillTrigger.EventType,
+): type is SkillTrigger.AccumulateType {
+  return SkillTrigger.accumulateTypes.some(
+    (accumulateType) => accumulateType === type,
+  );
 }
 
-type Skills = Partial<Record<EventType, SkillContext[]>>;
+type Skills = Partial<Record<SkillTrigger.EventType, SkillContext[]>>;
 
 export class SkillTrigger {
   progress = new Map<string, number>();
   skills: Skills = {};
 
   initializeProgress(rng: RandomGenerator, unit: Unit): void {
-    for (const type of accumulateTypes) {
+    for (const type of SkillTrigger.accumulateTypes) {
       for (const { uuid } of unit.skills[type] ?? []) {
         this.progress.set(uuid, rng.rand());
       }
@@ -71,7 +57,12 @@ export class SkillTrigger {
     );
   }
 
-  trigger(ctx: BattleContext, unit: Unit, type: EventType, amount = 1): void {
+  trigger(
+    ctx: BattleContext,
+    unit: Unit,
+    type: SkillTrigger.EventType,
+    amount = 1,
+  ): void {
     if (isAccumulateType(type)) {
       this.castByAccumulation(ctx, unit, type, amount);
     } else {
@@ -82,7 +73,7 @@ export class SkillTrigger {
   private castByAccumulation(
     ctx: BattleContext,
     unit: Unit,
-    type: AccumulateType,
+    type: SkillTrigger.AccumulateType,
     amount: number,
   ): void {
     if (!Number.isFinite(amount) || amount < 0) {
@@ -115,7 +106,11 @@ export class SkillTrigger {
     }
   }
 
-  private castByChance(ctx: BattleContext, unit: Unit, type: ChanceType): void {
+  private castByChance(
+    ctx: BattleContext,
+    unit: Unit,
+    type: SkillTrigger.ChanceType,
+  ): void {
     for (const skill of this.skills[type] ?? []) {
       const { uuid, castRate } = skill;
       if (castRate === undefined) {
@@ -133,4 +128,26 @@ export class SkillTrigger {
       }
     }
   }
+}
+
+export namespace SkillTrigger {
+  export const accumulateTypes = [
+    "onUpdate",
+    "onDamageDealt",
+    "onDamageReceived",
+  ] as const;
+
+  export const chanceTypes = [
+    "onHitDealt",
+    "onHitReceived",
+    "onHeal",
+    "onKill",
+    "onDeath",
+  ] as const;
+
+  export const eventTypes = [...accumulateTypes, ...chanceTypes];
+
+  export type AccumulateType = (typeof accumulateTypes)[number];
+  export type ChanceType = (typeof chanceTypes)[number];
+  export type EventType = AccumulateType | ChanceType;
 }

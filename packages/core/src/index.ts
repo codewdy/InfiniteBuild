@@ -10,6 +10,8 @@ export type { UnitSkill, UnitSkills } from "./battle/combat/skill-trigger.js";
 export { cast } from "./battle/combat/skill.js";
 export type { SkillDefinition, SkillParams, SkillContext, SkillCaster } from "./battle/combat/skill.js";
 export type { UnitDefinition } from "./battle/combat/regular-unit.js";
+export type { PlayerDefinition } from "./player/definition.js";
+export { SkillTablet } from "./player/tablet/skill-tablet.js";
 export type { PlayerBuild, PlayerStatus } from "./player/build.js";
 export { inferPlayerStatus } from "./player/build.js";
 export { Tablet } from "./player/tablet/tablet.js";

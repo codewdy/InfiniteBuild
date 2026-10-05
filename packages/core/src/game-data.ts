@@ -13,6 +13,7 @@ import {
   defineBuff as defineBuffImpl,
   buffs as buffsImpl,
 } from "./game-data/buff.js";
+import type { PlayerDefinition } from "./player/definition.js";
 
 export type { UnitDefinition } from "./battle/combat/regular-unit.js";
 export type {
@@ -27,6 +28,7 @@ export type GameData = {
   mapDefinitions: Record<string, MapDefinition>;
   skillDefinitions: Record<string, SkillDefinition>;
   buffDefinitions: Record<string, BuffDefinition>;
+  playerDefinition: PlayerDefinition;
   config: Config;
 };
 
