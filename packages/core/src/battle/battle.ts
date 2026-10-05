@@ -38,7 +38,7 @@ export class Battle {
     spec: BattleSpec,
     state: PlayerState | Record<number, PlayerState>,
   ) {
-    const stateLog = "build" in state ? { 0: state } : state;
+    const stateLog = "level" in state ? { 0: state } : state;
     this.stateLog = Object.fromEntries(
       Object.entries(stateLog).map(([frame, entry]) => [
         frame,
@@ -67,7 +67,7 @@ export class Battle {
       taskScheduler: new TaskScheduler(),
       events: new EventManager(gameData),
     };
-    player.onBuildChanged(this.ctx);
+    player.onStateChanged(this.ctx);
   }
   changeState(state: PlayerState): void {
     if (this.ctx.status !== "Running") return;
@@ -80,7 +80,7 @@ export class Battle {
     const state = this.stateLog[this.ctx.frame];
     if (state) {
       this.ctx.playerState = structuredClone(state);
-      this.ctx.player.onBuildChanged(this.ctx);
+      this.ctx.player.onStateChanged(this.ctx);
     }
     spawnUnits(this.ctx);
     for (const unit of this.ctx.units) {

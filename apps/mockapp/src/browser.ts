@@ -23,8 +23,8 @@ const tabletBoard = element<HTMLDivElement>("tablet-board");
 const tabletMessage = element<HTMLParagraphElement>("tablet-message");
 const logs = element<HTMLPreElement>("logs");
 const vision = gameData.config.map.visionRange;
-const range = playerState.build.move.range;
-const selectedTablets = structuredClone(playerState.build.tablets);
+const range = playerState.move.range;
+const selectedTablets = structuredClone(playerState.tablets);
 for (const row of TabletMap.pos2Id) {
   for (const id of row) {
     const label = document.createElement("label");
@@ -63,7 +63,7 @@ for (const row of TabletMap.pos2Id) {
 }
 
 function selectedState() {
-  return { ...playerState, build: { ...playerState.build, tablets: [...selectedTablets] } };
+  return { ...playerState, tablets: [...selectedTablets] };
 }
 
 let runningSkills =
@@ -148,7 +148,7 @@ function addVisualEffect(event: BattleEvent.Effect, previous: BattleLog): void {
 }
 
 element("config").textContent =
-  `Seed ${battleSpec.seed} · 视野 ${vision} · 范围 ${range} · 目标 ${playerState.build.move.count}`;
+  `Seed ${battleSpec.seed} · 视野 ${vision} · 范围 ${range} · 目标 ${playerState.move.count}`;
 
 function draw(): void {
   const context = canvas.getContext("2d");

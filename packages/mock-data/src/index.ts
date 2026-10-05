@@ -89,14 +89,12 @@ export const gameData: GameData = {
 
 export const playerState: PlayerState = {
   level: 1,
-  build: {
-    move: { speed: 1, safeRange: 1, range: 5, count: 2 },
-    tablets: Array.from({ length: TabletMap.idSize }, (_, id) =>
-      id === 0 ? createTablet("fireball", id)
-        : id === 1 ? createTablet("nova", id)
-        : null,
-    ),
-  },
+  move: { speed: 1, safeRange: 1, range: 5, count: 2 },
+  tablets: Array.from({ length: TabletMap.idSize }, (_, id) =>
+    id === 0 ? createTablet("fireball", id)
+      : id === 1 ? createTablet("nova", id)
+      : null,
+  ),
 };
 
 export const battleSpec: BattleSpec = { seed: 42, map: "demo" };

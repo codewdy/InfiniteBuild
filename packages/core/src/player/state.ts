@@ -5,21 +5,20 @@ import { Status } from "../battle/combat/status.js";
 import { tabletRun } from "./tablet/runner.js";
 
 export type PlayerCombatProfile = {
+  move: PlayerState["move"];
   skills: UnitSkills;
   status: Status;
 };
 
 export type PlayerState = {
   level: number;
-  build: {
-    move: {
-      speed: number;
-      safeRange: number;
-      range: number;
-      count: number;
-    };
-    tablets: TabletSpec.Slot[];
+  move: {
+    speed: number;
+    safeRange: number;
+    range: number;
+    count: number;
   };
+  tablets: TabletSpec.Slot[];
 };
 
 export function derivePlayerCombatProfile(
@@ -27,10 +26,11 @@ export function derivePlayerCombatProfile(
   state: PlayerState,
 ): PlayerCombatProfile {
   const player: PlayerCombatProfile = {
+    move: { ...state.move },
     skills: {},
     status: Status.apply(game.playerDefinition.baseStatus, []),
   };
-  const tablets = state.build.tablets.map((tablet) =>
+  const tablets = state.tablets.map((tablet) =>
     TabletSpec.buildTablet(game, tablet),
   );
   tabletRun(tablets, player);

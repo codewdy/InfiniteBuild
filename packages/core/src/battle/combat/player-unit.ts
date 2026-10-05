@@ -13,7 +13,7 @@ export class PlayerUnit extends Unit {
     this.faction = "Ally";
     this.position = 0;
   }
-  onBuildChanged(ctx: BattleContext): void {
+  onStateChanged(ctx: BattleContext): void {
     this.combatProfile = derivePlayerCombatProfile(ctx.gameData, ctx.playerState);
     this.skills = this.combatProfile.skills;
   }
@@ -21,7 +21,7 @@ export class PlayerUnit extends Unit {
     return this.combatProfile!.status;
   }
   override onMove(ctx: BattleContext): void {
-    const { speed, range, count, safeRange } = ctx.playerState.build.move;
+    const { speed, range, count, safeRange } = this.combatProfile!.move;
     const visionRange = ctx.gameData.config.map.visionRange;
     const enemyPositions: number[] = [];
     for (const unit of ctx.units) {
