@@ -155,7 +155,6 @@ export const gameData: GameData = {
           {
             uuid: "slime-self-destruct",
             skill: "selfDestruct",
-            castRate: 1,
             params: { damage: 1, radius: 2 },
           },
         ],
