@@ -12,6 +12,7 @@ export type SkillParams = Record<string, unknown>;
 
 export type SkillDefinition = {
   name: string;
+  description?: (params: SkillParams) => string;
   caster: SkillCaster;
 };
 

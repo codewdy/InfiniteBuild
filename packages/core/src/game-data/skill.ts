@@ -14,11 +14,12 @@ type TypedSkillCaster<Schema extends z.ZodObject> = (
 
 type TypedSkillDefinition<Schema extends z.ZodObject> = Omit<
   SkillDefinition,
-  "caster"
+  "caster" | "description"
 > & {
   id: string;
   params: Schema;
   caster: TypedSkillCaster<NoInfer<Schema>>;
+  description?: (params: z.output<NoInfer<Schema>>) => string;
 };
 type TypedUnitSkill<Schema extends z.ZodObject> = Omit<
   UnitSkill,
@@ -36,12 +37,15 @@ type ResolvedSkillDefinition<Schema extends z.ZodObject> = {
 export function defineSkill<Schema extends z.ZodObject>(
   definition: TypedSkillDefinition<Schema>,
 ): ResolvedSkillDefinition<Schema> {
-  const { id, params, caster, ...fields } = definition;
+  const { id, params, caster, description, ...fields } = definition;
   return {
     id,
     definition: {
       ...fields,
       caster: caster as SkillCaster,
+      ...(description ? {
+        description: (values) => description(params.parse(values)),
+      } : {}),
     },
     skill(unitSkill) {
       return {

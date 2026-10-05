@@ -334,8 +334,11 @@ function render(): void {
     const row = document.createElement("div");
     row.className = "skill-progress-row";
     const name = document.createElement("span");
-    const skillName = gameData.skillDefinitions[entry.skill]!.name;
+    const definition = gameData.skillDefinitions[entry.skill]!;
+    const skillName = definition.name;
     name.textContent = skillName;
+    const description = definition.description?.(entry.params);
+    if (description) row.title = description;
     const progress = Math.max(
       0,
       Math.min(1, skillProgress.get(entry.uuid) ?? 0),
@@ -358,7 +361,12 @@ function render(): void {
       tablets: selectedTablets.map((tablet) => tablet
         ? { kind: tablet.kind, slot: tablet.slot, name: tablet.name }
         : null),
-      skills: inferPlayerStatus(selectedBuild()).skills,
+      skills: {
+        onUpdate: (inferPlayerStatus(selectedBuild()).skills.onUpdate ?? []).map((entry) => ({
+          ...entry,
+          description: gameData.skillDefinitions[entry.skill]!.description?.(entry.params),
+        })),
+      },
     },
     null,
     2,
