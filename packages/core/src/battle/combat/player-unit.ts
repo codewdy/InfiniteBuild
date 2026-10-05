@@ -1,13 +1,9 @@
 import { Unit } from "./unit.js";
 import { move } from "./movement.js";
 import type { BattleContext } from "../battle.js";
-import { Status } from "./status.js";
-import type { UnitSkills } from "./skill-trigger.js";
-
-export type PlayerStatus = {
-  skills: UnitSkills;
-  status: Status;
-};
+import type { Status } from "./status.js";
+import { inferPlayerStatus } from "../../player/build.js";
+import type { PlayerStatus } from "../../player/build.js";
 
 export class PlayerUnit extends Unit {
   playerStatus?: PlayerStatus;
@@ -18,10 +14,7 @@ export class PlayerUnit extends Unit {
     this.position = 0;
   }
   onBuildChanged(ctx: BattleContext): void {
-    this.playerStatus = {
-      skills: ctx.build.skills,
-      status: Status.createByConfig({ attributes: { maxHp: 10 } }),
-    };
+    this.playerStatus = inferPlayerStatus(ctx.build);
     this.skills = this.playerStatus.skills;
   }
   override calcBaseStatus(ctx: BattleContext): Status {

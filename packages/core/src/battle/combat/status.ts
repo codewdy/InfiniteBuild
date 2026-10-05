@@ -42,12 +42,7 @@ export namespace Status {
 
   export function createByConfig(config: StatusConfig): Status {
     return {
-      attributes: Object.fromEntries(
-        FieldName.map((field) => [
-          field,
-          { base: config.attributes?.[field] ?? 0, inc: 0, more: 0 },
-        ]),
-      ) as Attributes,
+      attributes: Attribute.createDictByRaw(FieldName, config.attributes),
       tags: new Set(config.tags),
       triggers: Trigger.merge(config.triggers ?? {}),
     };

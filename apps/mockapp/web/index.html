@@ -69,9 +69,6 @@
           <button id="play" class="primary">播放</button
           ><button id="step">下一帧</button><button id="reset">重置</button
           ><label
-            >当前自动施放
-            <select id="skill" aria-describedby="skill-help"></select></label
-          ><label
             >播放速度
             <select id="speed">
               <option value="1">1 帧 / 秒</option>
@@ -81,12 +78,16 @@
             </select></label
           >
         </div>
-        <p id="skill-help">
-          切换技能下一帧生效，保留各自进度。fireball：锁定范围内最近敌人，每帧飞行
-          1 个距离单位，飞行帧数向上取整且至少 1 帧，抵达后造成 10 伤害，每 2
-          帧施放；nova：锁定施放时视野范围内敌人，按距离从近到远造成 6 伤害，10
-          帧扩散至最大半径，每 5 帧施放。
-        </p>
+      </section>
+      <section class="panel tablet-panel" aria-labelledby="tablet-title">
+        <div class="panel-title">
+          <h2 id="tablet-title">石板盘</h2>
+          <span>中心槽位 0 · 顺时针向外排列</span>
+        </div>
+        <p>每个槽位可放置火球石板、新星石板或留空。可同时装备多块技能石板。</p>
+        <div id="tablet-board" class="tablet-board" aria-label="5 × 5 石板盘"></div>
+        <p>火球：10 伤害，每 2 帧施放，射程 5。新星：6 伤害，每 5 帧施放，10 帧扩散至半径 20。</p>
+        <p id="tablet-message" role="status">修改石板下一帧生效；战斗结束后可修改并重新开始。</p>
       </section>
       <div class="inspector">
         <div class="tabs" role="tablist" aria-label="战斗详情">
@@ -140,7 +141,7 @@
         >
           <div class="panel-title">
             <h2>PlayerBuild</h2>
-            <span>当前选择的配置 · 技能切换下一帧生效</span>
+            <span>当前石板配置与推导技能 · 修改下一帧生效</span>
           </div>
           <pre id="player-build" aria-label="当前 PlayerBuild 配置"></pre>
         </section>

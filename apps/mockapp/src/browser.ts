@@ -1,6 +1,7 @@
-import { Battle } from "@infinite-build/core";
+import { Battle, TabletMap, inferPlayerStatus } from "@infinite-build/core";
 import type { BattleEvent, BattleLog } from "@infinite-build/core";
-import { battleSpec, gameData, playerBuild } from "@infinite-build/mock-data";
+import { battleSpec, gameData, playerBuild, createTablet, tabletOptions } from "@infinite-build/mock-data";
+import type { MockTablet, TabletKind } from "@infinite-build/mock-data";
 
 function element<T extends HTMLElement>(id: string): T {
   const result = document.getElementById(id);
@@ -12,35 +13,53 @@ const canvas = element<HTMLCanvasElement>("battlefield");
 const play = element<HTMLButtonElement>("play");
 const step = element<HTMLButtonElement>("step");
 const speed = element<HTMLSelectElement>("speed");
-const skillSelect = element<HTMLSelectElement>("skill");
+const tabletBoard = element<HTMLDivElement>("tablet-board");
+const tabletMessage = element<HTMLParagraphElement>("tablet-message");
 const logs = element<HTMLPreElement>("logs");
 const vision = gameData.config.map.visionRange;
 const range = playerBuild.move.range;
-for (const entry of playerBuild.skills.onUpdate ?? []) {
-  const option = document.createElement("option");
-  option.value = entry.uuid;
-  option.textContent = `${entry.skill} · ${gameData.skillDefinitions[entry.skill]!.name}`;
-  skillSelect.append(option);
+const selectedTablets = playerBuild.tablets.map((tablet) => tablet as MockTablet | undefined);
+for (const row of TabletMap.pos2Id) {
+  for (const id of row) {
+    const label = document.createElement("label");
+    label.className = "tablet-slot";
+    const title = document.createElement("span");
+    title.textContent = `槽位 ${id}`;
+    const select = document.createElement("select");
+    select.setAttribute("aria-label", `槽位 ${id} 的石板`);
+    select.dataset.slot = String(id);
+    const empty = document.createElement("option");
+    empty.value = "";
+    empty.textContent = "空槽位";
+    select.append(empty);
+    for (const option of tabletOptions) {
+      const entry = document.createElement("option");
+      entry.value = option.kind;
+      entry.textContent = option.name;
+      select.append(entry);
+    }
+    select.value = selectedTablets[id]?.kind ?? "";
+    label.append(title, select);
+    tabletBoard.append(label);
+    select.addEventListener("change", () => {
+      const kind = select.value as TabletKind | "";
+      selectedTablets[id] = kind ? createTablet(kind, id) : undefined;
+      if (log.status === "Running") {
+        battle.changeBuild(selectedBuild());
+        tabletMessage.textContent = "石板已修改，下一帧生效。";
+      } else {
+        tabletMessage.textContent = "石板已修改，点击重新开始使用新构筑。";
+      }
+      render();
+    });
+  }
 }
-
-const bothSkillsOption = document.createElement("option");
-bothSkillsOption.value = "both";
-bothSkillsOption.textContent = "同时施放 fireball + nova";
-skillSelect.append(bothSkillsOption);
 
 function selectedBuild() {
-  return {
-    ...playerBuild,
-    skills: {
-      ...playerBuild.skills,
-      onUpdate: (playerBuild.skills.onUpdate ?? []).filter(
-        (entry) => skillSelect.value === "both" || entry.uuid === skillSelect.value,
-      ),
-    },
-  };
+  return { ...playerBuild, tablets: [...selectedTablets] };
 }
 
-let runningSkills = selectedBuild().skills.onUpdate ?? [];
+let runningSkills = inferPlayerStatus(selectedBuild()).skills.onUpdate ?? [];
 const skillProgress = new Map<string, number>();
 let battle = new Battle(gameData, battleSpec, selectedBuild());
 let log = battle.renderLog();
@@ -334,7 +353,13 @@ function render(): void {
   });
   element("skill-progress-list").replaceChildren(...progressRows);
   element("player-build").textContent = JSON.stringify(
-    selectedBuild(),
+    {
+      ...selectedBuild(),
+      tablets: selectedTablets.map((tablet) => tablet
+        ? { kind: tablet.kind, slot: tablet.slot, name: tablet.name }
+        : null),
+      skills: inferPlayerStatus(selectedBuild()).skills,
+    },
     null,
     2,
   );
@@ -424,7 +449,6 @@ function render(): void {
       ? "播放"
       : "暂停";
   speed.disabled = finished;
-  skillSelect.disabled = finished;
   element("reset").textContent = finished ? "重新开始" : "重置";
   draw();
 }
@@ -443,7 +467,8 @@ function advance(): void {
   effects = effects.filter(
     (effect) => log.frame - effect.startFrame <= effect.durationFrames,
   );
-  runningSkills = selectedBuild().skills.onUpdate ?? [];
+  runningSkills = inferPlayerStatus(selectedBuild()).skills.onUpdate ?? [];
+  tabletMessage.textContent = "当前石板已生效，可继续修改。";
   const ids = new Set(log.units.map((unit) => unit.id));
   deaths += previous.units.filter((unit) => !ids.has(unit.id)).length;
   for (const event of log.events) {
@@ -470,7 +495,8 @@ play.addEventListener("click", () => (timer === undefined ? start() : pause()));
 step.addEventListener("click", advance);
 element("reset").addEventListener("click", () => {
   pause();
-  runningSkills = selectedBuild().skills.onUpdate ?? [];
+  runningSkills = inferPlayerStatus(selectedBuild()).skills.onUpdate ?? [];
+  tabletMessage.textContent = "当前石板已生效，可继续修改。";
   skillProgress.clear();
   effects = [];
   battle = new Battle(gameData, battleSpec, selectedBuild());
@@ -479,10 +505,6 @@ element("reset").addEventListener("click", () => {
   deaths = 0;
   totalDamage = 0;
   playerPosition = 0;
-  render();
-});
-skillSelect.addEventListener("change", () => {
-  battle.changeBuild(selectedBuild());
   render();
 });
 speed.addEventListener("change", () => {

@@ -11,6 +11,22 @@ export namespace Attribute {
     Record<Field, Modifier>
   >;
 
+  export function createByRaw(base: number): Attribute {
+    return { base, inc: 0, more: 0 };
+  }
+
+  export function createDictByRaw<Field extends string>(
+    fields: readonly Field[],
+    source: Partial<Record<NoInfer<Field>, number>> = {},
+  ): Dict<Field> {
+    return Object.fromEntries(
+      fields.map((field) => [
+        field,
+        createByRaw(source[field] ?? 0),
+      ]),
+    ) as Dict<Field>;
+  }
+
   export function merge(...sources: (Modifier | undefined)[]): Attribute {
     let base = 0;
     let inc = 0;

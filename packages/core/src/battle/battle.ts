@@ -9,7 +9,7 @@ import type { BattleLog, BattleStatus } from "./battle-log.js";
 import { EventManager } from "./event-manager.js";
 import { spawnUnits, fixPosition } from "./combat/movement.js";
 import { updateStatus, resolveDeath } from "./combat/unit-status.js";
-import type { PlayerBuild } from "../player-build.js";
+import type { PlayerBuild } from "../player/build.js";
 import type { GameData } from "../game-data.js";
 
 export type BattleSpec = {
@@ -30,6 +30,12 @@ export type BattleContext = {
   events: EventManager;
 };
 
+function cloneBuild(build: PlayerBuild): PlayerBuild {
+  const { tablets, ...data } = build;
+  // 石板包含方法，不能 structuredClone；复制槽位数组并保留石板实例。
+  return { ...structuredClone(data), tablets: [...tablets] };
+}
+
 export class Battle {
   private ctx: BattleContext;
   private buildLog: Record<number, PlayerBuild>;
@@ -38,7 +44,13 @@ export class Battle {
     spec: BattleSpec,
     build: PlayerBuild | Record<number, PlayerBuild>,
   ) {
-    this.buildLog = structuredClone("level" in build ? { 0: build } : build);
+    const buildLog = "level" in build ? { 0: build } : build;
+    this.buildLog = Object.fromEntries(
+      Object.entries(buildLog).map(([frame, entry]) => [
+        frame,
+        cloneBuild(entry),
+      ]),
+    );
     const initialBuild = this.buildLog[0];
     if (!initialBuild)
       throw new Error("buildLog must include an initial build at frame 0");
@@ -50,7 +62,7 @@ export class Battle {
     }
     this.ctx = {
       gameData: gameData,
-      build: structuredClone(initialBuild),
+      build: cloneBuild(initialBuild),
       spec: spec,
       rng: rng,
       frame: 0,
@@ -65,7 +77,7 @@ export class Battle {
   }
   changeBuild(build: PlayerBuild): void {
     if (this.ctx.status !== "Running") return;
-    this.buildLog[this.ctx.frame + 1] = structuredClone(build);
+    this.buildLog[this.ctx.frame + 1] = cloneBuild(build);
   }
   executeFrame(): BattleLog {
     if (this.ctx.status !== "Running") return this.renderLog();
@@ -73,7 +85,7 @@ export class Battle {
     this.ctx.events.clear();
     const build = this.buildLog[this.ctx.frame];
     if (build) {
-      this.ctx.build = structuredClone(build);
+      this.ctx.build = cloneBuild(build);
       this.ctx.player.onBuildChanged(this.ctx);
     }
     spawnUnits(this.ctx);
