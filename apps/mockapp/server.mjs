@@ -1,11 +1,13 @@
 import { createServer } from "node:http";
 import { readFile, readdir, stat } from "node:fs/promises";
 import { spawn } from "node:child_process";
-import { resolve, extname } from "node:path";
+import { resolve, extname, dirname } from "node:path";
+import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 
 const base = fileURLToPath(new URL(".", import.meta.url));
 const workspace = resolve(base, "../..");
+const mockDataRequire = createRequire(resolve(workspace, "packages/mock-data/package.json"));
 const clients = new Set();
 let revision = 0;
 let building = false;
@@ -79,6 +81,7 @@ const roots = {
   "/app/": resolve(base, "dist"),
   "/core/": resolve(base, "../../packages/core/dist"),
   "/mock-data/": resolve(base, "../../packages/mock-data/dist"),
+  "/zod/": dirname(mockDataRequire.resolve("zod")),
 };
 const contentTypes = {
   ".html": "text/html; charset=utf-8",
