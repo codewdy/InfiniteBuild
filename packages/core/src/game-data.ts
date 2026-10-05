@@ -9,7 +9,7 @@ import type { UnitDefinition } from "./battle/combat/regular-unit.js";
 import type { SkillDefinition } from "./battle/combat/skill.js";
 
 export type { UnitDefinition } from "./battle/combat/regular-unit.js";
-export type { SkillDefinition, SkillParams } from "./battle/combat/skill.js";
+export type { SkillDefinition, SkillParams, SkillContext, SkillCaster } from "./battle/combat/skill.js";
 
 export type GameData = {
   unitDefinitions: Record<string, UnitDefinition>;

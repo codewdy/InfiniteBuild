@@ -30,7 +30,8 @@ export const gameData: GameData = {
   skillDefinitions: {
     selfDestruct: {
       name: "自爆",
-      *caster(self, ctx, params) {
+      *caster(self, skillContext) {
+        const { battleContext: ctx, params } = skillContext;
         const radius = numberParam(params, "radius");
         const damage = numberParam(params, "damage");
         for (const unit of ctx.units) {
@@ -47,7 +48,8 @@ export const gameData: GameData = {
     },
     fireball: {
       name: "火球",
-      *caster(self, ctx, params) {
+      *caster(self, skillContext) {
+        const { battleContext: ctx, params } = skillContext;
         const damage = numberParam(params, "damage");
         const range = numberParam(params, "range");
         const projectileSpeed = numberParam(params, "projectileSpeed", true);
@@ -85,7 +87,8 @@ export const gameData: GameData = {
     },
     nova: {
       name: "新星",
-      *caster(self, ctx, params) {
+      *caster(self, skillContext) {
+        const { battleContext: ctx, params } = skillContext;
         const radius = numberParam(params, "radius");
         const damage = numberParam(params, "damage");
         const center = self.position;

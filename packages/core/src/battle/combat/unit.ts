@@ -1,4 +1,4 @@
-import { cast, type SkillParams } from "./skill.js";
+import { cast, type SkillContext, type SkillParams } from "./skill.js";
 import type { BattleContext } from "../battle.js";
 import { Status } from "./status.js";
 import { BuffManager } from "./buff.js";
@@ -51,6 +51,7 @@ export abstract class Unit {
     attributes: { maxHp: 1 },
     tags: [],
   });
+  skillContexts: Record<string, SkillContext> = {};
 
   private accumulateSkills(
     ctx: BattleContext,
@@ -62,9 +63,9 @@ export abstract class Unit {
         "progress amount must be a finite non-negative number",
       );
     }
-    for (const { uuid, skill, castRate, params } of this.skills[type] ?? []) {
+    for (const { uuid, castRate } of this.skills[type] ?? []) {
       if (castRate === undefined) {
-        cast(ctx, this, skill, params);
+        cast(this, this.skillContexts[uuid]!);
         continue;
       }
       if (!Number.isFinite(castRate) || castRate < 0) {
@@ -81,7 +82,7 @@ export abstract class Unit {
           uuid,
           Math.max(0, (this.skillProgress.get(uuid) ?? 0) - 1),
         );
-        cast(ctx, this, skill, params);
+        cast(this, this.skillContexts[uuid]!);
       }
     }
   }
@@ -94,9 +95,9 @@ export abstract class Unit {
     ctx: BattleContext,
     type: Exclude<keyof UnitSkills, "onUpdate">,
   ): void {
-    for (const { skill, castRate, params } of this.skills[type] ?? []) {
+    for (const { uuid, castRate } of this.skills[type] ?? []) {
       if (castRate === undefined) {
-        cast(ctx, this, skill, params);
+        cast(this, this.skillContexts[uuid]!);
         continue;
       }
       if (!Number.isFinite(castRate) || castRate < 0) {
@@ -106,7 +107,7 @@ export abstract class Unit {
       const chance = castRate - casts;
       if (chance > 0 && ctx.rng.rand() < chance) casts += 1;
       for (let index = 0; index < casts; index++) {
-        cast(ctx, this, skill, params);
+        cast(this, this.skillContexts[uuid]!);
       }
     }
   }
