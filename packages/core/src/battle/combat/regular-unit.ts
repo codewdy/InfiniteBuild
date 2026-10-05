@@ -1,4 +1,5 @@
-import { Unit, type Faction, type UnitSkills } from "./unit.js";
+import type { UnitSkills } from "./skill-trigger.js";
+import { Unit, type Faction } from "./unit.js";
 import { move } from "./movement.js";
 import type { BattleContext } from "../battle.js";
 import { Status } from "./status.js";
@@ -32,15 +33,7 @@ export class RegularUnit extends Unit {
     this.faction = faction;
     this.definition = definition;
     this.skills = structuredClone(definition.skills);
-    for (const type of [
-      "onUpdate",
-      "onDamageDealt",
-      "onDamageReceived",
-    ] as const) {
-      for (const { uuid } of this.skills[type] ?? []) {
-        this.skillProgress.set(uuid, rng.rand());
-      }
-    }
+    this.skillTrigger.initializeProgress(rng, this);
     const { min, max } = definition.move.range;
     this.moveRange = rng.uniform(min, max);
   }

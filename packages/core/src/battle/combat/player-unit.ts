@@ -57,8 +57,16 @@ export class PlayerUnit extends Unit {
   override onUpdate(ctx: BattleContext): void {
     super.onUpdate(ctx);
     for (const { uuid, skill, castRate } of this.skills.onUpdate ?? []) {
-      const progress = castRate === undefined ? 0 : (this.skillProgress.get(uuid) ?? 0);
-      ctx.events.addPlayerSkillProgress({ uuid, skill, castRate: castRate ?? 1, progress });
+      const progress =
+        castRate === undefined
+          ? 0
+          : (this.skillTrigger.progress.get(uuid) ?? 0);
+      ctx.events.addPlayerSkillProgress({
+        uuid,
+        skill,
+        castRate: castRate ?? 1,
+        progress,
+      });
     }
   }
 }

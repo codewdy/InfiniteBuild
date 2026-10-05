@@ -9,21 +9,7 @@ export function updateStatus(ctx: BattleContext, unit: Unit): void {
   const status = Status.apply(unit.calcBaseStatus(ctx), modifiers);
   unit.status = status;
   unit.rawStatus = Status.resolve(unit.status);
-  unit.skillContexts = Object.fromEntries(
-    Object.values(unit.skills).flatMap((skills) => skills.map(({ uuid, skill, params }) => {
-      const definition = ctx.gameData.skillDefinitions[skill];
-      if (!definition) throw new Error(`Unknown skill: ${skill}`);
-      const skillStatus = Status.apply(unit.status, []);
-      return [uuid, {
-        skill,
-        caster: definition.caster,
-        battleContext: ctx,
-        params: structuredClone(params),
-        status: skillStatus,
-        rawStatus: Status.resolve(skillStatus),
-      }];
-    })),
-  );
+  unit.skillTrigger.updateStatus(ctx, unit);
   if (unit.rawStatus.attributes.maxHp != unit.maxHp) {
     unit.hp = (unit.hp * unit.rawStatus.attributes.maxHp) / unit.maxHp;
     unit.maxHp = unit.rawStatus.attributes.maxHp;

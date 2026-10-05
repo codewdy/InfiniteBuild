@@ -3,7 +3,11 @@ import type { Routine } from "../task-scheduler.js";
 import type { Unit } from "./unit.js";
 import type { Status } from "./status.js";
 
-export type SkillCaster = (unit: Unit, ctx: SkillContext) => Routine;
+export type SkillCaster = (
+  ctx: BattleContext,
+  unit: Unit,
+  skill: SkillContext,
+) => Routine;
 export type SkillParams = Record<string, unknown>;
 
 export type SkillDefinition = {
@@ -12,14 +16,20 @@ export type SkillDefinition = {
 };
 
 export type SkillContext = {
+  uuid: string;
   skill: string;
   caster: SkillCaster;
+  castRate?: number;
   battleContext: BattleContext;
   params: SkillParams;
   status: Status.Status;
   rawStatus: Status.RawStatus;
 };
 
-export function cast(unit: Unit, ctx: SkillContext): void {
-  ctx.battleContext.taskScheduler.start(() => ctx.caster(unit, ctx));
+export function cast(
+  ctx: BattleContext,
+  unit: Unit,
+  skill: SkillContext,
+): void {
+  ctx.taskScheduler.start(() => skill.caster(ctx, unit, skill));
 }
