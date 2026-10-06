@@ -88,6 +88,7 @@ export const gameData: GameData = {
 };
 
 export const playerState: PlayerState = {
+  inventory: [],
   level: 1,
   move: { speed: 1, safeRange: 1, range: 5, count: 2 },
   tablets: Array.from({ length: TabletMap.idSize }, (_, id) =>
