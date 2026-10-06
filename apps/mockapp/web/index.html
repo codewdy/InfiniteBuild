@@ -79,33 +79,67 @@
           >
         </div>
       </section>
-      <section class="panel tablet-panel" aria-labelledby="tablet-title">
-        <div class="panel-title">
-          <h2 id="tablet-title">石板盘</h2>
-          <span>中心槽位 0 · 顺时针向外排列</span>
-        </div>
-        <p>选择已有石板进行装备或交换；选择空槽位会将原石板卸回背包。</p>
-        <div
-          id="tablet-board"
-          class="tablet-board"
-          aria-label="5 × 5 石板盘"
-        ></div>
-        <p>
-          火球：10 伤害，每 2 帧施放，射程 5。新星：6 伤害，每 5 帧施放，10
-          帧扩散至半径 20。
-        </p>
-        <p id="tablet-message" role="status">
-          修改石板下一帧生效；战斗结束后可修改并重新开始。
-        </p>
-      </section>
-      <section class="panel inventory-panel" aria-labelledby="inventory-title">
-        <div class="panel-title">
-          <h2 id="inventory-title">背包</h2>
-          <span id="inventory-count"></span>
-        </div>
-        <p>选择目标槽位后装备石板；原槽位石板会交换回背包。</p>
-        <div id="inventory-list" aria-label="背包物品"></div>
-      </section>
+      <div class="loadout">
+        <section class="panel tablet-panel" aria-labelledby="tablet-title">
+          <div class="panel-title">
+            <h2 id="tablet-title">石板盘</h2>
+            <span>中心槽位 0 · 顺时针向外排列</span>
+          </div>
+          <p>拖动石板到目标槽位，放在已有石板上即可交换。</p>
+          <div
+            id="tablet-board"
+            class="tablet-board"
+            aria-label="5 × 5 石板盘"
+          ></div>
+          <p>
+            火球：10 伤害，每 2 帧施放，射程 5。新星：6 伤害，每 5 帧施放，10
+            帧扩散至半径 20。
+          </p>
+          <p id="tablet-message" role="status">
+            修改石板下一帧生效；战斗结束后可修改并重新开始。
+          </p>
+        </section>
+        <section
+          class="panel inventory-panel"
+          aria-labelledby="inventory-title"
+        >
+          <div class="panel-title">
+            <h2 id="inventory-title">背包</h2>
+            <span id="inventory-count"></span>
+          </div>
+          <p>
+            拖到石板盘即可装备，拖回背包即可卸下。也可点选石板，再点击目标槽位。
+          </p>
+          <div id="inventory-list" aria-label="背包物品"></div>
+          <div class="tablet-tools">
+            <div class="panel-title">
+              <h2>新增石板</h2>
+              <span>加入背包</span>
+            </div>
+            <div id="tablet-add-actions" class="tablet-add-actions"></div>
+            <button
+              id="tablet-trash"
+              class="tablet-trash"
+              type="button"
+              aria-label="垃圾箱：拖入石板或选中石板后点击删除"
+            >
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 10v7M14 10v7"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <span
+                ><strong>垃圾箱</strong
+                ><small>拖入删除 · 也可选中后点击</small></span
+              >
+            </button>
+          </div>
+        </section>
+      </div>
       <div class="inspector">
         <div class="tabs" role="tablist" aria-label="战斗详情">
           <button

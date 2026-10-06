@@ -41,8 +41,13 @@ function tabletName(tablet: TabletSpec.Tablet): string {
   );
 }
 
-function submitState(state: PlayerState): void {
-  const error = game.changeState(state);
+function submitState(
+  state: PlayerState,
+  mode: "validate" | "force" = "validate",
+  message = "石板已修改",
+): void {
+  if (mode === "force") game.forceChangeState(state);
+  const error = mode === "validate" ? game.changeState(state) : null;
   if (error) {
     tabletMessage.textContent = `修改失败：${error.message}`;
     tabletMessage.dataset.error = "true";
@@ -50,124 +55,244 @@ function submitState(state: PlayerState): void {
     tabletMessage.dataset.error = "false";
     if (log.status === "Running") {
       battle.changeState(game.getState());
-      tabletMessage.textContent = "石板已修改，下一帧生效。";
+      tabletMessage.textContent = `${message}，下一帧生效。`;
     } else {
-      tabletMessage.textContent = "石板已修改，点击重新开始使用新构筑。";
+      tabletMessage.textContent = `${message}，点击重新开始使用新构筑。`;
     }
   }
   render();
 }
 
-function equipTablet(slot: number, uuid: string): void {
+type SlotLocation = { area: "tablets" | "inventory"; index: number };
+let selectedUuid: string | undefined;
+let draggingUuid: string | undefined;
+let renderedLoadout = "";
+
+function tabletAt(
+  state: PlayerState,
+  location: SlotLocation,
+): TabletSpec.Tablet | null {
+  if (location.area === "tablets") return state.tablets[location.index] ?? null;
+  const item = state.inventory[location.index];
+  return item?.kind === "tablet" ? item.tablet : null;
+}
+
+function setTablet(
+  state: PlayerState,
+  location: SlotLocation,
+  tablet: TabletSpec.Tablet | null,
+): void {
+  if (location.area === "tablets") state.tablets[location.index] = tablet;
+  else
+    state.inventory[location.index] = tablet
+      ? { kind: "tablet", uuid: tablet.uuid, tablet }
+      : null;
+}
+
+function moveTablet(uuid: string, target: SlotLocation): void {
   const state = game.getState();
-  const current = state.tablets[slot] ?? null;
-  if (current?.uuid === uuid) return;
-  if (!uuid) {
-    if (current) {
-      const item = {
-        kind: "tablet" as const,
-        uuid: current.uuid,
-        tablet: current,
-      };
-      const empty = state.inventory.indexOf(null);
-      if (empty < 0) state.inventory.push(item);
-      else state.inventory[empty] = item;
-      state.tablets[slot] = null;
-    }
-  } else {
-    const equipped = state.tablets.findIndex((tablet) => tablet?.uuid === uuid);
-    if (equipped >= 0) {
-      state.tablets[slot] = state.tablets[equipped] ?? null;
-      state.tablets[equipped] = current;
-    } else {
-      const index = state.inventory.findIndex(
-        (item) => item?.kind === "tablet" && item.uuid === uuid,
-      );
-      const item = state.inventory[index];
-      if (!item || item.kind !== "tablet") {
-        tabletMessage.textContent = "未找到所选石板，请重新选择。";
-        tabletMessage.dataset.error = "true";
-        render();
-        return;
-      }
-      state.tablets[slot] = item.tablet;
-      state.inventory[index] = current
-        ? { kind: "tablet", uuid: current.uuid, tablet: current }
-        : null;
-    }
-  }
+  const equipped = state.tablets.findIndex((tablet) => tablet?.uuid === uuid);
+  const stored = state.inventory.findIndex((item) => item?.uuid === uuid);
+  const source: SlotLocation =
+    equipped >= 0
+      ? { area: "tablets", index: equipped }
+      : { area: "inventory", index: stored };
+  if (
+    source.index < 0 ||
+    (source.area === target.area && source.index === target.index)
+  )
+    return;
+  const tablet = tabletAt(state, source);
+  if (!tablet) return;
+  setTablet(state, source, tabletAt(state, target));
+  setTablet(state, target, tablet);
+  selectedUuid = undefined;
   submitState(state);
 }
 
-function renderTablets(): void {
+function discardTablet(uuid: string): void {
   const state = game.getState();
-  const owned = [
-    ...state.tablets.flatMap((tablet, slot) =>
-      tablet ? [{ tablet, location: `槽位 ${slot}` }] : [],
-    ),
-    ...state.inventory.flatMap((item, slot) =>
-      item?.kind === "tablet"
-        ? [{ tablet: item.tablet, location: `背包 ${slot}` }]
-        : [],
-    ),
-  ];
-  const slots = TabletMap.pos2Id.flatMap((row) =>
-    row.map((id) => {
-      const label = document.createElement("label");
-      label.className = "tablet-slot";
-      const title = document.createElement("span");
-      title.textContent = `槽位 ${id}`;
-      const select = document.createElement("select");
-      select.setAttribute("aria-label", `槽位 ${id} 的石板`);
-      select.dataset.slot = String(id);
-      const empty = document.createElement("option");
-      empty.value = "";
-      empty.textContent = "空槽位 / 卸下";
-      select.append(empty);
-      for (const { tablet, location } of owned) {
-        const option = document.createElement("option");
-        option.value = tablet.uuid;
-        option.textContent = `${tabletName(tablet)} · ${location}`;
-        option.title = tablet.uuid;
-        select.append(option);
-      }
-      select.value = state.tablets[id]?.uuid ?? "";
-      select.addEventListener("change", () => equipTablet(id, select.value));
-      label.append(title, select);
-      return label;
-    }),
-  );
-  tabletBoard.replaceChildren(...slots);
-  const inventory = state.inventory.map((item, index) => {
-    const row = document.createElement("div");
-    row.className = "inventory-slot";
-    const name = document.createElement("span");
-    name.textContent = `背包 ${index} · ${item ? tabletName(item.tablet) : "空槽位"}`;
-    row.append(name);
-    if (item?.kind === "tablet") {
-      row.title = item.uuid;
-      const target = document.createElement("select");
-      target.setAttribute("aria-label", `背包 ${index} 的装备目标`);
-      for (let slot = 0; slot < state.tablets.length; slot++) {
-        const option = document.createElement("option");
-        option.value = String(slot);
-        option.textContent = `槽位 ${slot}`;
-        target.append(option);
-      }
-      target.value = String(Math.max(0, state.tablets.indexOf(null)));
-      const equip = document.createElement("button");
-      equip.textContent = "装备 / 交换";
-      equip.addEventListener("click", () =>
-        equipTablet(Number(target.value), item.uuid),
-      );
-      row.append(target, equip);
-    }
-    return row;
-  });
-  element("inventory-list").replaceChildren(...inventory);
-  element("inventory-count").textContent =
-    `${state.inventory.filter((item) => item !== null).length} 件物品`;
+  const equipped = state.tablets.findIndex((tablet) => tablet?.uuid === uuid);
+  const stored = state.inventory.findIndex((item) => item?.uuid === uuid);
+  if (equipped < 0 && stored < 0) return;
+  if (equipped >= 0) state.tablets[equipped] = null;
+  else state.inventory[stored] = null;
+  selectedUuid = undefined;
+  draggingUuid = undefined;
+  submitState(state, "force", "石板已删除");
 }
+
+const trash = element<HTMLButtonElement>("tablet-trash");
+trash.addEventListener("dragover", (event) => {
+  if (!draggingUuid) return;
+  event.preventDefault();
+  if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+  trash.classList.add("drop-target");
+});
+trash.addEventListener("dragleave", () =>
+  trash.classList.remove("drop-target"),
+);
+trash.addEventListener("drop", (event) => {
+  event.preventDefault();
+  trash.classList.remove("drop-target");
+  const uuid = draggingUuid;
+  draggingUuid = undefined;
+  if (uuid && event.dataTransfer?.getData("text/plain") === uuid)
+    discardTablet(uuid);
+  renderTablets();
+});
+trash.addEventListener("click", () => {
+  if (selectedUuid) discardTablet(selectedUuid);
+  else
+    tabletMessage.textContent = "将石板拖入垃圾箱，或先选中石板再点击垃圾箱。";
+});
+
+for (const option of tabletOptions) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "add-tablet";
+  button.dataset.skill = option.kind;
+  button.textContent = `＋ 新增${option.name}`;
+  button.title = option.description;
+  button.addEventListener("click", () => {
+    const state = game.getState();
+    const tablet: TabletSpec.Tablet = {
+      kind: "skill",
+      uuid: crypto.randomUUID(),
+      skill: option.kind,
+    };
+    const item = { kind: "tablet" as const, uuid: tablet.uuid, tablet };
+    const empty = state.inventory.indexOf(null);
+    if (empty < 0) state.inventory.push(item);
+    else state.inventory[empty] = item;
+    selectedUuid = undefined;
+    submitState(state, "force", `${option.name}已加入背包`);
+  });
+  element("tablet-add-actions").append(button);
+}
+
+function createSlot(
+  state: PlayerState,
+  location: SlotLocation,
+): HTMLButtonElement {
+  const tablet = tabletAt(state, location);
+  const slot = document.createElement("button");
+  slot.type = "button";
+  slot.className = "item-slot";
+  slot.dataset.area = location.area;
+  slot.dataset.slot = String(location.index);
+  slot.dataset.skill = tablet?.skill ?? "empty";
+  slot.dataset.selected = String(!!tablet && tablet.uuid === selectedUuid);
+  if (location.area === "tablets" && location.index === 0)
+    slot.classList.add("center-slot");
+  const label =
+    location.area === "tablets"
+      ? `槽位 ${location.index}`
+      : `背包 ${location.index}`;
+  slot.setAttribute(
+    "aria-label",
+    `${label}：${tablet ? tabletName(tablet) : "空槽位"}，点击选择或拖放交换`,
+  );
+  slot.setAttribute("aria-pressed", slot.dataset.selected);
+  slot.title = tablet
+    ? `${tabletName(tablet)}\n${tabletOptions.find((option) => option.kind === tablet.skill)?.description ?? ""}\n${tablet.uuid}`
+    : `${label} · 拖入石板`;
+  const index = document.createElement("span");
+  index.className = "slot-index";
+  index.textContent =
+    location.area === "tablets" && location.index === 0
+      ? "核心 · 0"
+      : String(location.index).padStart(2, "0");
+  const icon = document.createElement("span");
+  icon.className = "tablet-icon";
+  icon.setAttribute("aria-hidden", "true");
+  if (tablet?.skill === "fireball") {
+    icon.innerHTML =
+      '<svg viewBox="0 0 48 48" fill="none"><path d="M27 5c2 10-9 12-5 21 2-5 6-6 8-11 7 6 11 12 8 20-3 10-20 12-26 3C3 25 19 20 17 11c5 3 6 7 6 10 6-5 4-11 4-16Z" fill="currentColor"/><path d="M25 26c0 5-7 7-5 13 2 5 10 3 10-2 0-4-3-7-5-11Z" fill="#fff0bd"/></svg>';
+  } else if (tablet) {
+    icon.innerHTML =
+      '<svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="17" stroke="currentColor" stroke-width="2"/><circle cx="24" cy="24" r="11" stroke="currentColor" opacity=".45"/><path d="m24 5 5 14 14 5-14 5-5 14-5-14-14-5 14-5Z" fill="currentColor"/><circle cx="24" cy="24" r="4" fill="#f4eaff"/></svg>';
+  } else {
+    icon.innerHTML =
+      '<svg viewBox="0 0 48 48" fill="none"><path d="M24 16v16M16 24h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+  }
+  const name = document.createElement("span");
+  name.className = "slot-name";
+  name.textContent = tablet ? tabletName(tablet).replace("石板", "") : "空槽位";
+  slot.append(index, icon, name);
+  slot.draggable = !!tablet;
+  slot.addEventListener("dragstart", (event) => {
+    if (!tablet || !event.dataTransfer) return;
+    draggingUuid = tablet.uuid;
+    selectedUuid = undefined;
+    event.dataTransfer.setData("text/plain", tablet.uuid);
+    event.dataTransfer.effectAllowed = "move";
+    slot.classList.add("dragging");
+  });
+  slot.addEventListener("dragover", (event) => {
+    if (!draggingUuid) return;
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+    slot.classList.add("drop-target");
+  });
+  slot.addEventListener("dragleave", () =>
+    slot.classList.remove("drop-target"),
+  );
+  slot.addEventListener("drop", (event) => {
+    event.preventDefault();
+    slot.classList.remove("drop-target");
+    const uuid = draggingUuid;
+    draggingUuid = undefined;
+    if (uuid && event.dataTransfer?.getData("text/plain") === uuid)
+      moveTablet(uuid, location);
+  });
+  slot.addEventListener("dragend", () => {
+    draggingUuid = undefined;
+    slot.classList.remove("dragging");
+    document
+      .querySelectorAll(".drop-target")
+      .forEach((target) => target.classList.remove("drop-target"));
+    renderTablets();
+  });
+  slot.addEventListener("click", () => {
+    if (selectedUuid) {
+      const uuid = selectedUuid;
+      selectedUuid = undefined;
+      moveTablet(uuid, location);
+    } else if (tablet) {
+      selectedUuid = tablet.uuid;
+      tabletMessage.textContent = "已选中石板，点击目标槽位进行移动或交换。";
+    }
+    renderTablets();
+  });
+  return slot;
+}
+
+function renderTablets(): void {
+  if (draggingUuid) return;
+  const state = game.getState();
+  const key = JSON.stringify([state.tablets, state.inventory, selectedUuid]);
+  if (key === renderedLoadout) return;
+  renderedLoadout = key;
+  tabletBoard.replaceChildren(
+    ...TabletMap.pos2Id.flatMap((row) =>
+      row.map((index) => createSlot(state, { area: "tablets", index })),
+    ),
+  );
+  element("inventory-list").replaceChildren(
+    ...Array.from({ length: state.inventory.length + 1 }, (_, index) =>
+      createSlot(state, { area: "inventory", index }),
+    ),
+  );
+  element("inventory-count").textContent =
+    `${state.inventory.filter((item) => item !== null).length} 块石板`;
+}
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+  selectedUuid = undefined;
+  renderTablets();
+});
 
 let runningSkills =
   derivePlayerCombatProfile(gameData, game.getState()).skills.onUpdate ?? [];
@@ -599,7 +724,9 @@ function advance(): void {
       result: log.status,
       frame: log.frame,
     });
-    pause();
+    const outcome = log.status === "Victory" ? "胜利" : "失败";
+    resetBattle();
+    tabletMessage.textContent = `上一场${outcome}，已自动开始第 ${round} 场。`;
   }
   render();
 }
@@ -611,10 +738,7 @@ function start(): void {
   render();
 }
 
-play.addEventListener("click", () => (timer === undefined ? start() : pause()));
-step.addEventListener("click", advance);
-element("reset").addEventListener("click", () => {
-  pause();
+function resetBattle(): void {
   runningSkills =
     derivePlayerCombatProfile(gameData, game.getState()).skills.onUpdate ?? [];
   tabletMessage.textContent = "当前石板已生效，可继续修改。";
@@ -634,6 +758,13 @@ element("reset").addEventListener("click", () => {
   deaths = 0;
   totalDamage = 0;
   playerPosition = 0;
+}
+
+play.addEventListener("click", () => (timer === undefined ? start() : pause()));
+step.addEventListener("click", advance);
+element("reset").addEventListener("click", () => {
+  pause();
+  resetBattle();
   render();
 });
 speed.addEventListener("change", () => {
