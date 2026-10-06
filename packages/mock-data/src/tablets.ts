@@ -26,3 +26,12 @@ export function createSupportTablet(slot: number): TabletSpec.SupportSkill {
     affixes: [{ id: "onUpdateCastRate", tier: 0, param: 0.5 }],
   };
 }
+
+export function createPassiveTablet(slot: number): TabletSpec.Passive {
+  return {
+    kind: "passive",
+    uuid: `mock-tablet-${slot}-max-hp`,
+    rotate: 0,
+    affixes: [{ id: "maxHp", tier: 0, param: 10 }],
+  };
+}

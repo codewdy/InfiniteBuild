@@ -16,6 +16,7 @@ import {
 import type { PlayerDefinition } from "./player/definition.js";
 import type { Affix } from "./player/affix.js";
 import type { SupportTablet } from "./player/tablet/support.js";
+import type { PassiveTablet } from "./player/tablet/passive.js";
 
 export type { UnitDefinition } from "./battle/combat/regular-unit.js";
 export type {
@@ -37,6 +38,7 @@ export type GameData = {
         skill: Affix.Definitions<SupportTablet.Apply>;
         passive: Affix.Definitions<SupportTablet.Apply>;
       };
+      passive: Affix.Definitions<PassiveTablet.Apply>;
     };
   };
   config: Config;

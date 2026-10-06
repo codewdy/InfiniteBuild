@@ -8,7 +8,6 @@ import type { GameData } from "../../game-data.js";
 
 export namespace Tablet {
   export const AttributeFieldName = [
-    "power",
     ...SkillTrigger.eventTypes.map((type) => `skill.${type}` as const),
   ] as const;
   export type AttributeField = (typeof AttributeFieldName)[number];

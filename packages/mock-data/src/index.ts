@@ -1,18 +1,19 @@
 import { Attribute, TabletMap } from "@infinite-build/core";
-import { createSupportTablet, createTablet } from "./tablets.js";
-export { createSupportTablet, createTablet, tabletOptions } from "./tablets.js";
+import { createPassiveTablet, createSupportTablet, createTablet } from "./tablets.js";
+export { createPassiveTablet, createSupportTablet, createTablet, tabletOptions } from "./tablets.js";
 export type { MockTablet, TabletKind } from "./tablets.js";
 import type { BattleSpec, GameData, PlayerState } from "@infinite-build/core";
 
 import { fireball, nova, selfDestruct, skillDefinitions } from "./skills.js";
 import { buffDefinitions } from "./buffs.js";
-import { supportSkillAffixes } from "./affixes.js";
-export { supportSkillAffixes } from "./affixes.js";
+import { passiveAffixes, supportSkillAffixes } from "./affixes.js";
+export { passiveAffixes, supportSkillAffixes } from "./affixes.js";
 
 export const gameData: GameData = {
   affixDefinition: {
     tablet: {
       support: { skill: supportSkillAffixes, passive: {} },
+      passive: passiveAffixes,
     },
   },
   playerDefinition: {
@@ -93,6 +94,7 @@ export const gameData: GameData = {
 };
 
 const supportTablet = createSupportTablet(TabletMap.idSize + 4);
+const passiveTablet = createPassiveTablet(TabletMap.idSize + 5);
 
 export const playerState: PlayerState = {
   inventory: [
@@ -103,6 +105,7 @@ export const playerState: PlayerState = {
       },
     ),
     { kind: "tablet", uuid: supportTablet.uuid, tablet: supportTablet },
+    { kind: "tablet", uuid: passiveTablet.uuid, tablet: passiveTablet },
     null,
   ],
   level: 1,

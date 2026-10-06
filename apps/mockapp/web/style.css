@@ -352,6 +352,7 @@ pre {
   border-color: var(--accent);
   transform: translateY(-2px);
 }
+.item-slot[data-skill="passive"],
 .item-slot[data-skill="support-skill"],
 .item-slot[data-skill="support-passive"] {
   --accent: #82e6ce;
@@ -520,6 +521,7 @@ pre {
 .add-tablet:hover {
   filter: brightness(1.2);
 }
+.add-tablet[data-skill="passive"],
 .add-tablet[data-skill="support-skill"] {
   color: #82e6ce;
   border-color: #41796f;

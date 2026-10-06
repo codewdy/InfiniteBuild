@@ -2,6 +2,7 @@ import type { GameData } from "../../game-data.js";
 import type { Affix } from "../affix.js";
 import type { TabletMap } from "./map.js";
 import { SkillTablet } from "./skill.js";
+import { PassiveTablet } from "./passive.js";
 import { SupportTablet } from "./support.js";
 import type { Tablet as RuntimeTablet } from "./tablet.js";
 
@@ -26,7 +27,13 @@ export namespace TabletSpec {
     delta: SupportTablet.Delta[];
     affixes: Affix.Spec[];
   };
-  export type Tablet = Skill | SupportSkill | SupportPassive;
+  export type Passive = {
+    kind: "passive";
+    uuid: string;
+    rotate: TabletMap.Rotate;
+    affixes: Affix.Spec[];
+  };
+  export type Tablet = Skill | Passive | SupportSkill | SupportPassive;
   export type Slot = Tablet | null;
 
   export function buildTablet(
@@ -43,6 +50,8 @@ export namespace TabletSpec {
       }
       case "support-skill":
         return new SupportTablet(ctx, tablet.delta, "skill", tablet.affixes);
+      case "passive":
+        return new PassiveTablet(ctx, tablet.affixes);
       case "support-passive":
         return new SupportTablet(ctx, tablet.delta, "passive", tablet.affixes);
       default:

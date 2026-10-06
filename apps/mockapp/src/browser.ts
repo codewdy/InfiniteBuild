@@ -12,6 +12,7 @@ import type {
 } from "@infinite-build/core";
 import {
   battleSpec,
+  createPassiveTablet,
   createSupportTablet,
   gameData,
   playerState,
@@ -36,6 +37,7 @@ const range = playerState.move.range;
 const game = new Game(playerState);
 let round = 1;
 function tabletName(tablet: TabletSpec.Tablet): string {
+  if (tablet.kind === "passive") return "生命石板";
   if (tablet.kind !== "skill") {
     return tablet.kind === "support-skill" ? "技能急速" : "被动辅助石板";
   }
@@ -196,6 +198,25 @@ hasteButton.addEventListener("click", () => {
 });
 element("tablet-add-actions").append(hasteButton);
 
+const lifeButton = document.createElement("button");
+lifeButton.type = "button";
+lifeButton.className = "add-tablet";
+lifeButton.dataset.skill = "passive";
+lifeButton.textContent = "＋ 新增生命石板";
+lifeButton.title = "装备后最大生命值 +10。";
+lifeButton.addEventListener("click", () => {
+  const state = game.getState();
+  const tablet = createPassiveTablet(state.inventory.length);
+  tablet.uuid = crypto.randomUUID();
+  const item = { kind: "tablet" as const, uuid: tablet.uuid, tablet };
+  const empty = state.inventory.indexOf(null);
+  if (empty < 0) state.inventory.push(item);
+  else state.inventory[empty] = item;
+  selectedUuid = undefined;
+  submitState(state, "force", "生命石板已加入背包");
+});
+element("tablet-add-actions").append(lifeButton);
+
 let supportPreview: SlotLocation | undefined;
 
 function updateSupportPreview(location?: SlotLocation): void {
@@ -203,7 +224,8 @@ function updateSupportPreview(location?: SlotLocation): void {
   const state = game.getState();
   const hovered = location ? tabletAt(state, location) : null;
   const sourceIds: number[] =
-    location?.area === "tablets" && hovered?.kind === "skill"
+    location?.area === "tablets" &&
+    (hovered?.kind === "skill" || hovered?.kind === "passive")
       ? JSON.parse(
           tabletBoard.querySelector<HTMLButtonElement>(
             `[data-slot="${location.index}"]`,
@@ -218,7 +240,7 @@ function updateSupportPreview(location?: SlotLocation): void {
         location?.area === "tablets" &&
         !!hovered &&
         sources.length > 0 &&
-        (hovered.kind === "skill"
+        (hovered.kind === "skill" || hovered.kind === "passive"
           ? Number(slot.dataset.slot) === location.index
           : sources.includes(location.index));
       slot.dataset.supported = String(visible);
@@ -273,9 +295,11 @@ function createSlot(
     slot.title += `\n旋转 ${tablet.rotate}° · 右键或按 R 顺时针旋转`;
     if (tablet.kind !== "skill") {
       const definitions =
-        gameData.affixDefinition.tablet.support[
-          tablet.kind === "support-skill" ? "skill" : "passive"
-        ];
+        tablet.kind === "passive"
+          ? gameData.affixDefinition.tablet.passive
+          : gameData.affixDefinition.tablet.support[
+              tablet.kind === "support-skill" ? "skill" : "passive"
+            ];
       slot.title = [
         tabletName(tablet),
         ...tablet.affixes.map((affix) =>
@@ -301,7 +325,10 @@ function createSlot(
   if (tablet?.kind === "skill" && tablet.skill === "fireball") {
     icon.innerHTML =
       '<svg viewBox="0 0 48 48" fill="none"><path d="M27 5c2 10-9 12-5 21 2-5 6-6 8-11 7 6 11 12 8 20-3 10-20 12-26 3C3 25 19 20 17 11c5 3 6 7 6 10 6-5 4-11 4-16Z" fill="currentColor"/><path d="M25 26c0 5-7 7-5 13 2 5 10 3 10-2 0-4-3-7-5-11Z" fill="#fff0bd"/></svg>';
-  } else if (tablet && tablet.kind !== "skill") {
+  } else if (
+    tablet &&
+    (tablet.kind === "support-skill" || tablet.kind === "support-passive")
+  ) {
     icon.innerHTML =
       '<svg viewBox="0 0 48 48" fill="none"><path d="m24 5 19 19-19 19L5 24Z" stroke="currentColor" stroke-width="2"/><path d="M12 24h24m-9-9 9 9-9 9" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     icon.style.transform = `rotate(${tablet.rotate}deg)`;
@@ -316,7 +343,10 @@ function createSlot(
   name.className = "slot-name";
   name.textContent = tablet ? tabletName(tablet).replace("石板", "") : "空槽位";
   slot.append(index, icon, name);
-  if (tablet && tablet.kind !== "skill") {
+  if (
+    tablet &&
+    (tablet.kind === "support-skill" || tablet.kind === "support-passive")
+  ) {
     const directions = document.createElement("span");
     directions.className = "support-directions";
     directions.setAttribute("aria-hidden", "true");
@@ -422,10 +452,15 @@ function renderTablets(): void {
   renderedLoadout = key;
   const supportedBy = new Map<number, number[]>();
   state.tablets.forEach((tablet, source) => {
-    if (!tablet || tablet.kind === "skill") return;
+    if (
+      !tablet ||
+      (tablet.kind !== "support-skill" && tablet.kind !== "support-passive")
+    )
+      return;
     for (const [x, y] of tablet.delta) {
       const target = TabletMap.move(source, x, y, tablet.rotate);
-      if (target === undefined || state.tablets[target]?.kind !== "skill")
+      const targetKind = tablet.kind === "support-skill" ? "skill" : "passive";
+      if (target === undefined || state.tablets[target]?.kind !== targetKind)
         continue;
       const sources = supportedBy.get(target) ?? [];
       if (!sources.includes(source)) sources.push(source);
