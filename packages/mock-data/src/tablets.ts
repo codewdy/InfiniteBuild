@@ -13,5 +13,16 @@ export function createTablet(kind: TabletKind, slot: number): MockTablet {
     kind: "skill",
     uuid: `mock-tablet-${slot}-${kind}`,
     skill: kind,
+    rotate: 0,
+  };
+}
+
+export function createSupportTablet(slot: number): TabletSpec.SupportSkill {
+  return {
+    kind: "support-skill",
+    uuid: `mock-tablet-${slot}-cast-rate-support`,
+    rotate: 0,
+    delta: [[1, 0]],
+    affixes: [{ id: "onUpdateCastRate", tier: 0, param: 0.5 }],
   };
 }

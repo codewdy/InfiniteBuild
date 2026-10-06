@@ -14,6 +14,8 @@ import {
   buffs as buffsImpl,
 } from "./game-data/buff.js";
 import type { PlayerDefinition } from "./player/definition.js";
+import type { Affix } from "./player/affix.js";
+import type { SupportTablet } from "./player/tablet/support.js";
 
 export type { UnitDefinition } from "./battle/combat/regular-unit.js";
 export type {
@@ -29,6 +31,14 @@ export type GameData = {
   skillDefinitions: Record<string, SkillDefinition>;
   buffDefinitions: Record<string, BuffDefinition>;
   playerDefinition: PlayerDefinition;
+  affixDefinition: {
+    tablet: {
+      support: {
+        skill: Affix.Definitions<SupportTablet.Apply>;
+        passive: Affix.Definitions<SupportTablet.Apply>;
+      };
+    };
+  };
   config: Config;
 };
 

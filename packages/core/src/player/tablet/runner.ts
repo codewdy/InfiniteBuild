@@ -17,11 +17,11 @@ export function tabletRun(
     defaultModifier(),
   );
 
-  slots.forEach((tablet, id) => {
-    tablet?.applyModifier(slots, modifiers, id);
+  slots.forEach((tablet) => {
+    tablet?.applyModifier(modifiers);
   });
 
   slots.forEach((tablet, id) => {
-    tablet?.applyPlayer(slots, modifiers[id]!, player);
+    tablet?.applyPlayer(modifiers[id]!, player);
   });
 }

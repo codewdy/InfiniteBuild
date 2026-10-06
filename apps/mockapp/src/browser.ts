@@ -12,6 +12,7 @@ import type {
 } from "@infinite-build/core";
 import {
   battleSpec,
+  createSupportTablet,
   gameData,
   playerState,
   tabletOptions,
@@ -35,6 +36,9 @@ const range = playerState.move.range;
 const game = new Game(playerState);
 let round = 1;
 function tabletName(tablet: TabletSpec.Tablet): string {
+  if (tablet.kind !== "skill") {
+    return tablet.kind === "support-skill" ? "技能急速" : "被动辅助石板";
+  }
   return (
     tabletOptions.find((option) => option.kind === tablet.skill)?.name ??
     tablet.skill
@@ -160,6 +164,7 @@ for (const option of tabletOptions) {
       kind: "skill",
       uuid: crypto.randomUUID(),
       skill: option.kind,
+      rotate: 0,
     };
     const item = { kind: "tablet" as const, uuid: tablet.uuid, tablet };
     const empty = state.inventory.indexOf(null);
@@ -171,9 +176,62 @@ for (const option of tabletOptions) {
   element("tablet-add-actions").append(button);
 }
 
+const hasteButton = document.createElement("button");
+hasteButton.type = "button";
+hasteButton.className = "add-tablet";
+hasteButton.dataset.skill = "support-skill";
+hasteButton.textContent = "＋ 新增技能急速";
+hasteButton.title =
+  "辅助箭头方向的技能石板，持续施放速率 +50%（加算）。右键旋转方向。";
+hasteButton.addEventListener("click", () => {
+  const state = game.getState();
+  const tablet = createSupportTablet(state.inventory.length);
+  tablet.uuid = crypto.randomUUID();
+  const item = { kind: "tablet" as const, uuid: tablet.uuid, tablet };
+  const empty = state.inventory.indexOf(null);
+  if (empty < 0) state.inventory.push(item);
+  else state.inventory[empty] = item;
+  selectedUuid = undefined;
+  submitState(state, "force", "技能急速已加入背包");
+});
+element("tablet-add-actions").append(hasteButton);
+
+let supportPreview: SlotLocation | undefined;
+
+function updateSupportPreview(location?: SlotLocation): void {
+  supportPreview = location;
+  const state = game.getState();
+  const hovered = location ? tabletAt(state, location) : null;
+  const sourceIds: number[] =
+    location?.area === "tablets" && hovered?.kind === "skill"
+      ? JSON.parse(
+          tabletBoard.querySelector<HTMLButtonElement>(
+            `[data-slot="${location.index}"]`,
+          )?.dataset.supportSources ?? "[]",
+        )
+      : [];
+  tabletBoard
+    .querySelectorAll<HTMLButtonElement>(".item-slot")
+    .forEach((slot) => {
+      const sources: number[] = JSON.parse(slot.dataset.supportSources ?? "[]");
+      const visible =
+        location?.area === "tablets" &&
+        !!hovered &&
+        sources.length > 0 &&
+        (hovered.kind === "skill"
+          ? Number(slot.dataset.slot) === location.index
+          : sources.includes(location.index));
+      slot.dataset.supported = String(visible);
+      slot.dataset.supportSource = String(
+        sourceIds.includes(Number(slot.dataset.slot)),
+      );
+    });
+}
+
 function createSlot(
   state: PlayerState,
   location: SlotLocation,
+  supportedBy: Map<number, number[]> = new Map(),
 ): HTMLButtonElement {
   const tablet = tabletAt(state, location);
   const slot = document.createElement("button");
@@ -181,8 +239,22 @@ function createSlot(
   slot.className = "item-slot";
   slot.dataset.area = location.area;
   slot.dataset.slot = String(location.index);
-  slot.dataset.skill = tablet?.skill ?? "empty";
+  slot.dataset.skill =
+    tablet?.kind === "skill" ? tablet.skill : (tablet?.kind ?? "empty");
   slot.dataset.selected = String(!!tablet && tablet.uuid === selectedUuid);
+  const sources =
+    location.area === "tablets" ? (supportedBy.get(location.index) ?? []) : [];
+  slot.dataset.supportSources = JSON.stringify(sources);
+  slot.dataset.supported = "false";
+  slot.addEventListener("mouseenter", () => updateSupportPreview(location));
+  slot.addEventListener("mouseleave", () => {
+    if (
+      supportPreview?.area === location.area &&
+      supportPreview.index === location.index
+    ) {
+      updateSupportPreview();
+    }
+  });
   if (location.area === "tablets" && location.index === 0)
     slot.classList.add("center-slot");
   const label =
@@ -191,12 +263,32 @@ function createSlot(
       : `背包 ${location.index}`;
   slot.setAttribute(
     "aria-label",
-    `${label}：${tablet ? tabletName(tablet) : "空槽位"}，点击选择或拖放交换`,
+    `${label}：${tablet ? tabletName(tablet) : "空槽位"}${sources.length ? `，被槽位 ${sources.join("、")} 辅助` : ""}，点击选择或拖放交换，右键或按 R 顺时针旋转`,
   );
   slot.setAttribute("aria-pressed", slot.dataset.selected);
   slot.title = tablet
-    ? `${tabletName(tablet)}\n${tabletOptions.find((option) => option.kind === tablet.skill)?.description ?? ""}\n${tablet.uuid}`
+    ? `${tabletName(tablet)}\n${tablet.kind === "skill" ? (tabletOptions.find((option) => option.kind === tablet.skill)?.description ?? "") : tablet.affixes.map((affix) => `${affix.id}: ${affix.param}`).join("\n")}\n${tablet.uuid}`
     : `${label} · 拖入石板`;
+  if (tablet) {
+    slot.title += `\n旋转 ${tablet.rotate}° · 右键或按 R 顺时针旋转`;
+    if (tablet.kind !== "skill") {
+      const definitions =
+        gameData.affixDefinition.tablet.support[
+          tablet.kind === "support-skill" ? "skill" : "passive"
+        ];
+      slot.title = [
+        tabletName(tablet),
+        ...tablet.affixes.map((affix) =>
+          affix.id === "onUpdateCastRate"
+            ? `持续施放速率 +${Math.round(affix.param * 100)}%（加算）`
+            : `${definitions[affix.id]?.name ?? affix.id}：${affix.param}`,
+        ),
+        `旋转 ${tablet.rotate}° · 右键或按 R 顺时针旋转`,
+        tablet.uuid,
+      ].join("\n");
+    }
+  }
+  if (sources.length) slot.title += `\n被辅助：来自槽位 ${sources.join("、")}`;
   const index = document.createElement("span");
   index.className = "slot-index";
   index.textContent =
@@ -206,9 +298,13 @@ function createSlot(
   const icon = document.createElement("span");
   icon.className = "tablet-icon";
   icon.setAttribute("aria-hidden", "true");
-  if (tablet?.skill === "fireball") {
+  if (tablet?.kind === "skill" && tablet.skill === "fireball") {
     icon.innerHTML =
       '<svg viewBox="0 0 48 48" fill="none"><path d="M27 5c2 10-9 12-5 21 2-5 6-6 8-11 7 6 11 12 8 20-3 10-20 12-26 3C3 25 19 20 17 11c5 3 6 7 6 10 6-5 4-11 4-16Z" fill="currentColor"/><path d="M25 26c0 5-7 7-5 13 2 5 10 3 10-2 0-4-3-7-5-11Z" fill="#fff0bd"/></svg>';
+  } else if (tablet && tablet.kind !== "skill") {
+    icon.innerHTML =
+      '<svg viewBox="0 0 48 48" fill="none"><path d="m24 5 19 19-19 19L5 24Z" stroke="currentColor" stroke-width="2"/><path d="M12 24h24m-9-9 9 9-9 9" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    icon.style.transform = `rotate(${tablet.rotate}deg)`;
   } else if (tablet) {
     icon.innerHTML =
       '<svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="17" stroke="currentColor" stroke-width="2"/><circle cx="24" cy="24" r="11" stroke="currentColor" opacity=".45"/><path d="m24 5 5 14 14 5-14 5-5 14-5-14-14-5 14-5Z" fill="currentColor"/><circle cx="24" cy="24" r="4" fill="#f4eaff"/></svg>';
@@ -220,9 +316,59 @@ function createSlot(
   name.className = "slot-name";
   name.textContent = tablet ? tabletName(tablet).replace("石板", "") : "空槽位";
   slot.append(index, icon, name);
+  if (tablet && tablet.kind !== "skill") {
+    const directions = document.createElement("span");
+    directions.className = "support-directions";
+    directions.setAttribute("aria-hidden", "true");
+    for (const [x, y] of tablet.delta) {
+      const [dx, dy] = TabletMap.rotateVec(x, y, tablet.rotate);
+      const arrow = document.createElement("span");
+      arrow.textContent = dx === 0 && dy === 0 ? "●" : "→";
+      arrow.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
+      directions.append(arrow);
+    }
+    slot.append(directions);
+  }
+  if (sources.length) {
+    const badge = document.createElement("span");
+    badge.className = "support-badge";
+    badge.textContent =
+      sources.length > 1 ? `辅助 ×${sources.length}` : "被辅助";
+    slot.append(badge);
+  }
+  const rotate = () => {
+    if (!tablet || draggingUuid) return;
+    const nextState = game.getState();
+    const current = tabletAt(nextState, location);
+    if (!current || current.uuid !== tablet.uuid) return;
+    const rotations = [0, 90, 180, 270] as const;
+    current.rotate =
+      rotations[(rotations.indexOf(current.rotate) + 1) % rotations.length]!;
+    submitState(
+      nextState,
+      "validate",
+      `${tabletName(current)}已旋转至 ${current.rotate}°`,
+    );
+  };
+  slot.addEventListener("contextmenu", (event) => {
+    if (!tablet) return;
+    event.preventDefault();
+    rotate();
+  });
+  slot.addEventListener("keydown", (event) => {
+    if (event.key.toLowerCase() !== "r" || !tablet) return;
+    event.preventDefault();
+    rotate();
+    const container =
+      location.area === "tablets" ? tabletBoard : element("inventory-list");
+    container
+      .querySelector<HTMLButtonElement>(`[data-slot="${location.index}"]`)
+      ?.focus();
+  });
   slot.draggable = !!tablet;
   slot.addEventListener("dragstart", (event) => {
     if (!tablet || !event.dataTransfer) return;
+    updateSupportPreview();
     draggingUuid = tablet.uuid;
     selectedUuid = undefined;
     event.dataTransfer.setData("text/plain", tablet.uuid);
@@ -274,9 +420,23 @@ function renderTablets(): void {
   const key = JSON.stringify([state.tablets, state.inventory, selectedUuid]);
   if (key === renderedLoadout) return;
   renderedLoadout = key;
+  const supportedBy = new Map<number, number[]>();
+  state.tablets.forEach((tablet, source) => {
+    if (!tablet || tablet.kind === "skill") return;
+    for (const [x, y] of tablet.delta) {
+      const target = TabletMap.move(source, x, y, tablet.rotate);
+      if (target === undefined || state.tablets[target]?.kind !== "skill")
+        continue;
+      const sources = supportedBy.get(target) ?? [];
+      if (!sources.includes(source)) sources.push(source);
+      supportedBy.set(target, sources);
+    }
+  });
   tabletBoard.replaceChildren(
     ...TabletMap.pos2Id.flatMap((row) =>
-      row.map((index) => createSlot(state, { area: "tablets", index })),
+      row.map((index) =>
+        createSlot(state, { area: "tablets", index }, supportedBy),
+      ),
     ),
   );
   element("inventory-list").replaceChildren(
@@ -286,6 +446,7 @@ function renderTablets(): void {
   );
   element("inventory-count").textContent =
     `${state.inventory.filter((item) => item !== null).length} 块石板`;
+  updateSupportPreview(supportPreview);
 }
 
 document.addEventListener("keydown", (event) => {
@@ -600,6 +761,16 @@ function render(): void {
     null,
     2,
   );
+  element("player-combat-profile").textContent = JSON.stringify(
+    derivePlayerCombatProfile(gameData, game.getState()),
+    (_key, value) => {
+      if (value instanceof Set) return [...value];
+      if (typeof value === "function")
+        return `[Function: ${value.name || "anonymous"}]`;
+      return value;
+    },
+    2,
+  );
   const finished = log.status !== "Running";
   const statusLabels = { Running: "战斗中", Victory: "胜利", Defeat: "失败" };
   const player = log.units.find((unit) => unit.kind === "Player");
@@ -773,7 +944,7 @@ speed.addEventListener("change", () => {
     start();
   }
 });
-const tabs = ["events", "units", "logs", "build"];
+const tabs = ["events", "units", "logs", "build", "combat-profile"];
 function selectTab(selected: string): void {
   for (const name of tabs) {
     const active = name === selected;

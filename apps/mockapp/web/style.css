@@ -352,6 +352,50 @@ pre {
   border-color: var(--accent);
   transform: translateY(-2px);
 }
+.item-slot[data-skill="support-skill"],
+.item-slot[data-skill="support-passive"] {
+  --accent: #82e6ce;
+  color: var(--accent);
+  border: 1px solid #41796f;
+  background: radial-gradient(circle at 50% 35%, #28564d, #172c30 75%);
+  cursor: grab;
+}
+.item-slot[data-supported="true"],
+.item-slot[data-support-source="true"] {
+  border-color: #82e6ce;
+  box-shadow:
+    inset 0 0 0 1px #82e6ce60,
+    0 0 12px #82e6ce25;
+}
+.support-badge {
+  display: none;
+  position: absolute;
+  top: 5px;
+  right: 4px;
+  border-radius: 4px;
+  padding: 2px 4px;
+  background: #193f37;
+  color: #a3f6df;
+  font-size: 9px;
+  pointer-events: none;
+}
+.item-slot[data-supported="true"] .support-badge {
+  display: block;
+}
+.support-directions {
+  display: none;
+  gap: 5px;
+  font-size: 13px;
+  line-height: 1;
+  pointer-events: none;
+}
+.item-slot:hover .support-directions,
+.item-slot[data-support-source="true"] .support-directions {
+  display: flex;
+}
+.support-directions span {
+  display: inline-block;
+}
 .item-slot[data-selected="true"],
 .item-slot.drop-target {
   border: 1px solid #82e6ce;
@@ -475,6 +519,11 @@ pre {
 }
 .add-tablet:hover {
   filter: brightness(1.2);
+}
+.add-tablet[data-skill="support-skill"] {
+  color: #82e6ce;
+  border-color: #41796f;
+  background: #193f37;
 }
 .tablet-trash {
   display: flex;

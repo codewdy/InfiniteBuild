@@ -32,8 +32,13 @@ export function derivePlayerCombatProfile(
     skills: {},
     status: Status.apply(game.playerDefinition.baseStatus, []),
   };
-  const tablets = state.tablets.map((tablet) =>
-    TabletSpec.buildTablet(game, tablet),
+  const tablets = state.tablets.map((tablet, id) =>
+    TabletSpec.buildTablet(game, tablet, {
+      gameData: game,
+      slots: state.tablets,
+      id,
+      rotate: tablet?.rotate ?? 0,
+    }),
   );
   tabletRun(tablets, player);
   return player;

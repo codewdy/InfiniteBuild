@@ -8,6 +8,35 @@ export type ValidateError = {
 };
 
 namespace validator {
+  function deepEqual(a: unknown, b: unknown): boolean {
+    if (Object.is(a, b)) return true;
+    if (
+      a === null ||
+      b === null ||
+      typeof a !== "object" ||
+      typeof b !== "object"
+    ) {
+      return false;
+    }
+    if (Array.isArray(a) || Array.isArray(b)) {
+      return (
+        Array.isArray(a) &&
+        Array.isArray(b) &&
+        a.length === b.length &&
+        a.every((value, index) => deepEqual(value, b[index]))
+      );
+    }
+    const left = a as Record<string, unknown>;
+    const right = b as Record<string, unknown>;
+    const keys = Object.keys(left);
+    return (
+      keys.length === Object.keys(right).length &&
+      keys.every(
+        (key) => Object.hasOwn(right, key) && deepEqual(left[key], right[key]),
+      )
+    );
+  }
+
   export function inventory(
     src: PlayerState,
     dst: PlayerState,
@@ -19,6 +48,7 @@ namespace validator {
     }
     return undefined;
   }
+
   export function tablet(
     src: PlayerState,
     dst: PlayerState,
@@ -44,6 +74,9 @@ namespace validator {
       ];
       for (const tablet of slots) {
         if (tablet === null) continue;
+        if (![0, 90, 180, 270].includes(tablet.rotate)) {
+          return `Invalid tablet rotation: ${tablet.uuid}.`;
+        }
         if (tablets.has(tablet.uuid)) {
           return `Duplicate tablet UUID: ${tablet.uuid}.`;
         }
@@ -58,7 +91,9 @@ namespace validator {
       if (!next) {
         return `Tablet UUID missing from destination: ${uuid}.`;
       }
-      if (tablet.kind !== next.kind || tablet.skill !== next.skill) {
+      const { rotate: _a, ...left } = tablet;
+      const { rotate: _b, ...right } = next;
+      if (!deepEqual(left, right)) {
         return `Tablet data must not change: ${uuid}.`;
       }
     }

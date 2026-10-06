@@ -1,13 +1,20 @@
 import { Attribute, TabletMap } from "@infinite-build/core";
-import { createTablet } from "./tablets.js";
-export { createTablet, tabletOptions } from "./tablets.js";
+import { createSupportTablet, createTablet } from "./tablets.js";
+export { createSupportTablet, createTablet, tabletOptions } from "./tablets.js";
 export type { MockTablet, TabletKind } from "./tablets.js";
 import type { BattleSpec, GameData, PlayerState } from "@infinite-build/core";
 
 import { fireball, nova, selfDestruct, skillDefinitions } from "./skills.js";
 import { buffDefinitions } from "./buffs.js";
+import { supportSkillAffixes } from "./affixes.js";
+export { supportSkillAffixes } from "./affixes.js";
 
 export const gameData: GameData = {
+  affixDefinition: {
+    tablet: {
+      support: { skill: supportSkillAffixes, passive: {} },
+    },
+  },
   playerDefinition: {
     baseStatus: {
       attributes: Attribute.createDictByRaw(["maxHp", "attack", "defense"], {
@@ -85,6 +92,8 @@ export const gameData: GameData = {
   },
 };
 
+const supportTablet = createSupportTablet(TabletMap.idSize + 4);
+
 export const playerState: PlayerState = {
   inventory: [
     ...(["fireball", "nova", "fireball", "nova"] as const).map(
@@ -93,7 +102,7 @@ export const playerState: PlayerState = {
         return { kind: "tablet" as const, uuid: tablet.uuid, tablet };
       },
     ),
-    null,
+    { kind: "tablet", uuid: supportTablet.uuid, tablet: supportTablet },
     null,
   ],
   level: 1,
