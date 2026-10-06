@@ -2,11 +2,7 @@ import { Attribute, TabletMap } from "@infinite-build/core";
 import { createTablet } from "./tablets.js";
 export { createTablet, tabletOptions } from "./tablets.js";
 export type { MockTablet, TabletKind } from "./tablets.js";
-import type {
-  BattleSpec,
-  GameData,
-  PlayerState,
-} from "@infinite-build/core";
+import type { BattleSpec, GameData, PlayerState } from "@infinite-build/core";
 
 import { fireball, nova, selfDestruct, skillDefinitions } from "./skills.js";
 import { buffDefinitions } from "./buffs.js";
@@ -14,7 +10,9 @@ import { buffDefinitions } from "./buffs.js";
 export const gameData: GameData = {
   playerDefinition: {
     baseStatus: {
-      attributes: Attribute.createDictByRaw(["maxHp", "attack", "defense"], { maxHp: 10 }),
+      attributes: Attribute.createDictByRaw(["maxHp", "attack", "defense"], {
+        maxHp: 10,
+      }),
       tags: new Set(),
       triggers: {},
     },
@@ -88,13 +86,24 @@ export const gameData: GameData = {
 };
 
 export const playerState: PlayerState = {
-  inventory: [],
+  inventory: [
+    ...(["fireball", "nova", "fireball", "nova"] as const).map(
+      (kind, index) => {
+        const tablet = createTablet(kind, TabletMap.idSize + index);
+        return { kind: "tablet" as const, uuid: tablet.uuid, tablet };
+      },
+    ),
+    null,
+    null,
+  ],
   level: 1,
   move: { speed: 1, safeRange: 1, range: 5, count: 2 },
   tablets: Array.from({ length: TabletMap.idSize }, (_, id) =>
-    id === 0 ? createTablet("fireball", id)
-      : id === 1 ? createTablet("nova", id)
-      : null,
+    id === 0
+      ? createTablet("fireball", id)
+      : id === 1
+        ? createTablet("nova", id)
+        : null,
   ),
 };
 

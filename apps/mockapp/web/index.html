@@ -84,10 +84,27 @@
           <h2 id="tablet-title">石板盘</h2>
           <span>中心槽位 0 · 顺时针向外排列</span>
         </div>
-        <p>每个槽位可放置火球石板、新星石板或留空。可同时装备多块技能石板。</p>
-        <div id="tablet-board" class="tablet-board" aria-label="5 × 5 石板盘"></div>
-        <p>火球：10 伤害，每 2 帧施放，射程 5。新星：6 伤害，每 5 帧施放，10 帧扩散至半径 20。</p>
-        <p id="tablet-message" role="status">修改石板下一帧生效；战斗结束后可修改并重新开始。</p>
+        <p>选择已有石板进行装备或交换；选择空槽位会将原石板卸回背包。</p>
+        <div
+          id="tablet-board"
+          class="tablet-board"
+          aria-label="5 × 5 石板盘"
+        ></div>
+        <p>
+          火球：10 伤害，每 2 帧施放，射程 5。新星：6 伤害，每 5 帧施放，10
+          帧扩散至半径 20。
+        </p>
+        <p id="tablet-message" role="status">
+          修改石板下一帧生效；战斗结束后可修改并重新开始。
+        </p>
+      </section>
+      <section class="panel inventory-panel" aria-labelledby="inventory-title">
+        <div class="panel-title">
+          <h2 id="inventory-title">背包</h2>
+          <span id="inventory-count"></span>
+        </div>
+        <p>选择目标槽位后装备石板；原槽位石板会交换回背包。</p>
+        <div id="inventory-list" aria-label="背包物品"></div>
       </section>
       <div class="inspector">
         <div class="tabs" role="tablist" aria-label="战斗详情">
