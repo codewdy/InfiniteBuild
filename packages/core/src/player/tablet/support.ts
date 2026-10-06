@@ -34,6 +34,7 @@ export class SupportTablet implements Tablet {
     for (const [x, y] of this.delta) {
       const id = TabletMap.move(this.ctx.id, x, y, this.ctx.rotate);
       if (id === undefined) continue;
+      if (this.ctx.slots[id]?.kind !== this.kind) continue;
       const modifier = modifiers[id];
       if (modifier === undefined) continue;
       for (const affix of affixes) {
