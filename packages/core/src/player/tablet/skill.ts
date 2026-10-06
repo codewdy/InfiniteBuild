@@ -14,7 +14,8 @@ export class SkillTablet implements Tablet {
     modifiers: Tablet.Modifier[],
     id: number,
   ): void {
-    modifiers[id] = Attribute.mergeDict(modifiers[id]!, {
+    const modifier = modifiers[id]!;
+    modifier.attribute = Attribute.mergeDict(modifier.attribute, {
       ["skill.onUpdate"]: { base: 1 },
     });
   }
@@ -24,7 +25,7 @@ export class SkillTablet implements Tablet {
     player: PlayerCombatProfile,
   ): void {
     for (const type of SkillTrigger.eventTypes) {
-      const multiplier = Attribute.resolve(modifier[`skill.${type}`]);
+      const multiplier = Attribute.resolve(modifier.attribute[`skill.${type}`]);
       if (multiplier < 1e-6) continue;
       const skill: UnitSkill = {
         ...structuredClone(this.skill),

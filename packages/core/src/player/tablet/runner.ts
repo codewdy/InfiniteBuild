@@ -3,7 +3,10 @@ import type { PlayerCombatProfile } from "../state.js";
 import { Tablet } from "./tablet.js";
 
 function defaultModifier(): Tablet.Modifier {
-  return Attribute.createDictByRaw(Tablet.ModifierFieldName);
+  return {
+    skillStatus: [],
+    attribute: Attribute.createDictByRaw(Tablet.AttributeFieldName),
+  };
 }
 
 export function tabletRun(
