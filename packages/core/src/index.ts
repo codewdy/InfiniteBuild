@@ -28,3 +28,4 @@ export { Attribute } from "./battle/combat/attribute.js";
 export { Affix } from "./player/affix.js";
 export { RandomGenerator } from "./random-generator.js";
 export { Trigger } from "./battle/combat/trigger.js";
+export { PlayerManager } from "./player/manager.js";

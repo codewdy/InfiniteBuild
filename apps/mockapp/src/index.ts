@@ -1,7 +1,7 @@
 import { Battle, Game } from "@infinite-build/core";
-import { battleSpec, gameData, playerState } from "@infinite-build/mock-data";
+import { battleSpec, gameData } from "@infinite-build/mock-data";
 
-const game = new Game(playerState);
+const game = new Game(gameData);
 const battleCount = 3;
 const maxFrames = 10000;
 

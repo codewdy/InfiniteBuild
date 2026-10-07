@@ -1,3 +1,5 @@
+import type { GameData } from "./game-data.js";
+import { PlayerManager } from "./player/manager.js";
 import type { BattleSpec } from "./battle/battle.js";
 import type { PlayerState } from "./player/state.js";
 import { stateValidate } from "./player/state-validate.js";
@@ -20,8 +22,10 @@ export class Game {
   private activeBattle?: Game.Battle;
   private state: PlayerState;
 
-  constructor(player: PlayerState) {
-    this.state = structuredClone(player);
+  private readonly playerManager = new PlayerManager();
+
+  constructor(private readonly data: GameData) {
+    this.state = this.playerManager.initPlayer(data);
   }
 
   get battle(): Game.Battle | undefined {
@@ -48,6 +52,12 @@ export class Game {
     if (!this.activeBattle || this.activeBattle.uuid !== result.uuid) {
       throw new Error("Battle result does not match the active battle.");
     }
+    this.state = this.playerManager.settleBattle(
+      this.data,
+      this.activeBattle.spec,
+      result,
+      this.state,
+    );
     this.activeBattle = undefined;
   }
 

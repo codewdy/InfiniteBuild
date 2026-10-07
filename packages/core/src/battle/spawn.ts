@@ -17,6 +17,7 @@ export type MapDefinition = {
       };
     }[];
   }[];
+  xp: number;
 };
 
 export function spawn(

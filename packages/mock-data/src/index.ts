@@ -19,6 +19,33 @@ import { buffDefinitions } from "./buffs.js";
 import { passiveAffixes, supportSkillAffixes } from "./affixes.js";
 export { passiveAffixes, supportSkillAffixes } from "./affixes.js";
 
+const supportTablet = createSupportTablet(TabletMap.idSize + 4);
+const passiveTablet = createPassiveTablet(TabletMap.idSize + 5);
+
+export const playerState: PlayerState = {
+  inventory: [
+    ...(["fireball", "nova", "fireball", "nova"] as const).map(
+      (kind, index) => {
+        const tablet = createTablet(kind, TabletMap.idSize + index);
+        return { kind: "tablet" as const, uuid: tablet.uuid, tablet };
+      },
+    ),
+    { kind: "tablet", uuid: supportTablet.uuid, tablet: supportTablet },
+    { kind: "tablet", uuid: passiveTablet.uuid, tablet: passiveTablet },
+    null,
+  ],
+  level: 1,
+  xp: 0,
+  move: { speed: 1, safeRange: 1, range: 5, count: 2 },
+  tablets: Array.from({ length: TabletMap.idSize }, (_, id) =>
+    id === 0
+      ? createTablet("fireball", id)
+      : id === 1
+        ? createTablet("nova", id)
+        : null,
+  ),
+};
+
 export const gameData: GameData = {
   affixDefinition: {
     tablet: {
@@ -27,6 +54,17 @@ export const gameData: GameData = {
     },
   },
   playerDefinition: {
+    defaultState: playerState,
+    levelXP: [0, 100, 300, 600, 1000],
+    loot: {
+      min: 1,
+      max: 3,
+      pool: [
+        { kind: "tablet-skill", weight: 1 },
+        { kind: "tablet-passive", weight: 1 },
+        { kind: "tablet-support-skill", weight: 1 },
+      ],
+    },
     baseStatus: {
       attributes: Attribute.createDictByRaw(["maxHp", "attack", "defense"], {
         maxHp: 10,
@@ -84,6 +122,7 @@ export const gameData: GameData = {
   },
   mapDefinitions: {
     demo: {
+      xp: 100,
       totalValue: 60,
       spawner: [
         {
@@ -101,32 +140,6 @@ export const gameData: GameData = {
       ],
     },
   },
-};
-
-const supportTablet = createSupportTablet(TabletMap.idSize + 4);
-const passiveTablet = createPassiveTablet(TabletMap.idSize + 5);
-
-export const playerState: PlayerState = {
-  inventory: [
-    ...(["fireball", "nova", "fireball", "nova"] as const).map(
-      (kind, index) => {
-        const tablet = createTablet(kind, TabletMap.idSize + index);
-        return { kind: "tablet" as const, uuid: tablet.uuid, tablet };
-      },
-    ),
-    { kind: "tablet", uuid: supportTablet.uuid, tablet: supportTablet },
-    { kind: "tablet", uuid: passiveTablet.uuid, tablet: passiveTablet },
-    null,
-  ],
-  level: 1,
-  move: { speed: 1, safeRange: 1, range: 5, count: 2 },
-  tablets: Array.from({ length: TabletMap.idSize }, (_, id) =>
-    id === 0
-      ? createTablet("fireball", id)
-      : id === 1
-        ? createTablet("nova", id)
-        : null,
-  ),
 };
 
 export const battleSpec: BattleSpec = { seed: 42, map: "demo" };

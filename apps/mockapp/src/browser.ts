@@ -16,7 +16,6 @@ import {
   createPassiveTablet,
   createSupportTablet,
   gameData,
-  playerState,
   tabletOptions,
   passiveTabletOptions,
   rollPassiveTablet,
@@ -36,8 +35,8 @@ const tabletBoard = element<HTMLDivElement>("tablet-board");
 const tabletMessage = element<HTMLParagraphElement>("tablet-message");
 const logs = element<HTMLPreElement>("logs");
 const vision = gameData.config.map.visionRange;
-const range = playerState.move.range;
-const game = new Game(playerState);
+const game = new Game(gameData);
+const range = game.player.move.range;
 let round = 1;
 function tabletName(tablet: TabletSpec.Tablet): string {
   if (tablet.kind === "passive") return "生命石板";

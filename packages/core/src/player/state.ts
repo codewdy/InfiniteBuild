@@ -13,6 +13,8 @@ export type PlayerCombatProfile = {
 
 export type PlayerState = {
   level: number;
+  /** Total accumulated experience; leveling up does not consume it. */
+  xp: number;
   move: {
     speed: number;
     safeRange: number;
