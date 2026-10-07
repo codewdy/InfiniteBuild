@@ -65,6 +65,26 @@ export class RandomGenerator {
     return pool.slice(0, size);
   }
 
+  /** Returns an index sampled in proportion to non-negative weights. */
+  weightedIndex(weights: readonly number[]): number {
+    const total = weights.reduce((sum, weight) => sum + weight, 0);
+    if (
+      !Number.isFinite(total) ||
+      total <= 0 ||
+      weights.some((weight) => weight < 0)
+    ) {
+      throw new Error("Invalid random weights.");
+    }
+    let value = this.rand() * total;
+    let last = 0;
+    for (const [index, weight] of weights.entries()) {
+      if (weight > 0) last = index;
+      if (value < weight) return index;
+      value -= weight;
+    }
+    return last;
+  }
+
   /** Returns a uniformly distributed number between min and max. */
   uniform(min: number, max: number): number {
     this.validateRange(min, max);

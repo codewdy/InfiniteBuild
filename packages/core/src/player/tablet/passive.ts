@@ -17,7 +17,7 @@ export class PassiveTablet implements Tablet {
   applyPlayer(modifier: Tablet.Modifier, player: PlayerCombatProfile): void {
     const definitions = this.ctx.gameData.affixDefinition.tablet.passive;
     const statuses = this.affixes.map((affix) => {
-      const definition = definitions[affix.id];
+      const definition = definitions.pool[affix.id];
       if (!definition) {
         throw new Error(`Unknown passive affix: ${affix.id}`);
       }

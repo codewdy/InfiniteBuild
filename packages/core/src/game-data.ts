@@ -34,10 +34,7 @@ export type GameData = {
   playerDefinition: PlayerDefinition;
   affixDefinition: {
     tablet: {
-      support: {
-        skill: Affix.Definitions<SupportTablet.Apply>;
-        passive: Affix.Definitions<SupportTablet.Apply>;
-      };
+      support: Affix.Definitions<SupportTablet.Apply>;
       passive: Affix.Definitions<PassiveTablet.Apply>;
     };
   };

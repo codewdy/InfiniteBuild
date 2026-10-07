@@ -1,5 +1,5 @@
 import type { Unit, Faction } from "./combat/unit.js";
-import type { RandomGenerator } from "./random-generator.js";
+import type { RandomGenerator } from "../random-generator.js";
 export class UnitList implements Iterable<Unit> {
   protected rng: RandomGenerator;
   protected units: Unit[];

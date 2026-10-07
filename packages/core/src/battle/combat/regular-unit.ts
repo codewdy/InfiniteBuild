@@ -3,7 +3,7 @@ import { Unit, type Faction } from "./unit.js";
 import { move } from "./movement.js";
 import type { BattleContext } from "../battle.js";
 import { Status } from "./status.js";
-import type { RandomGenerator } from "../random-generator.js";
+import type { RandomGenerator } from "../../random-generator.js";
 
 export type UnitDefinition = {
   kind: string;

@@ -2,6 +2,7 @@ import {
   Battle,
   Game,
   TabletMap,
+  RandomGenerator,
   derivePlayerCombatProfile,
 } from "@infinite-build/core";
 import type {
@@ -17,6 +18,8 @@ import {
   gameData,
   playerState,
   tabletOptions,
+  passiveTabletOptions,
+  rollPassiveTablet,
 } from "@infinite-build/mock-data";
 
 function element<T extends HTMLElement>(id: string): T {
@@ -45,6 +48,23 @@ function tabletName(tablet: TabletSpec.Tablet): string {
     tabletOptions.find((option) => option.kind === tablet.skill)?.name ??
     tablet.skill
   );
+}
+
+function affixText(
+  tablet: Exclude<TabletSpec.Tablet, TabletSpec.Skill>,
+  affix: TabletSpec.Passive["affixes"][number],
+): string {
+  const definitions =
+    tablet.kind === "passive"
+      ? gameData.affixDefinition.tablet.passive
+      : gameData.affixDefinition.tablet.support;
+  const name = definitions.pool[affix.id]?.name ?? affix.id;
+  const percent =
+    affix.id === "maxHpPercent" || affix.id === "onUpdateCastRate";
+  const value = (affix.param * (percent ? 100 : 1)).toLocaleString("zh-CN", {
+    maximumFractionDigits: 1,
+  });
+  return `${name} +${value}${percent ? "%" : ""} · T${affix.tier + 1}`;
 }
 
 function submitState(
@@ -217,6 +237,33 @@ lifeButton.addEventListener("click", () => {
 });
 element("tablet-add-actions").append(lifeButton);
 
+const passiveRng = new RandomGenerator(
+  crypto.getRandomValues(new Uint32Array(1))[0]!,
+);
+for (const option of passiveTabletOptions) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "add-tablet";
+  button.dataset.skill = "passive";
+  button.textContent = `＋ ${option.name}被动石板`;
+  button.title = `等级 ${option.level} · 随机生成 1–2 条生命词缀，最高 T${option.level === 1 ? 1 : option.level === 20 ? 3 : 5}`;
+  button.addEventListener("click", () => {
+    const state = game.getState();
+    const tablet = rollPassiveTablet(passiveRng, option.level);
+    const item = { kind: "tablet" as const, uuid: tablet.uuid, tablet };
+    const empty = state.inventory.indexOf(null);
+    if (empty < 0) state.inventory.push(item);
+    else state.inventory[empty] = item;
+    selectedUuid = undefined;
+    submitState(
+      state,
+      "force",
+      `${option.name}被动石板（等级 ${option.level}）已加入背包`,
+    );
+  });
+  element("tablet-add-actions").append(button);
+}
+
 let supportPreview: SlotLocation | undefined;
 
 function updateSupportPreview(location?: SlotLocation): void {
@@ -294,19 +341,9 @@ function createSlot(
   if (tablet) {
     slot.title += `\n旋转 ${tablet.rotate}° · 右键或按 R 顺时针旋转`;
     if (tablet.kind !== "skill") {
-      const definitions =
-        tablet.kind === "passive"
-          ? gameData.affixDefinition.tablet.passive
-          : gameData.affixDefinition.tablet.support[
-              tablet.kind === "support-skill" ? "skill" : "passive"
-            ];
       slot.title = [
         tabletName(tablet),
-        ...tablet.affixes.map((affix) =>
-          affix.id === "onUpdateCastRate"
-            ? `持续施放速率 +${Math.round(affix.param * 100)}%（加算）`
-            : `${definitions[affix.id]?.name ?? affix.id}：${affix.param}`,
-        ),
+        ...tablet.affixes.map((affix) => affixText(tablet, affix)),
         `旋转 ${tablet.rotate}° · 右键或按 R 顺时针旋转`,
         tablet.uuid,
       ].join("\n");
@@ -343,6 +380,16 @@ function createSlot(
   name.className = "slot-name";
   name.textContent = tablet ? tabletName(tablet).replace("石板", "") : "空槽位";
   slot.append(index, icon, name);
+  if (tablet?.kind === "passive") {
+    const affixes = document.createElement("span");
+    affixes.className = "tablet-affixes";
+    for (const affix of tablet.affixes) {
+      const line = document.createElement("span");
+      line.textContent = affixText(tablet, affix);
+      affixes.append(line);
+    }
+    slot.append(affixes);
+  }
   if (
     tablet &&
     (tablet.kind === "support-skill" || tablet.kind === "support-passive")

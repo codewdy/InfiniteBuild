@@ -22,9 +22,9 @@ export class SupportTablet implements Tablet {
   ) {}
   applyModifier(modifiers: Tablet.Modifier[]): void {
     const definitions =
-      this.ctx.gameData.affixDefinition.tablet.support[this.kind];
+      this.ctx.gameData.affixDefinition.tablet.support;
     const affixes = this.affixes.map((affix) => {
-      const definition = definitions[affix.id];
+      const definition = definitions.pool[affix.id];
       if (!definition) {
         throw new Error(`Unknown ${this.kind} support affix: ${affix.id}`);
       }

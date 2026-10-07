@@ -1,5 +1,5 @@
 import type { Unit } from "./combat/unit.js";
-import type { RandomGenerator } from "./random-generator.js";
+import type { RandomGenerator } from "../random-generator.js";
 import { RegularUnit } from "./combat/regular-unit.js";
 import type { GameData } from "../game-data.js";
 

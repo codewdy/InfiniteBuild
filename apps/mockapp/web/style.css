@@ -441,6 +441,21 @@ pre {
   line-height: 1.4;
   color: inherit;
 }
+.tablet-affixes {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 100%;
+  font-size: 9px;
+  line-height: 1.3;
+  color: #bceadd;
+}
+.tablet-affixes span {
+  overflow-wrap: anywhere;
+}
+.item-slot[data-skill="passive"] .tablet-icon {
+  width: 30px;
+}
 #tablet-message {
   color: #82e6ce;
   min-height: 36px;

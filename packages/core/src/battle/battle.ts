@@ -1,5 +1,5 @@
 import { BuffManager } from "./combat/buff.js";
-import { RandomGenerator } from "./random-generator.js";
+import { RandomGenerator } from "../random-generator.js";
 import { spawn } from "./spawn.js";
 import { UnitManager } from "./unit-list.js";
 import type { Unit } from "./combat/unit.js";

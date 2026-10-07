@@ -1,6 +1,16 @@
 import { Attribute, TabletMap } from "@infinite-build/core";
-import { createPassiveTablet, createSupportTablet, createTablet } from "./tablets.js";
-export { createPassiveTablet, createSupportTablet, createTablet, tabletOptions } from "./tablets.js";
+import {
+  createPassiveTablet,
+  createSupportTablet,
+  createTablet,
+} from "./tablets.js";
+export {
+  createPassiveTablet,
+  createSupportTablet,
+  createTablet,
+  tabletOptions,
+} from "./tablets.js";
+export { rollPassiveTablet, passiveTabletOptions } from "./tablets.js";
 export type { MockTablet, TabletKind } from "./tablets.js";
 import type { BattleSpec, GameData, PlayerState } from "@infinite-build/core";
 
@@ -12,7 +22,7 @@ export { passiveAffixes, supportSkillAffixes } from "./affixes.js";
 export const gameData: GameData = {
   affixDefinition: {
     tablet: {
-      support: { skill: supportSkillAffixes, passive: {} },
+      support: supportSkillAffixes,
       passive: passiveAffixes,
     },
   },

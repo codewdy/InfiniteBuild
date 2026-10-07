@@ -1,7 +1,7 @@
 import { cast, type SkillContext, type SkillParams } from "./skill.js";
 import type { Unit } from "./unit.js";
 import type { BattleContext } from "../battle.js";
-import type { RandomGenerator } from "../random-generator.js";
+import type { RandomGenerator } from "../../random-generator.js";
 import { Status } from "./status.js";
 
 export type UnitSkill = {

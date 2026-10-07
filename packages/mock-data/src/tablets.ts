@@ -1,11 +1,40 @@
 import type { TabletSpec } from "@infinite-build/core";
+import { Affix } from "@infinite-build/core";
+import type { RandomGenerator } from "@infinite-build/core";
+import { passiveAffixes } from "./affixes.js";
+
+export const passiveTabletOptions = [
+  { name: "低级", level: 1 },
+  { name: "中级", level: 20 },
+  { name: "高级", level: 40 },
+] as const;
+
+export function rollPassiveTablet(
+  rng: RandomGenerator,
+  level: number,
+): TabletSpec.Passive {
+  return {
+    kind: "passive",
+    uuid: crypto.randomUUID(),
+    rotate: 0,
+    affixes: Affix.rollAffixes(rng, passiveAffixes, ["passive"], level),
+  };
+}
 
 export type TabletKind = "fireball" | "nova";
 export type MockTablet = TabletSpec.Skill;
 
 export const tabletOptions = [
-  { kind: "fireball", name: "火球石板", description: "10 伤害 · 每 2 帧施放 · 射程 5" },
-  { kind: "nova", name: "新星石板", description: "6 伤害 · 每 5 帧施放 · 半径 20" },
+  {
+    kind: "fireball",
+    name: "火球石板",
+    description: "10 伤害 · 每 2 帧施放 · 射程 5",
+  },
+  {
+    kind: "nova",
+    name: "新星石板",
+    description: "6 伤害 · 每 5 帧施放 · 半径 20",
+  },
 ] as const;
 
 export function createTablet(kind: TabletKind, slot: number): MockTablet {
