@@ -10,6 +10,7 @@ export class PlayerUnit extends Unit {
   constructor() {
     super();
     this.kind = "Player";
+    this.name = "玩家";
     this.faction = "Ally";
     this.position = 0;
   }

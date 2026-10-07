@@ -105,6 +105,7 @@ export class Battle {
       units: Array.from(this.ctx.units, (unit) => ({
         id: unit.id,
         kind: unit.kind,
+        name: unit.name,
         position: unit.position,
         hp: unit.hp,
         status: {

@@ -35,6 +35,7 @@ export type BattleLog = {
   units: {
     id: number;
     kind: string;
+    name: string;
     position: number;
     hp: number;
     status: {

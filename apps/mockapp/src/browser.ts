@@ -583,7 +583,7 @@ function render(): void {
     const row = document.createElement("tr");
     for (const value of [
       unit.id,
-      unit.kind,
+      unit.name,
       unit.position.toFixed(2),
       `${unit.hp.toFixed(1)} / ${unit.status.attributes.maxHp.toFixed(1)}`,
       unit.status.attributes.attack.toFixed(1),

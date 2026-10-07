@@ -7,6 +7,7 @@ import type { RandomGenerator } from "../../random-generator.js";
 
 export type UnitDefinition = {
   kind: string;
+  name: string;
   status: Status.StatusConfig;
   move: {
     speed: number;
@@ -29,6 +30,7 @@ export class RegularUnit extends Unit {
   ) {
     super();
     this.kind = definition.kind;
+    this.name = definition.name;
     this.position = position;
     this.faction = faction;
     this.definition = definition;

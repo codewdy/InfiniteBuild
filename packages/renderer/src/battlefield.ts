@@ -116,6 +116,7 @@ export class Battlefield {
       }
       view.from += (view.position - view.from) * progress;
       view.position = unit.position;
+      view.label.text = unit.name;
       view.health.clear().rect(-19, -40, 38, 4).fill(0x25324b);
       const ratio = Math.max(0, Math.min(1, unit.hp / (unit.status.attributes.maxHp || 1)));
       if (ratio > 0) view.health.rect(-19, -40, 38 * ratio, 4).fill(ratio < 0.3 ? 0xff718a : 0x7ee2ba);
@@ -249,7 +250,7 @@ export class Battlefield {
     body.y = 20;
     const shadow = new Graphics().ellipse(0, 20, 20, 5).fill({ color: 0x000000, alpha: 0.25 });
     const health = new Graphics();
-    const label = this.text(`${unit.kind} #${unit.id}`, 10, 0xb3c2dc);
+    const label = this.text(unit.name, 10, 0xb3c2dc);
     label.anchor.set(0.5);
     label.y = -49;
     root.addChild(shadow, body, health, label);

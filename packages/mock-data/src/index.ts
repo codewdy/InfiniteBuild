@@ -94,6 +94,7 @@ export const gameData: GameData = {
   unitDefinitions: {
     Slime: {
       kind: "Slime",
+      name: "史莱姆",
       status: { attributes: { maxHp: 20, attack: 5, defense: 0 }, tags: [] },
       move: { speed: 0.5, range: { min: 1.5, max: 2 } },
       skills: {
@@ -107,6 +108,7 @@ export const gameData: GameData = {
     },
     Goblin: {
       kind: "Goblin",
+      name: "哥布林",
       status: { attributes: { maxHp: 30, attack: 5, defense: 0 }, tags: [] },
       move: { speed: 1, range: { min: 2.5, max: 3 } },
       skills: {

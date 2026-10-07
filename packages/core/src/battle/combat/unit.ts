@@ -14,6 +14,7 @@ export const Faction = {
 export abstract class Unit {
   id: number = -1;
   kind!: string;
+  name!: string;
   faction!: Faction;
   position!: number;
   skills: UnitSkills = {};
