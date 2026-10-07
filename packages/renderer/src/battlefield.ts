@@ -25,6 +25,7 @@ export type BattlefieldOptions = {
   vision: number;
   frameDuration: number;
   playing: boolean;
+  skillNames?: Readonly<Record<string, string>>;
 };
 
 /** Presentation only: battle logs remain the authority for time and positions. */
@@ -189,7 +190,8 @@ export class Battlefield {
       const progress = Math.max(0, Math.min(1, event.progress));
       const color = event.skill === "nova" ? 0xc49aff : 0xffbb73;
       const track = new Graphics();
-      const label = this.text(`${event.skill}  ${Math.round(progress * 100)}%`, 11, 0xe6ecfa);
+      const name = this.options.skillNames?.[event.skill] ?? "未知技能";
+      const label = this.text(`${name}  ${Math.round(progress * 100)}%`, 11, 0xe6ecfa);
       this.skillLayer.addChild(track, label);
       this.skillBars.push({ progress, track, label, color });
     }

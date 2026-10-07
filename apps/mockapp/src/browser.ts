@@ -37,6 +37,9 @@ const tabletBoard = element<HTMLDivElement>("tablet-board");
 const tabletMessage = element<HTMLParagraphElement>("tablet-message");
 const logs = element<HTMLPreElement>("logs");
 const vision = gameData.config.map.visionRange;
+const skillNames = Object.fromEntries(
+  Object.entries(gameData.skillDefinitions).map(([id, definition]) => [id, definition.name]),
+);
 const game = new Game(gameData);
 let round = 1;
 function tabletName(tablet: TabletSpec.Tablet): string {
@@ -646,6 +649,7 @@ function render(): void {
   element("reset").textContent = finished ? "重新开始" : "重置";
   battlefield.update(log, {
     vision,
+    skillNames,
     frameDuration: 1000 / Number(speed.value),
     playing: timer !== undefined,
   });
