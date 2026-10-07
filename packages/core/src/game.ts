@@ -72,6 +72,10 @@ export class Game {
     return null;
   }
 
+  deleteItem(uuid: string): void {
+    this.playerManager.deleteItem(this.state, uuid);
+  }
+
   forceChangeState(player: PlayerState): void {
     this.state = structuredClone(player);
   }

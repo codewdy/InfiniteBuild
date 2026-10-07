@@ -27,10 +27,17 @@ export class PlayerManager {
     player: PlayerState,
   ): void {
     if (result.result !== "Victory") return;
-    const items = Loot.generateLoots(data, new RandomGenerator(battle.seed), player);
+    const items = Loot.generateLoots(
+      data,
+      new RandomGenerator(battle.seed),
+      player,
+    );
     let slot = 0;
     for (const item of items) {
-      while (slot < player.inventory.length && player.inventory[slot] !== null) {
+      while (
+        slot < player.inventory.length &&
+        player.inventory[slot] !== null
+      ) {
         slot += 1;
       }
       player.inventory[slot] = item;
@@ -54,5 +61,11 @@ export class PlayerManager {
       if (player.xp < threshold) break;
       player.level += 1;
     }
+  }
+  deleteItem(player: PlayerState, uuid: string): void {
+    const stored = player.inventory.findIndex((item) => item?.uuid === uuid);
+    if (stored >= 0) player.inventory[stored] = null;
+    const equipped = player.tablets.findIndex((tablet) => tablet?.uuid === uuid);
+    if (equipped >= 0) player.tablets[equipped] = null;
   }
 }

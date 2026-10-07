@@ -136,11 +136,10 @@ function discardTablet(uuid: string): void {
   const equipped = state.tablets.findIndex((tablet) => tablet?.uuid === uuid);
   const stored = state.inventory.findIndex((item) => item?.uuid === uuid);
   if (equipped < 0 && stored < 0) return;
-  if (equipped >= 0) state.tablets[equipped] = null;
-  else state.inventory[stored] = null;
+  game.deleteItem(uuid);
   selectedUuid = undefined;
   draggingUuid = undefined;
-  submitState(state, "force", "石板已删除");
+  submitState(game.getState(), "validate", "石板已删除");
 }
 
 const trash = element<HTMLButtonElement>("tablet-trash");
