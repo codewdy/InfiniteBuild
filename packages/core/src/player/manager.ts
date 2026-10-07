@@ -1,4 +1,4 @@
-import { RandomGenerator } from "../random-generator.js";
+import type { RandomGenerator } from "../random-generator.js";
 import { Loot } from "./loot.js";
 import type { BattleSpec } from "../battle/battle.js";
 import type { GameData } from "../game-data.js";
@@ -6,32 +6,27 @@ import type { Game } from "../game.js";
 import type { PlayerState } from "./state.js";
 
 export class PlayerManager {
-  initPlayer(data: GameData): PlayerState {
-    return structuredClone(data.playerDefinition.defaultState);
+  constructor(
+    private readonly data: GameData,
+    private readonly rng: RandomGenerator,
+  ) {}
+
+  initPlayer(): PlayerState {
+    return structuredClone(this.data.playerDefinition.defaultState);
   }
   settleBattle(
-    data: GameData,
     battle: BattleSpec,
     result: Game.BattleResult,
     player: PlayerState,
   ): PlayerState {
     const next = structuredClone(player);
-    this.loot(data, battle, result, next);
-    this.gainXP(data, battle, result, next);
+    this.loot(result, next);
+    this.gainXP(battle, result, next);
     return next;
   }
-  loot(
-    data: GameData,
-    battle: BattleSpec,
-    result: Game.BattleResult,
-    player: PlayerState,
-  ): void {
+  loot(result: Game.BattleResult, player: PlayerState): void {
     if (result.result !== "Victory") return;
-    const items = Loot.generateLoots(
-      data,
-      new RandomGenerator(battle.seed),
-      player,
-    );
+    const items = Loot.generateLoots(this.data, this.rng, player);
     let slot = 0;
     for (const item of items) {
       while (
@@ -45,16 +40,15 @@ export class PlayerManager {
     }
   }
   gainXP(
-    data: GameData,
     battle: BattleSpec,
     result: Game.BattleResult,
     player: PlayerState,
   ): void {
     if (result.result !== "Victory") return;
-    const map = data.mapDefinitions[battle.map];
+    const map = this.data.mapDefinitions[battle.map];
     if (!map) throw new Error(`Unknown map: ${battle.map}`);
     player.xp += map.xp;
-    const thresholds = data.playerDefinition.levelXP;
+    const thresholds = this.data.playerDefinition.levelXP;
     // Index 0 is the total XP required for level 1.
     while (player.level < thresholds.length) {
       const threshold = thresholds[player.level]!;
@@ -65,7 +59,9 @@ export class PlayerManager {
   deleteItem(player: PlayerState, uuid: string): void {
     const stored = player.inventory.findIndex((item) => item?.uuid === uuid);
     if (stored >= 0) player.inventory[stored] = null;
-    const equipped = player.tablets.findIndex((tablet) => tablet?.uuid === uuid);
+    const equipped = player.tablets.findIndex(
+      (tablet) => tablet?.uuid === uuid,
+    );
     if (equipped >= 0) player.tablets[equipped] = null;
   }
 }

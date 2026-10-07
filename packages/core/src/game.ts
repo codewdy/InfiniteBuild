@@ -1,4 +1,5 @@
 import type { GameData } from "./game-data.js";
+import { RandomGenerator } from "./random-generator.js";
 import { PlayerManager } from "./player/manager.js";
 import type { BattleSpec } from "./battle/battle.js";
 import type { PlayerState } from "./player/state.js";
@@ -22,10 +23,13 @@ export class Game {
   private activeBattle?: Game.Battle;
   private state: PlayerState;
 
-  private readonly playerManager = new PlayerManager();
+  readonly rng: RandomGenerator;
+  private readonly playerManager: PlayerManager;
 
-  constructor(private readonly data: GameData) {
-    this.state = this.playerManager.initPlayer(data);
+  constructor(data: GameData, seed: number = Date.now()) {
+    this.rng = new RandomGenerator(seed);
+    this.playerManager = new PlayerManager(data, this.rng);
+    this.state = this.playerManager.initPlayer();
   }
 
   get battle(): Game.Battle | undefined {
@@ -53,7 +57,6 @@ export class Game {
       throw new Error("Battle result does not match the active battle.");
     }
     this.state = this.playerManager.settleBattle(
-      this.data,
       this.activeBattle.spec,
       result,
       this.state,
