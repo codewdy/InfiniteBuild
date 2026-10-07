@@ -7,6 +7,7 @@ export namespace Affix {
   };
   export type Definition<T> = {
     name: string;
+    description: (param: number) => string;
     apply: T;
     tier: Tier[];
     tag: string[];

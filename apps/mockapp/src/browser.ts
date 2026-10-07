@@ -58,13 +58,9 @@ function affixText(
     tablet.kind === "passive"
       ? gameData.affixDefinition.tablet.passive
       : gameData.affixDefinition.tablet.support;
-  const name = definitions.pool[affix.id]?.name ?? affix.id;
-  const percent =
-    affix.id === "maxHpPercent" || affix.id === "onUpdateCastRate";
-  const value = (affix.param * (percent ? 100 : 1)).toLocaleString("zh-CN", {
-    maximumFractionDigits: 1,
-  });
-  return `${name} +${value}${percent ? "%" : ""} · T${affix.tier + 1}`;
+  const description =
+    definitions.pool[affix.id]?.description(affix.param) ?? affix.id;
+  return `${description} · T${affix.tier + 1}`;
 }
 
 function submitState(
@@ -204,7 +200,7 @@ hasteButton.className = "add-tablet";
 hasteButton.dataset.skill = "support-skill";
 hasteButton.textContent = "＋ 新增技能急速";
 hasteButton.title =
-  "辅助箭头方向的技能石板，持续施放速率 +50%（加算）。右键旋转方向。";
+  "辅助箭头方向的技能石板，持续施放速率提升(add) 50%。右键旋转方向。";
 hasteButton.addEventListener("click", () => {
   const state = game.getState();
   const tablet = createSupportTablet(state.inventory.length);

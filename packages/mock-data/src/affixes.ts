@@ -1,6 +1,10 @@
 import { Attribute } from "@infinite-build/core";
 import type { GameData } from "@infinite-build/core";
 
+function formatValue(value: number): string {
+  return value.toLocaleString("zh-CN", { maximumFractionDigits: 1 });
+}
+
 export const passiveAffixes: GameData["affixDefinition"]["tablet"]["passive"] =
   {
     roll: {
@@ -12,6 +16,7 @@ export const passiveAffixes: GameData["affixDefinition"]["tablet"]["passive"] =
       maxHp: {
         tag: ["passive"],
         name: "最大生命值",
+        description: (param) => `最大生命值 +${formatValue(param)}`,
         tier: [
           { min: 8, max: 12 },
           { min: 15, max: 25 },
@@ -23,7 +28,9 @@ export const passiveAffixes: GameData["affixDefinition"]["tablet"]["passive"] =
       },
       maxHpPercent: {
         tag: ["passive"],
-        name: "最大生命值提高",
+        name: "最大生命值提升",
+        description: (param) =>
+          `最大生命值提升(add) ${formatValue(param * 100)}%`,
         tier: [
           { min: 0.05, max: 0.1 },
           { min: 0.1, max: 0.15 },
@@ -47,6 +54,8 @@ export const supportSkillAffixes: GameData["affixDefinition"]["tablet"]["support
       onUpdateCastRate: {
         tag: ["support-skill"],
         name: "持续施放速率",
+        description: (param) =>
+          `持续施放速率提升(add) ${formatValue(param * 100)}%`,
         tier: [{ min: 0.5, max: 0.5 }],
         apply: (_ctx, modifier, param) => {
           modifier.attribute = Attribute.mergeDict(modifier.attribute, {
