@@ -10,7 +10,9 @@
         "imports": {
           "@infinite-build/core": "/core/index.js",
           "@infinite-build/mock-data": "/mock-data/index.js",
-          "zod": "/zod/index.js"
+          "@infinite-build/renderer": "/renderer/dist/index.js",
+          "zod": "/zod/index.js",
+          "pixi.js": "/pixi/pixi.min.mjs"
         }
       }
     </script>
@@ -45,40 +47,25 @@
         <div><span>场上敌人</span><strong id="enemies">0</strong></div>
         <div><span>累计死亡</span><strong id="deaths">0</strong></div>
       </section>
-      <section class="panel">
-        <div class="panel-title">
-          <h2>战场</h2>
-          <span id="config"></span>
-        </div>
+      <section class="panel battlefield-panel" aria-label="战场">
         <canvas
           id="battlefield"
-          aria-label="战场：玩家与敌人位置，玩家视野和移动范围"
+          aria-label="像素战场：角色与技能动画"
         ></canvas>
-        <div id="skill-progress-list" aria-label="当前技能进度"></div>
-        <div class="legend">
-          <span><i class="player"></i>Player</span
-          ><span><i class="slime"></i>Slime</span
-          ><span><i class="goblin"></i>Goblin</span
-          ><span>绿色区域 · 移动范围</span><span>蓝色区域 · 视野</span
-          ><span class="move-event">蓝色箭头 · Move</span
-          ><span class="damage-event">红色数值 · Damage</span
-          ><span class="fireball-effect">橙色火球 · fireball</span
-          ><span class="nova-effect">紫色扩散环 · nova</span>
-        </div>
-        <div class="controls">
-          <button id="play" class="primary">播放</button
-          ><button id="step">下一帧</button><button id="reset">重置</button
-          ><label
-            >播放速度
-            <select id="speed">
-              <option value="1">1 帧 / 秒</option>
-              <option value="5" selected>5 帧 / 秒</option>
-              <option value="15">15 帧 / 秒</option>
-              <option value="30">30 帧 / 秒</option>
-            </select></label
-          >
-        </div>
       </section>
+      <div class="controls" aria-label="战斗操作">
+        <button id="play" class="primary">播放</button
+        ><button id="step">下一帧</button><button id="reset">重置</button
+        ><label
+          >播放速度
+          <select id="speed">
+            <option value="1">1 帧 / 秒</option>
+            <option value="5" selected>5 帧 / 秒</option>
+            <option value="15">15 帧 / 秒</option>
+            <option value="30">30 帧 / 秒</option>
+          </select></label
+        >
+      </div>
       <div class="loadout">
         <section class="panel tablet-panel" aria-labelledby="tablet-title">
           <div class="panel-title">

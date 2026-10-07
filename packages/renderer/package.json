@@ -1,0 +1,21 @@
+{
+  "name": "@infinite-build/renderer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./assets/*": "./assets/*"
+  },
+  "files": ["dist", "assets"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@infinite-build/core": "workspace:*",
+    "pixi.js": "^8.22.0"
+  }
+}

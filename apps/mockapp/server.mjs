@@ -8,6 +8,8 @@ import { fileURLToPath } from "node:url";
 const base = fileURLToPath(new URL(".", import.meta.url));
 const workspace = resolve(base, "../..");
 const mockDataRequire = createRequire(resolve(workspace, "packages/mock-data/package.json"));
+const rendererRoot = resolve(workspace, "packages/renderer");
+const rendererRequire = createRequire(resolve(rendererRoot, "package.json"));
 const clients = new Set();
 let revision = 0;
 let building = false;
@@ -51,17 +53,21 @@ async function snapshot(directory) {
   return files.sort().join("\n");
 }
 
-const sourceDirectories = ["packages/core/src", "packages/mock-data/src", "apps/mockapp/src"];
+const sourceDirectories = ["packages/core/src", "packages/mock-data/src", "packages/renderer/src", "apps/mockapp/src"];
 const sourceSnapshot = () => Promise.all(sourceDirectories.map((path) => snapshot(resolve(workspace, path))));
 let sources = (await sourceSnapshot()).join("\n");
-let web = await snapshot(resolve(base, "web"));
+const webSnapshot = async () => (await Promise.all([
+  snapshot(resolve(base, "web")),
+  snapshot(resolve(rendererRoot, "assets")),
+])).join("\n");
+let web = await webSnapshot();
 let checking = false;
 const watcher = setInterval(async () => {
   if (checking) return;
   checking = true;
   try {
     const nextSources = (await sourceSnapshot()).join("\n");
-    const nextWeb = await snapshot(resolve(base, "web"));
+    const nextWeb = await webSnapshot();
     if (nextSources !== sources) {
       sources = nextSources;
       rebuild();
@@ -78,15 +84,20 @@ const watcher = setInterval(async () => {
   }
 }, 500);
 const roots = {
+  "/renderer/": rendererRoot,
   "/app/": resolve(base, "dist"),
   "/core/": resolve(base, "../../packages/core/dist"),
   "/mock-data/": resolve(base, "../../packages/mock-data/dist"),
   "/zod/": dirname(mockDataRequire.resolve("zod")),
+  "/pixi/": resolve(dirname(rendererRequire.resolve("pixi.js")), "../dist"),
 };
 const contentTypes = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
+  ".mjs": "text/javascript; charset=utf-8",
+  ".png": "image/png",
+  ".json": "application/json; charset=utf-8",
 };
 
 const server = createServer(async (request, response) => {
@@ -111,7 +122,9 @@ const server = createServer(async (request, response) => {
       if (prefix) {
         const root = roots[prefix];
         const candidate = resolve(root, pathname.slice(prefix.length));
-        if (candidate.startsWith(`${root}/`) && extname(candidate) === ".js") filename = candidate;
+        const extensions = prefix === "/renderer/" && pathname.startsWith("/renderer/assets/")
+          ? [".png", ".json"] : [".js", ".mjs"];
+        if (candidate.startsWith(`${root}/`) && extensions.includes(extname(candidate))) filename = candidate;
       }
     }
     if (!filename) {
@@ -127,8 +140,9 @@ const server = createServer(async (request, response) => {
     response.writeHead(404).end("Not found");
   }
 });
-server.listen(3000, "0.0.0.0", () => {
-  console.log("Battle mock: http://localhost:3000");
+const port = Number(process.env.PORT ?? 3000);
+server.listen(port, "0.0.0.0", () => {
+  console.log(`Battle mock: http://localhost:${port}`);
 });
 server.on("error", (error) => {
   clearInterval(watcher);

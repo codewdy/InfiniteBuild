@@ -1,3 +1,4 @@
+import { Battlefield } from "@infinite-build/renderer";
 import {
   Battle,
   Game,
@@ -6,7 +7,6 @@ import {
   derivePlayerCombatProfile,
 } from "@infinite-build/core";
 import type {
-  BattleEvent,
   BattleLog,
   PlayerState,
   TabletSpec,
@@ -28,6 +28,8 @@ function element<T extends HTMLElement>(id: string): T {
 }
 
 const canvas = element<HTMLCanvasElement>("battlefield");
+const battlefield = await Battlefield.create(canvas);
+window.addEventListener("pagehide", () => battlefield.destroy(), { once: true });
 const play = element<HTMLButtonElement>("play");
 const step = element<HTMLButtonElement>("step");
 const speed = element<HTMLSelectElement>("speed");
@@ -36,7 +38,6 @@ const tabletMessage = element<HTMLParagraphElement>("tablet-message");
 const logs = element<HTMLPreElement>("logs");
 const vision = gameData.config.map.visionRange;
 const game = new Game(gameData);
-const range = game.player.move.range;
 let round = 1;
 function tabletName(tablet: TabletSpec.Tablet): string {
   if (tablet.kind === "passive") return "生命石板";
@@ -531,9 +532,6 @@ document.addEventListener("keydown", (event) => {
   renderTablets();
 });
 
-let runningSkills =
-  derivePlayerCombatProfile(gameData, game.getState()).skills.onUpdate ?? [];
-const skillProgress = new Map<string, number>();
 let task = game.startBattle(battleSpec);
 let battle = new Battle(gameData, task.spec, task.player);
 let log = battle.renderLog();
@@ -542,296 +540,8 @@ let deaths = 0;
 let totalDamage = 0;
 let playerPosition = 0;
 let timer: number | undefined;
-type VisualEffect = {
-  startFrame: number;
-  durationFrames: number;
-} & (
-  | {
-      kind: "fireball";
-      from: number;
-      to: number;
-      fromY: number;
-      targetPosition: number;
-      targetY: number;
-    }
-  | { kind: "nova"; center: number; radius: number; y: number }
-);
-let effects: VisualEffect[] = [];
-
-function unitY(unit: BattleLog["units"][number], index: number): number {
-  return unit.kind === "Player" ? 155 : 90 + (index % 4) * 35;
-}
-
-function addVisualEffect(event: BattleEvent.Effect, previous: BattleLog): void {
-  const { durationFrames, from, to, center, radius } = event.payload;
-  if (
-    typeof durationFrames !== "number" ||
-    !Number.isFinite(durationFrames) ||
-    durationFrames <= 0
-  )
-    return;
-  const timing = {
-    startFrame: log.frame,
-    durationFrames,
-  };
-  const sourceIndex = previous.units.findIndex(
-    (unit) => unit.id === event.source,
-  );
-  const source = previous.units[sourceIndex];
-  const y = source ? unitY(source, sourceIndex) : 155;
-  if (
-    event.effect === "fireball" &&
-    typeof from === "number" &&
-    Number.isFinite(from) &&
-    typeof to === "number" &&
-    Number.isSafeInteger(to)
-  ) {
-    const units = log.units.some((unit) => unit.id === to)
-      ? log.units
-      : previous.units;
-    const targetIndex = units.findIndex((unit) => unit.id === to);
-    const target = units[targetIndex];
-    if (!target) return;
-    effects.push({
-      ...timing,
-      kind: "fireball",
-      from,
-      to,
-      fromY: y,
-      targetPosition: target.position,
-      targetY: unitY(target, targetIndex),
-    });
-  } else if (
-    event.effect === "nova" &&
-    typeof center === "number" &&
-    Number.isFinite(center) &&
-    typeof radius === "number" &&
-    Number.isFinite(radius) &&
-    radius >= 0
-  ) {
-    effects.push({ ...timing, kind: "nova", center, radius, y });
-  }
-}
-
-function renderConfig(): void {
-  element("config").textContent =
-    `第 ${round} 场 · Seed ${task.spec.seed} · 视野 ${vision} · 范围 ${range} · 目标 ${game.getState().move.count}`;
-}
-renderConfig();
-
-function draw(): void {
-  const context = canvas.getContext("2d");
-  if (!context) return;
-  const width = canvas.clientWidth;
-  const height = canvas.clientHeight;
-  const ratio = window.devicePixelRatio || 1;
-  canvas.width = Math.round(width * ratio);
-  canvas.height = Math.round(height * ratio);
-  context.scale(ratio, ratio);
-  const player = log.units.find((unit) => unit.kind === "Player");
-  const origin = player?.position ?? playerPosition;
-  const left = 48;
-  const right = width - 38;
-  const span = vision + 4;
-  const x = (position: number) =>
-    left + ((position - origin + 2) / span) * (right - left);
-  context.fillStyle = "#101929";
-  context.fillRect(0, 0, width, height);
-  context.fillStyle = "#192e47";
-  context.fillRect(x(origin), 35, x(origin + vision) - x(origin), 205);
-  context.fillStyle = "#1e443f";
-  context.fillRect(x(origin), 35, x(origin + range) - x(origin), 205);
-  context.font = "11px system-ui";
-  context.fillStyle = "#96b6cd";
-  context.fillText("移动范围", x(origin) + 8, 53);
-  context.fillText("视野", x(origin + vision) - 32, 53);
-  for (let offset = 0; offset <= vision; offset += 5) {
-    const at = x(origin + offset);
-    context.strokeStyle = "#30405a";
-    context.beginPath();
-    context.moveTo(at, 65);
-    context.lineTo(at, 245);
-    context.stroke();
-    context.fillStyle = "#8498b2";
-    context.fillText((origin + offset).toFixed(1), at - 10, 265);
-  }
-  log.units.forEach((unit, index) => {
-    const at = x(unit.position);
-    const y = unitY(unit, index);
-    context.fillStyle =
-      unit.kind === "Player"
-        ? "#79b8ff"
-        : unit.kind === "Slime"
-          ? "#72dab5"
-          : "#f5ba79";
-    context.beginPath();
-    context.arc(at, y, unit.kind === "Player" ? 10 : 7, 0, Math.PI * 2);
-    context.fill();
-    context.textAlign = "center";
-    context.fillText(`${unit.kind} #${unit.id}`, at, y - 16);
-    const healthRatio =
-      unit.status.attributes.maxHp > 0
-        ? Math.max(0, Math.min(1, unit.hp / unit.status.attributes.maxHp))
-        : 0;
-    context.fillStyle = "#30405a";
-    context.fillRect(at - 16, y - 11, 32, 3);
-    context.fillStyle = healthRatio <= 0.3 ? "#ff7b89" : "#72dab5";
-    context.fillRect(at - 16, y - 11, 32 * healthRatio, 3);
-    context.textAlign = "left";
-  });
-  const previousUnits = history[history.length - 2]?.units ?? [];
-  // Effects keep their world positions even as the player's viewport moves.
-  context.save();
-  context.beginPath();
-  context.rect(left, 65, right - left, 180);
-  context.clip();
-  for (const effect of effects) {
-    const progress = Math.max(
-      0,
-      Math.min(1, (log.frame - effect.startFrame) / effect.durationFrames),
-    );
-    context.globalAlpha = 1 - progress * 0.5;
-    if (effect.kind === "fireball") {
-      const units = log.units.some((unit) => unit.id === effect.to)
-        ? log.units
-        : previousUnits;
-      const targetIndex = units.findIndex((unit) => unit.id === effect.to);
-      const target = units[targetIndex];
-      if (target) {
-        effect.targetPosition = target.position;
-        effect.targetY = unitY(target, targetIndex);
-      }
-      const at = x(
-        effect.from + (effect.targetPosition - effect.from) * progress,
-      );
-      const y = effect.fromY + (effect.targetY - effect.fromY) * progress;
-      const tailProgress = Math.max(0, progress - 0.18);
-      context.strokeStyle = "#ff963e";
-      context.lineWidth = 5;
-      context.beginPath();
-      context.moveTo(
-        x(effect.from + (effect.targetPosition - effect.from) * tailProgress),
-        effect.fromY + (effect.targetY - effect.fromY) * tailProgress,
-      );
-      context.lineTo(at, y);
-      context.stroke();
-      const angle = Math.atan2(
-        effect.targetY - effect.fromY,
-        x(effect.targetPosition) - x(effect.from),
-      );
-      context.save();
-      context.translate(at, y);
-      context.rotate(angle);
-      context.shadowColor = "#ff963e";
-      context.shadowBlur = 16;
-      context.fillStyle = "#ff963e";
-      context.beginPath();
-      context.moveTo(11, 0);
-      context.bezierCurveTo(7, -9, -3, -9, -15, 0);
-      context.bezierCurveTo(-3, 9, 7, 9, 11, 0);
-      context.closePath();
-      context.fill();
-      context.fillStyle = "#ffe6a3";
-      context.beginPath();
-      context.ellipse(3, 0, 6, 4, 0, 0, Math.PI * 2);
-      context.fill();
-      context.restore();
-    } else {
-      const waveRadius = effect.radius * progress;
-      const radius = Math.abs(x(effect.center + waveRadius) - x(effect.center));
-      context.globalAlpha = 0.85;
-      context.strokeStyle = "#c49bff";
-      context.fillStyle = "#b18aff";
-      context.lineWidth = 3;
-      context.beginPath();
-      context.arc(x(effect.center), effect.y, radius, 0, Math.PI * 2);
-      context.stroke();
-      context.globalAlpha = 0.08;
-      context.fill();
-    }
-  }
-  context.restore();
-  const damageByUnit = new Map<number, number>();
-  for (const event of log.events) {
-    if (event.kind === "Damage") {
-      damageByUnit.set(
-        event.dst,
-        (damageByUnit.get(event.dst) ?? 0) + event.damage,
-      );
-      continue;
-    }
-    if (event.kind !== "Move") continue;
-    if (event.distance === 0 || event.direction === 0) continue;
-    const index = log.units.findIndex((unit) => unit.id === event.unit);
-    const unit =
-      log.units[index] ?? previousUnits.find((unit) => unit.id === event.unit);
-    if (!unit) continue;
-    const y =
-      (unit.kind === "Player" ? 155 : 90 + (Math.max(index, 0) % 4) * 35) + 12;
-    const start = x(unit.position - event.direction * event.distance);
-    const end = x(unit.position);
-    const direction = Math.sign(event.direction * event.distance);
-    context.strokeStyle = "#79b8ff";
-    context.lineWidth = 2;
-    context.beginPath();
-    context.moveTo(start, y);
-    context.lineTo(end, y);
-    context.moveTo(end - direction * 5, y - 4);
-    context.lineTo(end, y);
-    context.lineTo(end - direction * 5, y + 4);
-    context.stroke();
-    context.lineWidth = 1;
-  }
-  for (const [id, damage] of damageByUnit) {
-    const index = log.units.findIndex((unit) => unit.id === id);
-    const previousIndex = previousUnits.findIndex((unit) => unit.id === id);
-    const unit = log.units[index] ?? previousUnits[previousIndex];
-    if (!unit) continue;
-    const displayIndex = index >= 0 ? index : previousIndex;
-    const y =
-      unit.kind === "Player" ? 155 : 90 + (Math.max(displayIndex, 0) % 4) * 35;
-    context.strokeStyle = "#ff7b89";
-    context.beginPath();
-    context.arc(x(unit.position), y, 13, 0, Math.PI * 2);
-    context.stroke();
-    context.fillStyle = "#ff7b89";
-    context.font = "bold 13px system-ui";
-    context.textAlign = "center";
-    context.fillText(
-      `-${damage}${index < 0 ? " · 死亡" : ""}`,
-      x(unit.position),
-      y + 29,
-    );
-    context.textAlign = "left";
-  }
-}
-
 function render(): void {
   renderTablets();
-  const progressRows = runningSkills.map((entry) => {
-    const row = document.createElement("div");
-    row.className = "skill-progress-row";
-    const name = document.createElement("span");
-    const definition = gameData.skillDefinitions[entry.skill]!;
-    const skillName = definition.name;
-    name.textContent = skillName;
-    row.title = definition.description(entry.params);
-    const progress = Math.max(
-      0,
-      Math.min(1, skillProgress.get(entry.uuid) ?? 0),
-    );
-    const pie = document.createElement("span");
-    pie.className = "skill-progress-pie";
-    pie.style.setProperty("--progress", `${progress * 360}deg`);
-    pie.setAttribute("role", "progressbar");
-    pie.setAttribute("aria-label", `${skillName}施放进度`);
-    pie.setAttribute("aria-valuemin", "0");
-    pie.setAttribute("aria-valuemax", "100");
-    pie.setAttribute("aria-valuenow", (progress * 100).toFixed(1));
-    row.append(name, pie);
-    return row;
-  });
-  element("skill-progress-list").replaceChildren(...progressRows);
   element("player-state").textContent = JSON.stringify(
     game.getState(),
     null,
@@ -934,7 +644,11 @@ function render(): void {
       : "暂停";
   speed.disabled = finished;
   element("reset").textContent = finished ? "重新开始" : "重置";
-  draw();
+  battlefield.update(log, {
+    vision,
+    frameDuration: 1000 / Number(speed.value),
+    playing: timer !== undefined,
+  });
 }
 
 function pause(): void {
@@ -948,20 +662,11 @@ function advance(): void {
   if (log.status !== "Running") return;
   const previous = log;
   log = battle.executeFrame();
-  effects = effects.filter(
-    (effect) => log.frame - effect.startFrame <= effect.durationFrames,
-  );
-  runningSkills =
-    derivePlayerCombatProfile(gameData, game.getState()).skills.onUpdate ?? [];
   tabletMessage.textContent = "当前石板已生效，可继续修改。";
   const ids = new Set(log.units.map((unit) => unit.id));
   deaths += previous.units.filter((unit) => !ids.has(unit.id)).length;
   for (const event of log.events) {
     if (event.kind === "Damage") totalDamage += event.damage;
-    if (event.kind === "Effect") addVisualEffect(event, previous);
-    if (event.kind === "PlayerSkillProgress") {
-      skillProgress.set(event.uuid, event.progress);
-    }
   }
   history.push(log);
   if (history.length > 100) history.shift();
@@ -986,11 +691,8 @@ function start(): void {
 }
 
 function resetBattle(): void {
-  runningSkills =
-    derivePlayerCombatProfile(gameData, game.getState()).skills.onUpdate ?? [];
   tabletMessage.textContent = "当前石板已生效，可继续修改。";
-  skillProgress.clear();
-  effects = [];
+  battlefield.reset();
   if (!game.battle) {
     round += 1;
     task = game.startBattle({
@@ -999,7 +701,6 @@ function resetBattle(): void {
     });
   }
   battle = new Battle(gameData, task.spec, game.getState());
-  renderConfig();
   log = battle.renderLog();
   history = [log];
   deaths = 0;
@@ -1058,5 +759,4 @@ for (const [index, name] of tabs.entries()) {
     element<HTMLButtonElement>(`tab-${nextName}`).focus();
   });
 }
-window.addEventListener("resize", draw);
 render();

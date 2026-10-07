@@ -1,0 +1,161 @@
+{
+  "image": "atlas.png",
+  "frames": {
+    "mage-idle": {
+      "frame": [
+        35,
+        50,
+        425,
+        350
+      ],
+      "size": [
+        448,
+        352
+      ],
+      "alignment": "feet"
+    },
+    "slime-idle": {
+      "frame": [
+        475,
+        100,
+        330,
+        305
+      ],
+      "size": [
+        448,
+        352
+      ],
+      "alignment": "feet"
+    },
+    "goblin-idle": {
+      "frame": [
+        865,
+        90,
+        350,
+        310
+      ],
+      "size": [
+        448,
+        352
+      ],
+      "alignment": "feet"
+    },
+    "mage-action": {
+      "frame": [
+        35,
+        405,
+        433,
+        315
+      ],
+      "size": [
+        448,
+        352
+      ],
+      "alignment": "feet"
+    },
+    "slime-action": {
+      "frame": [
+        470,
+        440,
+        330,
+        285
+      ],
+      "size": [
+        448,
+        352
+      ],
+      "alignment": "feet"
+    },
+    "goblin-action": {
+      "frame": [
+        800,
+        415,
+        420,
+        310
+      ],
+      "size": [
+        448,
+        352
+      ],
+      "alignment": "feet"
+    },
+    "fireball-0": {
+      "frame": [
+        95,
+        775,
+        220,
+        183
+      ],
+      "size": [
+        400,
+        300
+      ],
+      "alignment": "center"
+    },
+    "fireball-1": {
+      "frame": [
+        450,
+        735,
+        355,
+        217
+      ],
+      "size": [
+        400,
+        300
+      ],
+      "alignment": "center"
+    },
+    "fireball-2": {
+      "frame": [
+        825,
+        730,
+        390,
+        222
+      ],
+      "size": [
+        400,
+        300
+      ],
+      "alignment": "center"
+    },
+    "nova-ring": {
+      "image": "nova-ring.png",
+      "frame": [
+        88,
+        88,
+        1078,
+        1078
+      ],
+      "size": [
+        1078,
+        1078
+      ],
+      "alignment": "center"
+    }
+  },
+  "characters": {
+    "Player": {
+      "idle": "mage-idle",
+      "action": "mage-action"
+    },
+    "Slime": {
+      "idle": "slime-idle",
+      "action": "slime-action"
+    },
+    "Goblin": {
+      "idle": "goblin-idle",
+      "action": "goblin-action"
+    }
+  },
+  "effects": {
+    "fireball": [
+      "fireball-0",
+      "fireball-1",
+      "fireball-2"
+    ],
+    "nova": [
+      "nova-ring"
+    ]
+  },
+  "background": "background-forest.png"
+}
