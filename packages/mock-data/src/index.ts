@@ -14,7 +14,7 @@ export { rollPassiveTablet, passiveTabletOptions } from "./tablets.js";
 export type { MockTablet, TabletKind } from "./tablets.js";
 import type { BattleSpec, GameData, PlayerState } from "@infinite-build/core";
 
-import { fireball, nova, selfDestruct, skillDefinitions } from "./skills.js";
+import { attack, fireball, nova, skillDefinitions } from "./skills.js";
 import { buffDefinitions } from "./buffs.js";
 import { passiveAffixes, supportSkillAffixes } from "./affixes.js";
 export { passiveAffixes, supportSkillAffixes } from "./affixes.js";
@@ -97,10 +97,11 @@ export const gameData: GameData = {
       status: { attributes: { maxHp: 20, attack: 5, defense: 0 }, tags: [] },
       move: { speed: 0.5, range: { min: 1.5, max: 2 } },
       skills: {
-        onDeath: [
-          selfDestruct.skill({
-            uuid: "slime-self-destruct",
-            params: { damage: 1, radius: 2 },
+        onUpdate: [
+          attack.skill({
+            uuid: "slime-attack",
+            castRate: 0.1,
+            params: { range: 2 },
           }),
         ],
       },
@@ -112,10 +113,10 @@ export const gameData: GameData = {
       move: { speed: 1, range: { min: 2.5, max: 3 } },
       skills: {
         onUpdate: [
-          fireball.skill({
-            uuid: "goblin-fireball",
+          attack.skill({
+            uuid: "goblin-attack",
             castRate: 0.1,
-            params: { damage: 0.1, range: 5, projectileSpeed: 1 },
+            params: { range: 3 },
           }),
         ],
       },

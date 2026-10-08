@@ -2,6 +2,34 @@ import { z } from "zod";
 import { GameData, hit } from "@infinite-build/core";
 import { ignite } from "./buffs.js";
 
+export const attack = GameData.defineSkill({
+  id: "attack",
+  params: z.object({ range: z.number().nonnegative() }),
+  name: "攻击",
+  description: ({ range }) =>
+    `攻击射程 ${range} 内最近的敌人，造成攻击力 10% 的伤害。`,
+  *caster(ctx, self, skill) {
+    let target: typeof self | undefined;
+    let nearestDistance = Infinity;
+    for (const unit of ctx.units) {
+      if (unit.faction === self.faction || unit.isDead || unit.hp <= 0) continue;
+      const distance = Math.abs(unit.position - self.position);
+      if (distance <= skill.params.range && distance < nearestDistance) {
+        target = unit;
+        nearestDistance = distance;
+      }
+    }
+    if (!target) return;
+    ctx.events.addEffect({
+      effect: "attack",
+      source: self.id,
+      skill: "attack",
+      payload: { from: self.position, to: target.id, durationFrames: 3 },
+    });
+    hit(ctx, self, target, self.rawStatus.attributes.attack * 0.1);
+  },
+});
+
 export const selfDestruct = GameData.defineSkill({
   id: "selfDestruct",
   params: z.object({
@@ -114,4 +142,4 @@ export const nova = GameData.defineSkill({
   },
 });
 
-export const skillDefinitions = GameData.skills([selfDestruct, fireball, nova]);
+export const skillDefinitions = GameData.skills([attack, selfDestruct, fireball, nova]);

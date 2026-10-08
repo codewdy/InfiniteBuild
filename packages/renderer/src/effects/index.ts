@@ -1,12 +1,14 @@
 import type { BattleEvent } from "@infinite-build/core";
 import { createFireball } from "./fireball.js";
 import { createNova } from "./nova.js";
+import { createAttack } from "./attack.js";
 import type { EffectCreateContext, EffectFactory, SkillEffect } from "./types.js";
 
 // Add new effect factories here; the battlefield only handles their lifecycle.
 const factories: Readonly<Record<string, EffectFactory>> = {
   fireball: createFireball,
   nova: createNova,
+  attack: createAttack,
 };
 
 export function createSkillEffect(event: BattleEvent.Effect, context: EffectCreateContext): SkillEffect | undefined {
