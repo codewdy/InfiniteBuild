@@ -549,7 +549,21 @@ function renderTablets(): void {
     details.append(name, description);
     const amount = document.createElement("strong");
     amount.textContent = `× ${count}`;
-    row.append(details, amount);
+    const actions = document.createElement("div");
+    actions.className = "pending-loot-actions";
+    for (const [label, requestedCount] of [["打开 1 件", 1], ["尽可能打开", undefined]] as const) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = label;
+      button.disabled = used >= inventoryCapacity;
+      button.title = button.disabled ? "背包已满，请先腾出空位" : label;
+      button.addEventListener("click", () => {
+        const opened = game.openLoots(loot, requestedCount);
+        submitState(opened.player, "validate", `已打开 ${opened.items.length} 件战利品`);
+      });
+      actions.append(button);
+    }
+    row.append(details, amount, actions);
     return row;
   });
   if (rows.length === 0) {

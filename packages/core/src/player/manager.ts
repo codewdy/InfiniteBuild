@@ -21,7 +21,9 @@ export class PlayerManager {
 
   initPlayer(): PlayerState {
     const player = structuredClone(this.data.playerDefinition.defaultState);
-    while (player.inventory.length < this.data.playerDefinition.inventoryCapacity) {
+    while (
+      player.inventory.length < this.data.playerDefinition.inventoryCapacity
+    ) {
       player.inventory.push(null);
     }
     return player;
@@ -91,6 +93,36 @@ export class PlayerManager {
       if (player.xp < threshold) break;
       player.level += 1;
     }
+  }
+  openLoots(
+    player: PlayerState,
+    loot: Loot.LootItem,
+    count?: number,
+  ): { player: PlayerState; items: Item[] } {
+    if (count !== undefined && (!Number.isSafeInteger(count) || count < 0)) {
+      throw new RangeError("Loot count must be a non-negative safe integer.");
+    }
+    const next = structuredClone(player);
+    const items: Item[] = [];
+    const index = next.pendingLoot.findIndex(
+      (entry) =>
+        entry.loot.kind === loot.kind &&
+        entry.loot.rarity === loot.rarity &&
+        entry.loot.level === loot.level,
+    );
+    if (index < 0) return { player: next, items };
+    const stack = next.pendingLoot[index]!;
+    const limit = Math.min(count ?? stack.count, stack.count);
+    const capacity = this.data.playerDefinition.inventoryCapacity;
+    for (let slot = 0; slot < capacity && items.length < limit; slot += 1) {
+      if (next.inventory[slot] != null) continue;
+      const item = Loot.generateLoot(this.data, this.rng, stack.loot);
+      next.inventory[slot] = item;
+      items.push(item);
+      stack.count -= 1;
+    }
+    if (stack.count === 0) next.pendingLoot.splice(index, 1);
+    return { player: next, items };
   }
   deleteItem(player: PlayerState, uuid: string): void {
     const stored = player.inventory.findIndex((item) => item?.uuid === uuid);

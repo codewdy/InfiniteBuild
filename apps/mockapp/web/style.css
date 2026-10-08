@@ -526,6 +526,7 @@ pre {
 }
 .pending-loot-item {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -537,6 +538,11 @@ pre {
 .pending-loot-item div {
   display: grid;
   gap: 4px;
+}
+.pending-loot-item .pending-loot-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 .pending-loot-item span,
 .pending-loot-empty {

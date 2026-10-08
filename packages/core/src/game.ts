@@ -6,6 +6,8 @@ import type { BattleSpec } from "./battle/battle.js";
 import type { PlayerState } from "./player/state.js";
 import { stateValidate } from "./player/state-validate.js";
 import type { ValidateError } from "./player/state-validate.js";
+import type { Loot } from "./player/loot.js";
+import type { Item } from "./player/item/item.js";
 
 export namespace Game {
   export type Battle = {
@@ -80,6 +82,14 @@ export class Game {
 
   deleteItem(uuid: string): void {
     this.playerManager.deleteItem(this.state, uuid);
+  }
+  openLoots(
+    loot: Loot.LootItem,
+    count?: number,
+  ): { player: PlayerState; items: Item[] } {
+    const opened = this.playerManager.openLoots(this.state, loot, count);
+    this.state = opened.player;
+    return structuredClone(opened);
   }
 
   forceChangeState(player: PlayerState): void {
