@@ -1,4 +1,6 @@
-import { Application, Container, Graphics, Sprite, Text } from "pixi.js";
+import { Application, Container, Graphics, Rectangle, Sprite, Text } from "pixi.js";
+import { BattleResultOverlay } from "./battle-result.js";
+import type { BattlefieldResult } from "./battle-result.js";
 import { loadBattlefieldAssets } from "./battlefield-assets.js";
 import type { BattlefieldAssets, CharacterTextures } from "./battlefield-assets.js";
 import { createSkillEffect } from "./effects/index.js";
@@ -31,6 +33,9 @@ export type BattlefieldOptions = {
 /** Presentation only: battle logs remain the authority for time and positions. */
 export class Battlefield {
   private readonly app = new Application();
+  private readonly scene = new Container();
+  private readonly transitionLayer = new Container();
+  private transition?: { snapshot: Sprite; startedAt: number };
   private readonly background = new Container();
   private readonly backgroundTiles: Sprite[] = [];
   private readonly actors = new Container();
@@ -38,6 +43,7 @@ export class Battlefield {
   private readonly effectsLayer = new Container();
   private readonly overlay = new Container();
   private readonly skillLayer = new Container();
+  private readonly resultOverlay = new BattleResultOverlay();
   private readonly skillBars: { progress: number; track: Graphics; label: Text; color: number }[] = [];
   private readonly clip = new Graphics();
   private readonly views = new Map<number, View>();
@@ -84,7 +90,8 @@ export class Battlefield {
     world.addChild(view.actors, view.effectsLayer);
     world.mask = view.clip;
     // Keep the player above skill effects and floating damage text.
-    view.app.stage.addChild(view.background, world, view.clip, view.overlay, view.skillLayer, view.playerLayer);
+    view.scene.addChild(view.background, world, view.clip, view.overlay, view.skillLayer, view.playerLayer);
+    view.app.stage.addChild(view.scene, view.transitionLayer, view.resultOverlay);
     view.observer.observe(canvas);
     view.app.ticker.add(() => view.draw());
     canvas.dataset.renderer = "pixi";
@@ -151,7 +158,25 @@ export class Battlefield {
     }
   }
 
-  reset(): void {
+  showBattleResult(result: BattlefieldResult, durationMs: number = 1000): void {
+    if (this.destroyed) return;
+    this.resultOverlay.show(result, durationMs);
+  }
+
+  reset(fadeToNextBattle: boolean = false): void {
+    this.clearTransition();
+    if (fadeToNextBattle && this.log) {
+      this.draw();
+      const snapshot = new Sprite(this.app.renderer.generateTexture({
+        target: this.scene,
+        frame: new Rectangle(0, 0, this.app.screen.width, this.app.screen.height),
+        resolution: this.app.renderer.resolution,
+      }));
+      this.transitionLayer.addChild(snapshot);
+      this.transition = { snapshot, startedAt: performance.now() };
+      this.scene.alpha = 0;
+    }
+    this.resultOverlay.hide();
     this.clearSkillBars();
     for (const view of this.views.values()) view.root.destroy({ children: true });
     for (const entry of this.damage) entry.text.destroy();
@@ -167,7 +192,34 @@ export class Battlefield {
     if (this.destroyed) return;
     this.destroyed = true;
     this.observer.disconnect();
+    this.clearTransition();
     this.app.destroy(false, { children: true });
+  }
+
+  private clearTransition(): void {
+    if (this.transition) {
+      const texture = this.transition.snapshot.texture;
+      this.transition.snapshot.destroy();
+      texture.destroy(true);
+      this.transition = undefined;
+    }
+    this.scene.alpha = 1;
+  }
+
+  private drawTransition(now: number): void {
+    if (!this.transition) return;
+    const progress = Math.min(1, Math.max(0, (now - this.transition.startedAt) / 500));
+    if (progress >= 1) {
+      this.clearTransition();
+      return;
+    }
+    const fadeOut = Math.min(1, progress * 2);
+    const fadeIn = Math.max(0, progress * 2 - 1);
+    const smooth = (value: number) => value * value * (3 - 2 * value);
+    this.transition.snapshot.alpha = 1 - smooth(fadeOut);
+    this.transition.snapshot.width = this.app.screen.width;
+    this.transition.snapshot.height = this.app.screen.height;
+    this.scene.alpha = smooth(fadeIn);
   }
 
   private resize(): void {
@@ -295,8 +347,10 @@ export class Battlefield {
   }
 
   private draw(): void {
-    if (!this.log) return;
     const now = performance.now();
+    this.drawTransition(now);
+    this.resultOverlay.update(now, this.app.screen.width, this.app.screen.height);
+    if (!this.log) return;
     const progress = this.progress(now);
     const origin = this.fromOrigin + (this.origin - this.fromOrigin) * progress;
     const width = this.app.screen.width;

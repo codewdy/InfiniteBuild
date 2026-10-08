@@ -1,4 +1,5 @@
 import { Battlefield } from "@infinite-build/renderer";
+import type { BattlefieldResult } from "@infinite-build/renderer";
 import {
   Battle,
   Game,
@@ -8,6 +9,7 @@ import {
 } from "@infinite-build/core";
 import type {
   BattleLog,
+  BattleSettlement,
   PlayerState,
   TabletSpec,
 } from "@infinite-build/core";
@@ -42,6 +44,12 @@ const skillNames = Object.fromEntries(
 );
 const game = new Game(gameData);
 const inventoryCapacity = gameData.playerDefinition.inventoryCapacity;
+const lootNames: Record<PlayerState["pendingLoot"][number]["loot"]["kind"], string> = {
+  "tablet-skill": "技能石板",
+  "tablet-passive": "被动石板",
+  "tablet-support-skill": "技能辅助石板",
+  "tablet-support-passive": "被动辅助石板",
+};
 let round = 1;
 function tabletName(tablet: TabletSpec.Tablet): string {
   if (tablet.kind === "passive") return "生命石板";
@@ -528,12 +536,6 @@ function renderTablets(): void {
   element("tablet-add-actions").querySelectorAll<HTMLButtonElement>("button").forEach((button) => {
     button.disabled = used >= inventoryCapacity;
   });
-  const lootNames: Record<PlayerState["pendingLoot"][number]["loot"]["kind"], string> = {
-    "tablet-skill": "技能石板",
-    "tablet-passive": "被动石板",
-    "tablet-support-skill": "技能辅助石板",
-    "tablet-support-passive": "被动辅助石板",
-  };
   element("pending-loot-count").textContent =
     `${state.pendingLoot.reduce((total, entry) => total + entry.count, 0)} 件`;
   const rows = state.pendingLoot.map(({ loot, count }) => {
@@ -599,13 +601,6 @@ function render(): void {
   element("frame").textContent = String(log.frame);
   element("status").textContent = statusLabels[log.status];
   element("status").dataset.status = log.status;
-  const result = element("result");
-  result.hidden = !finished;
-  result.dataset.status = log.status;
-  element("result-title").textContent =
-    log.status === "Victory" ? "战斗胜利" : "战斗失败";
-  element("result-detail").textContent =
-    `${log.status === "Victory" ? "所有敌人已清除。" : "玩家已死亡。"}结束于第 ${log.frame} 帧 · 累计死亡 ${deaths} · 累计伤害 ${totalDamage}`;
   element("position").textContent = playerPosition.toFixed(2);
   element("enemies").textContent = String(
     log.units.filter((unit) => unit.kind !== "Player").length,
@@ -694,6 +689,24 @@ function pause(): void {
   render();
 }
 
+function createBattleResult(settlement: BattleSettlement): BattlefieldResult {
+  const rewards: BattlefieldResult["rewards"][number][] = [];
+  for (const item of settlement.items) {
+    const kind = item.tablet.kind;
+    const reward = rewards.find((entry) => entry.kind === kind);
+    if (reward) reward.count += 1;
+    else rewards.push({ kind, count: 1 });
+  }
+  if (settlement.pendingLoot.length > 0) {
+    rewards.push({ kind: "pending", count: settlement.pendingLoot.length });
+  }
+  return {
+    outcome: log.status === "Victory" ? "Victory" : "Defeat",
+    xpGain: settlement.xpGain,
+    rewards,
+  };
+}
+
 function advance(): void {
   if (log.status !== "Running") return;
   const previous = log;
@@ -707,13 +720,15 @@ function advance(): void {
   history.push(log);
   if (history.length > 100) history.shift();
   if (log.status !== "Running") {
-    game.battleResult({
+    const settlement = game.battleResult({
       uuid: task.uuid,
       result: log.status,
       frame: log.frame,
     });
+    const battleResult = createBattleResult(settlement);
     const outcome = log.status === "Victory" ? "胜利" : "失败";
     resetBattle();
+    battlefield.showBattleResult(battleResult);
     tabletMessage.textContent = `上一场${outcome}，已自动开始第 ${round} 场。`;
   }
   render();
@@ -728,7 +743,7 @@ function start(): void {
 
 function resetBattle(): void {
   tabletMessage.textContent = "当前石板已生效，可继续修改。";
-  battlefield.reset();
+  battlefield.reset(!game.battle);
   if (!game.battle) {
     round += 1;
     task = game.startBattle({
