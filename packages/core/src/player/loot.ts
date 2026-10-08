@@ -1,4 +1,4 @@
-import { RandomGenerator } from "../random-generator.js";
+import type { RandomGenerator } from "../random-generator.js";
 import { Affix } from "./affix.js";
 import type { TabletSpec } from "./tablet/spec.js";
 import type { GameData } from "../game-data.js";
