@@ -60,9 +60,9 @@ export const gameData: GameData = {
       min: 1,
       max: 3,
       pool: [
-        { kind: "tablet-skill", weight: 1 },
-        { kind: "tablet-passive", weight: 1 },
-        { kind: "tablet-support-skill", weight: 1 },
+        { kind: "tablet-skill", rarity: "magic", weight: 1 },
+        { kind: "tablet-passive", rarity: "magic", weight: 1 },
+        { kind: "tablet-support-skill", rarity: "magic", weight: 1 },
       ],
     },
     baseStatus: {

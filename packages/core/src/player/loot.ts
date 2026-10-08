@@ -11,23 +11,33 @@ export namespace Loot {
     | "tablet-support-passive"
     | "tablet-skill"
     | "tablet-passive";
+  export type Rarity = "magic" | "rare";
   export type Definition = {
     min: number;
     max: number;
     pool: {
       kind: Loot.Kind;
+      rarity: Rarity;
       weight: number;
     }[];
+  };
+  export type LootItem = {
+    kind: Kind;
+    rarity: Rarity;
+    level: number;
+  };
+  export const rarityAffixCount: Record<Rarity, readonly [number, number]> = {
+    magic: [1, 2],
+    rare: [3, 4],
   };
   export function generateLoot(
     data: GameData,
     rng: RandomGenerator,
-    kind: Kind,
-    level: number,
+    loot: LootItem,
   ): Item {
     const uuid = crypto.randomUUID();
     let tablet: TabletSpec.Tablet;
-    switch (kind) {
+    switch (loot.kind) {
       case "tablet-skill": {
         const skill = rng.choice(Object.keys(data.playerDefinition.skills));
         if (skill === undefined) {
@@ -45,14 +55,17 @@ export namespace Loot {
             rng,
             data.affixDefinition.tablet.passive,
             ["passive"],
-            level,
+            loot.level,
+            rng.randInt(...rarityAffixCount[loot.rarity]),
           ),
         };
         break;
       case "tablet-support-skill":
       case "tablet-support-passive": {
         const tabletKind =
-          kind === "tablet-support-skill" ? "support-skill" : "support-passive";
+          loot.kind === "tablet-support-skill"
+            ? "support-skill"
+            : "support-passive";
         tablet = {
           kind: tabletKind,
           uuid,
@@ -62,13 +75,14 @@ export namespace Loot {
             rng,
             data.affixDefinition.tablet.support,
             [tabletKind],
-            level,
+            loot.level,
+            rng.randInt(...rarityAffixCount[loot.rarity]),
           ),
         };
         break;
       }
       default:
-        throw new Error(`Unknown loot kind: ${kind}`);
+        throw new Error(`Unknown loot kind: ${loot.kind}`);
     }
     return { kind: "tablet", uuid, tablet };
   }
@@ -77,7 +91,7 @@ export namespace Loot {
     data: GameData,
     rng: RandomGenerator,
     player: PlayerState,
-  ): Item[] {
+  ): LootItem[] {
     const { min, max, pool } = data.playerDefinition.loot;
     if (min < 0) {
       throw new RangeError("Minimum loot count must be non-negative.");
@@ -89,7 +103,7 @@ export namespace Loot {
     const weights = pool.map((entry) => entry.weight);
     return Array.from({ length: count }, () => {
       const entry = pool[rng.weightedIndex(weights)]!;
-      return generateLoot(data, rng, entry.kind, player.level);
+      return { kind: entry.kind, level: player.level, rarity: entry.rarity };
     });
   }
 }

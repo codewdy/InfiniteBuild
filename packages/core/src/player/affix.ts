@@ -72,8 +72,8 @@ export namespace Affix {
     pool: Definitions<T>,
     tags: string[],
     level: number,
+    count: number = rng.weightedIndex(pool.roll.countWeight),
   ): Spec[] {
-    const count = rng.weightedIndex(pool.roll.countWeight);
     const ids = Object.keys(pool.pool).filter((id) =>
       tags.every((tag) => pool.pool[id]!.tag.includes(tag)),
     );

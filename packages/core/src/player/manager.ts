@@ -26,7 +26,9 @@ export class PlayerManager {
   }
   loot(result: Game.BattleResult, player: PlayerState): void {
     if (result.result !== "Victory") return;
-    const items = Loot.generateLoots(this.data, this.rng, player);
+    const items = Loot.generateLoots(this.data, this.rng, player).map((loot) =>
+      Loot.generateLoot(this.data, this.rng, loot),
+    );
     let slot = 0;
     for (const item of items) {
       while (
