@@ -131,6 +131,118 @@
         1078
       ],
       "alignment": "center"
+    },
+    "settlement-victory": {
+      "image": "settlement-icons.png",
+      "frame": [
+        10,
+        240,
+        316,
+        355
+      ],
+      "size": [
+        355,
+        355
+      ],
+      "alignment": "center"
+    },
+    "settlement-defeat": {
+      "image": "settlement-icons.png",
+      "frame": [
+        338,
+        280,
+        270,
+        326
+      ],
+      "size": [
+        326,
+        326
+      ],
+      "alignment": "center"
+    },
+    "settlement-skill": {
+      "image": "settlement-icons.png",
+      "frame": [
+        640,
+        272,
+        289,
+        323
+      ],
+      "size": [
+        323,
+        323
+      ],
+      "alignment": "center"
+    },
+    "settlement-passive": {
+      "image": "settlement-icons.png",
+      "frame": [
+        945,
+        272,
+        299,
+        325
+      ],
+      "size": [
+        325,
+        325
+      ],
+      "alignment": "center"
+    },
+    "settlement-support-skill": {
+      "image": "settlement-icons.png",
+      "frame": [
+        13,
+        695,
+        294,
+        306
+      ],
+      "size": [
+        306,
+        306
+      ],
+      "alignment": "center"
+    },
+    "settlement-support-passive": {
+      "image": "settlement-icons.png",
+      "frame": [
+        329,
+        695,
+        284,
+        306
+      ],
+      "size": [
+        306,
+        306
+      ],
+      "alignment": "center"
+    },
+    "settlement-pending": {
+      "image": "settlement-icons.png",
+      "frame": [
+        633,
+        737,
+        305,
+        263
+      ],
+      "size": [
+        305,
+        305
+      ],
+      "alignment": "center"
+    },
+    "settlement-xp": {
+      "image": "settlement-icons.png",
+      "frame": [
+        950,
+        688,
+        290,
+        318
+      ],
+      "size": [
+        318,
+        318
+      ],
+      "alignment": "center"
     }
   },
   "characters": {
@@ -157,5 +269,19 @@
       "nova-ring"
     ]
   },
-  "background": "background-forest.png"
+  "background": "background-forest.png",
+  "settlement": {
+    "emblems": {
+      "Victory": "settlement-victory",
+      "Defeat": "settlement-defeat"
+    },
+    "rewards": {
+      "skill": "settlement-skill",
+      "passive": "settlement-passive",
+      "support-skill": "settlement-support-skill",
+      "support-passive": "settlement-support-passive",
+      "pending": "settlement-pending",
+      "xp": "settlement-xp"
+    }
+  }
 }

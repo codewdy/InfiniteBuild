@@ -1,11 +1,16 @@
 import { Assets, Rectangle, Texture } from "pixi.js";
 
 export type CharacterTextures = { idle: Texture; action: Texture };
+export type SettlementAssets = {
+  emblems: Record<"Victory" | "Defeat", Texture>;
+  rewards: Record<"skill" | "passive" | "support-skill" | "support-passive" | "pending" | "xp", Texture>;
+};
 export type BattlefieldAssets = {
   background: Texture;
   characters: Record<string, CharacterTextures>;
   fireball: Texture[];
   nova: Texture[];
+  settlement: SettlementAssets;
 };
 type AtlasManifest = {
   background: string;
@@ -18,6 +23,9 @@ type AtlasManifest = {
   }>;
   characters: Record<string, { idle: string; action: string }>;
   effects: { fireball: string[]; nova: string[] };
+  settlement: {
+    [K in keyof SettlementAssets]: Record<keyof SettlementAssets[K], string>;
+  };
 };
 
 let loading: Promise<BattlefieldAssets> | undefined;
@@ -78,5 +86,9 @@ async function loadAtlas(): Promise<BattlefieldAssets> {
     ])),
     fireball: manifest.effects.fireball.map(texture),
     nova: manifest.effects.nova.map(texture),
+    settlement: {
+      emblems: Object.fromEntries(Object.entries(manifest.settlement.emblems).map(([kind, name]) => [kind, texture(name)])) as SettlementAssets["emblems"],
+      rewards: Object.fromEntries(Object.entries(manifest.settlement.rewards).map(([kind, name]) => [kind, texture(name)])) as SettlementAssets["rewards"],
+    },
   };
 }

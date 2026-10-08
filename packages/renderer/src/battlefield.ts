@@ -43,7 +43,7 @@ export class Battlefield {
   private readonly effectsLayer = new Container();
   private readonly overlay = new Container();
   private readonly skillLayer = new Container();
-  private readonly resultOverlay = new BattleResultOverlay();
+  private readonly resultOverlay: BattleResultOverlay;
   private readonly skillBars: { progress: number; track: Graphics; label: Text; color: number }[] = [];
   private readonly clip = new Graphics();
   private readonly views = new Map<number, View>();
@@ -63,6 +63,7 @@ export class Battlefield {
     private readonly canvas: HTMLCanvasElement,
     private readonly assets: BattlefieldAssets,
   ) {
+    this.resultOverlay = new BattleResultOverlay(assets.settlement);
     // Two tiles cover any viewport because each tile is at least viewport-wide.
     for (let index = 0; index < 2; index++) {
       const tile = new Sprite({ texture: assets.background, roundPixels: true });

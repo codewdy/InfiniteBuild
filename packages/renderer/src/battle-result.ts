@@ -1,4 +1,6 @@
-import { Container, Graphics, Text } from "pixi.js";
+import { Container, Sprite, Text } from "pixi.js";
+import type { Texture } from "pixi.js";
+import type { SettlementAssets } from "./battlefield-assets.js";
 
 export type BattlefieldResult = {
   outcome: "Victory" | "Defeat";
@@ -9,114 +11,61 @@ export type BattlefieldResult = {
   }[];
 };
 
-const trophy = [
-  "0000000000000000", "0001111111111000", "0111222222221110", "0121222222221210",
-  "0121222222221210", "0121222222221210", "0011222222221100", "0001122222211000",
-  "0000112222110000", "0000011221100000", "0000001221000000", "0000001221000000",
-  "0000111221110000", "0000122222210000", "0001111111111000", "0000000000000000",
-];
-const skull = [
-  "0000011111100000", "0001122222211000", "0012222222222100", "0122222222222210",
-  "0122222222222210", "0122112221122210", "0122112221122210", "0122222222222210",
-  "0012222112222100", "0001222112221000", "0001122222211000", "0000121212210000",
-  "0000121212210000", "0000011111100000", "0000000000000000", "0000000000000000",
-];
-
-const flame = [
-  "0000000100000000", "0000001100000000", "0000011200000000", "0000112200000000",
-  "0000122100100000", "0001222100120000", "0012222111221000", "0012222222221000",
-  "0122222332222100", "0122223333222100", "0122233333322100", "0122233333322100",
-  "0012223333221000", "0011222222211000", "0001112221110000", "0000011111000000",
-];
-const heart = [
-  "0000000000000000", "0001110001110000", "0012221012221000", "0122222122222100",
-  "0123322222232100", "0123322222222100", "0122222222222100", "0012222222221000",
-  "0001222222210000", "0000122222100000", "0000012221000000", "0000001210000000",
-  "0000000100000000", "0000000000000000", "0000000000000000", "0000000000000000",
-];
-const arrow = [
-  "0000000000000000", "0000000010000000", "0000000011000000", "0000000012100000",
-  "0000000012210000", "0011111112221000", "0012222222222100", "0012333333322210",
-  "0012222222222100", "0011111112221000", "0000000012210000", "0000000012100000",
-  "0000000011000000", "0000000010000000", "0000000000000000", "0000000000000000",
-];
-const chest = [
-  "0000000000000000", "0000111111110000", "0001222222221000", "0012222222222100",
-  "0012111111112100", "0012222332222100", "0011111331111100", "0012222332222100",
-  "0012222222222100", "0012222222222100", "0012222222222100", "0011111111111100",
-  "0000000000000000", "0000000000000000", "0000000000000000", "0000000000000000",
-];
-const crystal = [
-  "0000000100000000", "0000001210000000", "0000012321000000", "0000123332100000",
-  "0001233333210000", "0012333333321000", "0122333333322100", "1222233333222210",
-  "0122223332222100", "0012222322221000", "0001222222210000", "0000122222100000",
-  "0000012221000000", "0000001210000000", "0000000100000000", "0000000000000000",
-];
-
-function text(size: number, fill: number): Text {
+function rewardText(value: string, fill: number): Text {
   return new Text({
-    text: "", resolution: 1, textureStyle: { scaleMode: "nearest" },
-    style: { fontFamily: "monospace", fontSize: size, fill, stroke: { color: 0x101827, width: 2 } },
+    text: value,
+    resolution: 2,
+    style: {
+      fontFamily: "monospace", fontSize: 16, fontWeight: "bold", fill,
+      stroke: { color: 0x101827, width: 3 },
+      dropShadow: { color: 0x080d18, alpha: 0.7, blur: 2, distance: 2 },
+    },
   });
 }
 
-function icon(pattern: readonly string[], colors: readonly number[]): Graphics {
-  const graphic = new Graphics();
-  for (const [y, row] of pattern.entries()) {
-    for (const [x, value] of [...row].entries()) {
-      if (value !== "0") graphic.rect(x, y, 1, 1).fill(colors[Number(value) - 1]!);
-    }
-  }
-  return graphic;
-}
-
-/** Two-line pixel-art settlement, timed independently of battle frames. */
+/** Transparent two-line settlement using shared atlas textures. */
 export class BattleResultOverlay extends Container {
   private readonly card = new Container();
-  private readonly emblem = new Container();
-  private readonly title = text(44, 0xefc471);
+  private readonly emblem = new Sprite();
+  private readonly title = new Text({
+    text: "", resolution: 2,
+    style: {
+      fontFamily: "system-ui, sans-serif", fontSize: 48, fontWeight: "900", fill: 0xffdf9a,
+      letterSpacing: 5,
+      stroke: { color: 0x202337, width: 5 },
+      dropShadow: { color: 0x080d18, alpha: 0.85, blur: 4, distance: 3 },
+    },
+  });
   private readonly rewardRow = new Container();
   private shownAt = 0;
   private expiresAt = 0;
-  private color = 0xefc471;
-  private shade = 0x735332;
   private viewportWidth = 0;
   private viewportHeight = 0;
   private cardY = 0;
-  private readonly cells: { root: Container; icon: Graphics; label: Text }[] = [];
+  private readonly cells: { root: Container; icon: Sprite; label: Text }[] = [];
 
-  constructor() {
+  constructor(private readonly assets: SettlementAssets) {
     super();
     this.visible = false;
     this.eventMode = "none";
-    this.title.style.fontWeight = "bold";
-    this.title.style.stroke = { color: 0x101827, width: 4 };
+    this.emblem.anchor.set(0.5);
+    this.title.anchor.set(0, 0.5);
     this.card.addChild(this.emblem, this.title, this.rewardRow);
     this.addChild(this.card);
   }
 
   show(result: BattlefieldResult, durationMs: number = 1000): void {
     const victory = result.outcome === "Victory";
-    this.color = victory ? 0xefc471 : 0xf28b87;
-    this.shade = victory ? 0x735332 : 0x713b4a;
     this.title.text = victory ? "胜利" : "失败";
-    this.title.style.fill = this.color;
-    for (const child of this.emblem.removeChildren()) child.destroy();
-    this.emblem.addChild(icon(victory ? trophy : skull, [this.shade, this.color]));
+    this.title.style.fill = victory ? 0xffdf9a : 0xffa6ac;
+    this.emblem.texture = this.assets.emblems[result.outcome];
+    // Sprites are disposable; atlas textures stay shared across all settlements.
     for (const child of this.rewardRow.removeChildren()) child.destroy({ children: true });
     this.cells.length = 0;
-    const palettes = {
-      skill: { pattern: flame, colors: [0x9d492e, 0xff9959, 0xffe5a1] },
-      passive: { pattern: heart, colors: [0x385e58, 0x7dd8ae, 0xc9f3cd] },
-      "support-skill": { pattern: arrow, colors: [0x3c568f, 0x88bcff, 0xe2efff] },
-      "support-passive": { pattern: arrow, colors: [0x694a90, 0xb69aef, 0xefddff] },
-      pending: { pattern: chest, colors: [0x805938, 0xc39056, 0xffd97d] },
-    };
     for (const reward of result.rewards) {
-      const palette = palettes[reward.kind];
-      this.addReward(icon(palette.pattern, palette.colors), `×${reward.count}`, 0xe6ecfa);
+      this.addReward(this.assets.rewards[reward.kind], `×${reward.count}`, 0xf3f1e9);
     }
-    this.addReward(icon(crystal, [0x355c85, 0x81cbdd, 0xd6f6ed]), `+${result.xpGain} XP`, 0xc9eadf);
+    this.addReward(this.assets.rewards.xp, `+${result.xpGain} XP`, 0xc4f0df);
     this.shownAt = performance.now();
     this.expiresAt = this.shownAt + durationMs;
     this.viewportWidth = this.viewportHeight = 0;
@@ -124,13 +73,15 @@ export class BattleResultOverlay extends Container {
     this.alpha = 0;
   }
 
-  private addReward(graphic: Graphics, value: string, color: number): void {
+  private addReward(texture: Texture, value: string, color: number): void {
     const root = new Container();
-    const label = text(14, color);
-    label.text = value;
-    root.addChild(graphic, label);
+    const icon = new Sprite({ texture, roundPixels: true });
+    const label = rewardText(value, color);
+    icon.anchor.set(0.5);
+    label.anchor.set(0, 0.5);
+    root.addChild(icon, label);
     this.rewardRow.addChild(root);
-    this.cells.push({ root, icon: graphic, label });
+    this.cells.push({ root, icon, label });
   }
 
   hide(): void {
@@ -141,26 +92,30 @@ export class BattleResultOverlay extends Container {
   private layout(width: number, height: number): void {
     this.viewportWidth = width;
     this.viewportHeight = height;
-    const w = Math.max(4, Math.floor(Math.min(420, width - 24) / 4) * 4);
-    const h = 120;
-    this.title.style.fontSize = w >= 360 ? 44 : 36;
-    const pixel = w >= 360 ? 2 : 1;
-    const iconSize = 16 * pixel;
-    this.emblem.scale.set(2);
-    this.emblem.position.set(Math.round((w - 32 - 12 - this.title.width) / 2), 18);
-    this.title.position.set(this.emblem.x + 44, Math.round(34 - this.title.height / 2));
+    const w = Math.max(1, Math.min(480, width - 24));
+    const h = 140;
+    const compact = w < 360;
+    this.title.style.fontSize = compact ? 40 : 48;
+    const badgeSize = compact ? 44 : 52;
+    const iconSize = compact ? 32 : 36;
+    const headerWidth = badgeSize + 14 + this.title.width;
+    this.emblem.width = this.emblem.height = badgeSize;
+    this.emblem.position.set(Math.round((w - headerWidth + badgeSize) / 2), 40);
+    this.title.position.set(this.emblem.x + badgeSize / 2 + 14, 40);
     let rowWidth = 0;
+    const gap = compact ? 12 : 18;
     for (const cell of this.cells) {
-      cell.icon.scale.set(pixel);
-      cell.label.style.fontSize = w >= 360 ? 14 : 12;
-      cell.label.position.set(iconSize + 4, Math.round((iconSize - cell.label.height) / 2));
+      cell.icon.width = cell.icon.height = iconSize;
+      cell.icon.position.set(iconSize / 2, 0);
+      cell.label.style.fontSize = compact ? 14 : 16;
+      cell.label.position.set(iconSize + 6, 0);
       cell.root.x = rowWidth;
-      rowWidth += iconSize + 4 + cell.label.width + 12;
+      rowWidth += iconSize + 6 + cell.label.width + gap;
     }
-    rowWidth -= 12;
-    const rowScale = Math.min(1, Math.max(1, w - 32) / rowWidth);
+    rowWidth -= gap;
+    const rowScale = Math.min(1, Math.max(1, w - 16) / rowWidth);
     this.rewardRow.scale.set(rowScale);
-    this.rewardRow.position.set(Math.round((w - rowWidth * rowScale) / 2), Math.round(96 - iconSize * rowScale / 2));
+    this.rewardRow.position.set(Math.round((w - rowWidth * rowScale) / 2), 106);
     const scale = Math.min(1, Math.max(1, height - 24) / h);
     this.card.scale.set(scale);
     this.cardY = Math.round((height - h * scale) / 2);
@@ -175,8 +130,9 @@ export class BattleResultOverlay extends Container {
     }
     const age = now - this.shownAt;
     const remaining = this.expiresAt - now;
-    this.alpha = Math.ceil(Math.min(1, age / 120, remaining / 300) * 4) / 4;
+    this.alpha = Math.min(1, age / 100, remaining / 180);
     if (width !== this.viewportWidth || height !== this.viewportHeight) this.layout(width, height);
-    this.card.y = this.cardY + Math.max(0, 3 - Math.floor(age / 40)) * 2;
+    const entrance = 1 - Math.min(1, age / 140);
+    this.card.y = this.cardY + Math.round(6 * entrance * entrance);
   }
 }
