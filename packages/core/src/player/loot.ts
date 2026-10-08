@@ -6,27 +6,25 @@ import type { Item } from "./item/item.js";
 import type { PlayerState } from "./state.js";
 
 export namespace Loot {
-  export type Kind =
-    | "tablet-support-skill"
-    | "tablet-support-passive"
-    | "tablet-skill"
-    | "tablet-passive";
-  export type Rarity = "magic" | "rare";
+  export type Kind = Item["kind"];
   export type Definition = {
     min: number;
     max: number;
     pool: {
       kind: Loot.Kind;
-      rarity: Rarity;
+      rarity: Item.Rarity;
       weight: number;
     }[];
   };
   export type LootItem = {
     kind: Kind;
-    rarity: Rarity;
+    rarity: Item.Rarity;
     level: number;
   };
-  export const rarityAffixCount: Record<Rarity, readonly [number, number]> = {
+  export const rarityAffixCount: Record<
+    Item.Rarity,
+    readonly [number, number]
+  > = {
     magic: [1, 2],
     rare: [3, 4],
   };
@@ -36,6 +34,11 @@ export namespace Loot {
     loot: LootItem,
   ): Item {
     const uuid = crypto.randomUUID();
+    const base: Item.ItemBase = {
+      uuid,
+      rarity: loot.rarity,
+      affixes: [],
+    };
     let tablet: TabletSpec.Tablet;
     switch (loot.kind) {
       case "tablet-skill": {
@@ -43,18 +46,17 @@ export namespace Loot {
         if (skill === undefined) {
           throw new Error("No player skills available for loot.");
         }
-        tablet = { kind: "skill", uuid, rotate: 0, skill };
+        tablet = { ...base, kind: "tablet-skill", skill };
         break;
       }
       case "tablet-passive":
         tablet = {
-          kind: "passive",
-          uuid,
-          rotate: 0,
+          ...base,
+          kind: "tablet-passive",
           affixes: Affix.rollAffixes(
             rng,
             data.affixDefinition.tablet.passive,
-            ["passive"],
+            [loot.kind],
             loot.level,
             rng.randInt(...rarityAffixCount[loot.rarity]),
           ),
@@ -62,19 +64,15 @@ export namespace Loot {
         break;
       case "tablet-support-skill":
       case "tablet-support-passive": {
-        const tabletKind =
-          loot.kind === "tablet-support-skill"
-            ? "support-skill"
-            : "support-passive";
         tablet = {
-          kind: tabletKind,
-          uuid,
+          ...base,
+          kind: loot.kind,
           rotate: 0,
           delta: [[1, 0]],
           affixes: Affix.rollAffixes(
             rng,
             data.affixDefinition.tablet.support,
-            [tabletKind],
+            [loot.kind],
             loot.level,
             rng.randInt(...rarityAffixCount[loot.rarity]),
           ),
@@ -84,7 +82,7 @@ export namespace Loot {
       default:
         throw new Error(`Unknown loot kind: ${loot.kind}`);
     }
-    return { kind: "tablet", uuid, tablet };
+    return tablet;
   }
 
   export function generateLoots(

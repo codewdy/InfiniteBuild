@@ -1,6 +1,6 @@
 import type { PlayerState } from "./state.js";
 import { Item } from "./item/item.js";
-import type { TabletSpec } from "./tablet/spec.js";
+import { TabletSpec } from "./tablet/spec.js";
 
 export type ValidateError = {
   kind: string;
@@ -55,26 +55,22 @@ namespace validator {
   ): string | undefined {
     const srcTablets = new Map<string, TabletSpec.Tablet>();
     const dstTablets = new Map<string, TabletSpec.Tablet>();
-    for (const state of [src, dst]) {
-      for (const item of state.inventory) {
-        if (item?.kind === "tablet" && item.uuid !== item.tablet.uuid) {
-          return "Inventory item UUID must match its tablet UUID.";
-        }
-      }
-    }
     for (const [state, tablets] of [
       [src, srcTablets],
       [dst, dstTablets],
     ] as const) {
-      const slots = [
-        ...state.tablets,
-        ...state.inventory.flatMap((item) =>
-          item?.kind === "tablet" ? [item.tablet] : [],
-        ),
-      ];
+      const inventoryTablets = state.inventory.filter(
+        (item): item is TabletSpec.Tablet =>
+          item !== null && TabletSpec.kind.includes(item.kind),
+      );
+      const slots = [...state.tablets, ...inventoryTablets];
       for (const tablet of slots) {
         if (tablet === null) continue;
-        if (![0, 90, 180, 270].includes(tablet.rotate)) {
+        if (
+          (tablet.kind === "tablet-support-skill" ||
+            tablet.kind === "tablet-support-passive") &&
+          ![0, 90, 180, 270].includes(tablet.rotate)
+        ) {
           return `Invalid tablet rotation: ${tablet.uuid}.`;
         }
         if (tablets.has(tablet.uuid)) {
@@ -91,8 +87,18 @@ namespace validator {
       if (!next) {
         return `Tablet UUID missing from destination: ${uuid}.`;
       }
-      const { rotate: _a, ...left } = tablet;
-      const { rotate: _b, ...right } = next;
+      const withoutRotation = (item: TabletSpec.Tablet) => {
+        if (
+          item.kind === "tablet-support-skill" ||
+          item.kind === "tablet-support-passive"
+        ) {
+          const { rotate: _, ...data } = item;
+          return data;
+        }
+        return item;
+      };
+      const left = withoutRotation(tablet);
+      const right = withoutRotation(next);
       if (!deepEqual(left, right)) {
         return `Tablet data must not change: ${uuid}.`;
       }

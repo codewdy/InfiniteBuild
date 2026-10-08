@@ -14,7 +14,7 @@ export const passiveAffixes: GameData["affixDefinition"]["tablet"]["passive"] =
     },
     pool: {
       maxHp: {
-        tag: ["passive"],
+        tag: ["tablet-passive"],
         name: "最大生命值",
         description: (param) => `最大生命值 +${formatValue(param)}`,
         tier: [
@@ -27,7 +27,7 @@ export const passiveAffixes: GameData["affixDefinition"]["tablet"]["passive"] =
         apply: (_ctx, param) => ({ attributes: { maxHp: { base: param } } }),
       },
       maxHpPercent: {
-        tag: ["passive"],
+        tag: ["tablet-passive"],
         name: "最大生命值提升",
         description: (param) =>
           `最大生命值提升(add) ${formatValue(param * 100)}%`,
@@ -52,7 +52,7 @@ export const supportSkillAffixes: GameData["affixDefinition"]["tablet"]["support
     },
     pool: {
       onUpdateCastRate: {
-        tag: ["support-skill"],
+        tag: ["tablet-support-skill"],
         name: "持续施放速率",
         description: (param) =>
           `持续施放速率提升(add) ${formatValue(param * 100)}%`,

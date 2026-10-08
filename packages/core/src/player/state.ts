@@ -44,7 +44,6 @@ export function derivePlayerCombatProfile(
       gameData: game,
       slots: state.tablets,
       id,
-      rotate: tablet?.rotate ?? 0,
     }),
   );
   tabletRun(tablets, player);

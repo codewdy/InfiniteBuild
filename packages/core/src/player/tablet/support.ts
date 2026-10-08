@@ -10,7 +10,7 @@ export namespace SupportTablet {
     param: number,
   ) => void;
   export type Delta = [number, number];
-  export type Kind = "skill" | "passive";
+  export type Kind = "tablet-skill" | "tablet-passive";
 }
 
 export class SupportTablet implements Tablet {

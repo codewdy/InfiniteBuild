@@ -30,3 +30,4 @@ export { RandomGenerator } from "./random-generator.js";
 export { Trigger } from "./battle/combat/trigger.js";
 export { PlayerManager } from "./player/manager.js";
 export type { BattleSettlement } from "./player/manager.js";
+export { Item } from "./player/item/item.js";

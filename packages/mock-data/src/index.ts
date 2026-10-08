@@ -26,13 +26,10 @@ export const playerState: PlayerState = {
   pendingLoot: [],
   inventory: [
     ...(["fireball", "nova", "fireball", "nova"] as const).map(
-      (kind, index) => {
-        const tablet = createTablet(kind, TabletMap.idSize + index);
-        return { kind: "tablet" as const, uuid: tablet.uuid, tablet };
-      },
+      (kind, index) => createTablet(kind, TabletMap.idSize + index),
     ),
-    { kind: "tablet", uuid: supportTablet.uuid, tablet: supportTablet },
-    { kind: "tablet", uuid: passiveTablet.uuid, tablet: passiveTablet },
+    supportTablet,
+    passiveTablet,
     null,
   ],
   level: 1,

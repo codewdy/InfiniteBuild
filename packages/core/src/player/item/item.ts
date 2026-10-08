@@ -1,12 +1,19 @@
+import type { Affix } from "../affix.js";
 import type { TabletSpec } from "../tablet/spec.js";
 
 export namespace Item {
-  export const Kinds = ["tablet"];
-  export type Tablet = {
-    kind: "tablet";
+  export type Rarity = "magic" | "rare";
+  export type ItemBase = {
     uuid: string;
-    tablet: TabletSpec.Tablet;
+    rarity: Rarity;
+    affixes: Affix.Spec[];
   };
+  export const Kinds = [
+    "tablet-skill",
+    "tablet-support-skill",
+    "tablet-support-passive",
+    "tablet-passive",
+  ];
 }
 
-export type Item = Item.Tablet;
+export type Item = TabletSpec.Tablet;

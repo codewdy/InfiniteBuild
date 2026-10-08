@@ -52,9 +52,9 @@ const lootNames: Record<PlayerState["pendingLoot"][number]["loot"]["kind"], stri
 };
 let round = 1;
 function tabletName(tablet: TabletSpec.Tablet): string {
-  if (tablet.kind === "passive") return "生命石板";
-  if (tablet.kind !== "skill") {
-    return tablet.kind === "support-skill" ? "技能急速" : "被动辅助石板";
+  if (tablet.kind === "tablet-passive") return "生命石板";
+  if (tablet.kind !== "tablet-skill") {
+    return tablet.kind === "tablet-support-skill" ? "技能急速" : "被动辅助石板";
   }
   return (
     tabletOptions.find((option) => option.kind === tablet.skill)?.name ??
@@ -67,7 +67,7 @@ function affixText(
   affix: TabletSpec.Passive["affixes"][number],
 ): string {
   const definitions =
-    tablet.kind === "passive"
+    tablet.kind === "tablet-passive"
       ? gameData.affixDefinition.tablet.passive
       : gameData.affixDefinition.tablet.support;
   const description =
@@ -106,9 +106,7 @@ function tabletAt(
   state: PlayerState,
   location: SlotLocation,
 ): TabletSpec.Tablet | null {
-  if (location.area === "tablets") return state.tablets[location.index] ?? null;
-  const item = state.inventory[location.index];
-  return item?.kind === "tablet" ? item.tablet : null;
+  return state[location.area][location.index] ?? null;
 }
 
 function setTablet(
@@ -116,11 +114,7 @@ function setTablet(
   location: SlotLocation,
   tablet: TabletSpec.Tablet | null,
 ): void {
-  if (location.area === "tablets") state.tablets[location.index] = tablet;
-  else
-    state.inventory[location.index] = tablet
-      ? { kind: "tablet", uuid: tablet.uuid, tablet }
-      : null;
+  state[location.area][location.index] = tablet;
 }
 
 function moveTablet(uuid: string, target: SlotLocation): void {
@@ -193,7 +187,7 @@ function addTabletToInventory(
     tabletMessage.dataset.error = "true";
     return;
   }
-  state.inventory[empty] = { kind: "tablet", uuid: tablet.uuid, tablet };
+  state.inventory[empty] = tablet;
   selectedUuid = undefined;
   submitState(state, "force", message);
 }
@@ -208,10 +202,11 @@ for (const option of tabletOptions) {
   button.addEventListener("click", () => {
     const state = game.getState();
     const tablet: TabletSpec.Tablet = {
-      kind: "skill",
+      kind: "tablet-skill",
       uuid: crypto.randomUUID(),
+      rarity: "magic",
+      affixes: [],
       skill: option.kind,
-      rotate: 0,
     };
     addTabletToInventory(state, tablet, `${option.name}已加入背包`);
   });
@@ -221,7 +216,7 @@ for (const option of tabletOptions) {
 const hasteButton = document.createElement("button");
 hasteButton.type = "button";
 hasteButton.className = "add-tablet";
-hasteButton.dataset.skill = "support-skill";
+hasteButton.dataset.skill = "tablet-support-skill";
 hasteButton.textContent = "＋ 新增技能急速";
 hasteButton.title =
   "辅助箭头方向的技能石板，持续施放速率提升(add) 50%。右键旋转方向。";
@@ -236,7 +231,7 @@ element("tablet-add-actions").append(hasteButton);
 const lifeButton = document.createElement("button");
 lifeButton.type = "button";
 lifeButton.className = "add-tablet";
-lifeButton.dataset.skill = "passive";
+lifeButton.dataset.skill = "tablet-passive";
 lifeButton.textContent = "＋ 新增生命石板";
 lifeButton.title = "装备后最大生命值 +10。";
 lifeButton.addEventListener("click", () => {
@@ -254,7 +249,7 @@ for (const option of passiveTabletOptions) {
   const button = document.createElement("button");
   button.type = "button";
   button.className = "add-tablet";
-  button.dataset.skill = "passive";
+  button.dataset.skill = "tablet-passive";
   button.textContent = `＋ ${option.name}被动石板`;
   button.title = `等级 ${option.level} · 随机生成 1–2 条生命词缀，最高 T${option.level === 1 ? 1 : option.level === 20 ? 3 : 5}`;
   button.addEventListener("click", () => {
@@ -277,7 +272,7 @@ function updateSupportPreview(location?: SlotLocation): void {
   const hovered = location ? tabletAt(state, location) : null;
   const sourceIds: number[] =
     location?.area === "tablets" &&
-    (hovered?.kind === "skill" || hovered?.kind === "passive")
+    (hovered?.kind === "tablet-skill" || hovered?.kind === "tablet-passive")
       ? JSON.parse(
           tabletBoard.querySelector<HTMLButtonElement>(
             `[data-slot="${location.index}"]`,
@@ -292,7 +287,7 @@ function updateSupportPreview(location?: SlotLocation): void {
         location?.area === "tablets" &&
         !!hovered &&
         sources.length > 0 &&
-        (hovered.kind === "skill" || hovered.kind === "passive"
+        (hovered.kind === "tablet-skill" || hovered.kind === "tablet-passive"
           ? Number(slot.dataset.slot) === location.index
           : sources.includes(location.index));
       slot.dataset.supported = String(visible);
@@ -312,9 +307,10 @@ function createSlot(
   slot.type = "button";
   slot.className = "item-slot";
   slot.dataset.area = location.area;
+  slot.dataset.rarity = tablet?.rarity ?? "";
   slot.dataset.slot = String(location.index);
   slot.dataset.skill =
-    tablet?.kind === "skill" ? tablet.skill : (tablet?.kind ?? "empty");
+    tablet?.kind === "tablet-skill" ? tablet.skill : (tablet?.kind ?? "empty");
   slot.dataset.selected = String(!!tablet && tablet.uuid === selectedUuid);
   const sources =
     location.area === "tablets" ? (supportedBy.get(location.index) ?? []) : [];
@@ -337,23 +333,26 @@ function createSlot(
       : `背包 ${location.index}`;
   slot.setAttribute(
     "aria-label",
-    `${label}：${tablet ? tabletName(tablet) : "空槽位"}${sources.length ? `，被槽位 ${sources.join("、")} 辅助` : ""}，点击选择或拖放交换，右键或按 R 顺时针旋转`,
+    `${label}：${tablet ? tabletName(tablet) : "空槽位"}${sources.length ? `，被槽位 ${sources.join("、")} 辅助` : ""}，点击选择或拖放交换${tablet && "rotate" in tablet ? "，右键或按 R 顺时针旋转" : ""}`,
   );
   slot.setAttribute("aria-pressed", slot.dataset.selected);
   slot.title = tablet
-    ? `${tabletName(tablet)}\n${tablet.kind === "skill" ? (tabletOptions.find((option) => option.kind === tablet.skill)?.description ?? "") : tablet.affixes.map((affix) => `${affix.id}: ${affix.param}`).join("\n")}\n${tablet.uuid}`
+    ? `${tabletName(tablet)}\n${tablet.kind === "tablet-skill" ? (tabletOptions.find((option) => option.kind === tablet.skill)?.description ?? "") : tablet.affixes.map((affix) => `${affix.id}: ${affix.param}`).join("\n")}\n${tablet.uuid}`
     : `${label} · 拖入石板`;
   if (tablet) {
-    slot.title += `\n旋转 ${tablet.rotate}° · 右键或按 R 顺时针旋转`;
-    if (tablet.kind !== "skill") {
+    if ("rotate" in tablet) {
+      slot.title += `\n旋转 ${tablet.rotate}° · 右键或按 R 顺时针旋转`;
+    }
+    if (tablet.kind !== "tablet-skill") {
       slot.title = [
         tabletName(tablet),
         ...tablet.affixes.map((affix) => affixText(tablet, affix)),
-        `旋转 ${tablet.rotate}° · 右键或按 R 顺时针旋转`,
+        ...("rotate" in tablet ? [`旋转 ${tablet.rotate}° · 右键或按 R 顺时针旋转`] : []),
         tablet.uuid,
       ].join("\n");
     }
   }
+  if (tablet) slot.title += `\n稀有度：${tablet.rarity === "rare" ? "稀有" : "魔法"}`;
   if (sources.length) slot.title += `\n被辅助：来自槽位 ${sources.join("、")}`;
   const index = document.createElement("span");
   index.className = "slot-index";
@@ -364,12 +363,12 @@ function createSlot(
   const icon = document.createElement("span");
   icon.className = "tablet-icon";
   icon.setAttribute("aria-hidden", "true");
-  if (tablet?.kind === "skill" && tablet.skill === "fireball") {
+  if (tablet?.kind === "tablet-skill" && tablet.skill === "fireball") {
     icon.innerHTML =
       '<svg viewBox="0 0 48 48" fill="none"><path d="M27 5c2 10-9 12-5 21 2-5 6-6 8-11 7 6 11 12 8 20-3 10-20 12-26 3C3 25 19 20 17 11c5 3 6 7 6 10 6-5 4-11 4-16Z" fill="currentColor"/><path d="M25 26c0 5-7 7-5 13 2 5 10 3 10-2 0-4-3-7-5-11Z" fill="#fff0bd"/></svg>';
   } else if (
     tablet &&
-    (tablet.kind === "support-skill" || tablet.kind === "support-passive")
+    (tablet.kind === "tablet-support-skill" || tablet.kind === "tablet-support-passive")
   ) {
     icon.innerHTML =
       '<svg viewBox="0 0 48 48" fill="none"><path d="m24 5 19 19-19 19L5 24Z" stroke="currentColor" stroke-width="2"/><path d="M12 24h24m-9-9 9 9-9 9" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -385,7 +384,7 @@ function createSlot(
   name.className = "slot-name";
   name.textContent = tablet ? tabletName(tablet).replace("石板", "") : "空槽位";
   slot.append(index, icon, name);
-  if (tablet?.kind === "passive") {
+  if (tablet?.kind === "tablet-passive") {
     const affixes = document.createElement("span");
     affixes.className = "tablet-affixes";
     for (const affix of tablet.affixes) {
@@ -397,7 +396,7 @@ function createSlot(
   }
   if (
     tablet &&
-    (tablet.kind === "support-skill" || tablet.kind === "support-passive")
+    (tablet.kind === "tablet-support-skill" || tablet.kind === "tablet-support-passive")
   ) {
     const directions = document.createElement("span");
     directions.className = "support-directions";
@@ -422,7 +421,7 @@ function createSlot(
     if (!tablet || draggingUuid) return;
     const nextState = game.getState();
     const current = tabletAt(nextState, location);
-    if (!current || current.uuid !== tablet.uuid) return;
+    if (!current || current.uuid !== tablet.uuid || !("rotate" in current)) return;
     const rotations = [0, 90, 180, 270] as const;
     current.rotate =
       rotations[(rotations.indexOf(current.rotate) + 1) % rotations.length]!;
@@ -433,12 +432,12 @@ function createSlot(
     );
   };
   slot.addEventListener("contextmenu", (event) => {
-    if (!tablet) return;
+    if (!tablet || !("rotate" in tablet)) return;
     event.preventDefault();
     rotate();
   });
   slot.addEventListener("keydown", (event) => {
-    if (event.key.toLowerCase() !== "r" || !tablet) return;
+    if (event.key.toLowerCase() !== "r" || !tablet || !("rotate" in tablet)) return;
     event.preventDefault();
     rotate();
     const container =
@@ -506,12 +505,12 @@ function renderTablets(): void {
   state.tablets.forEach((tablet, source) => {
     if (
       !tablet ||
-      (tablet.kind !== "support-skill" && tablet.kind !== "support-passive")
+      (tablet.kind !== "tablet-support-skill" && tablet.kind !== "tablet-support-passive")
     )
       return;
     for (const [x, y] of tablet.delta) {
       const target = TabletMap.move(source, x, y, tablet.rotate);
-      const targetKind = tablet.kind === "support-skill" ? "skill" : "passive";
+      const targetKind = tablet.kind === "tablet-support-skill" ? "tablet-skill" : "tablet-passive";
       if (target === undefined || state.tablets[target]?.kind !== targetKind)
         continue;
       const sources = supportedBy.get(target) ?? [];
@@ -691,8 +690,14 @@ function pause(): void {
 
 function createBattleResult(settlement: BattleSettlement): BattlefieldResult {
   const rewards: BattlefieldResult["rewards"][number][] = [];
+  const rewardKinds = {
+    "tablet-skill": "skill",
+    "tablet-passive": "passive",
+    "tablet-support-skill": "support-skill",
+    "tablet-support-passive": "support-passive",
+  } as const;
   for (const item of settlement.items) {
-    const kind = item.tablet.kind;
+    const kind = rewardKinds[item.kind];
     const reward = rewards.find((entry) => entry.kind === kind);
     if (reward) reward.count += 1;
     else rewards.push({ kind, count: 1 });

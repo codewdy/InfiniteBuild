@@ -14,10 +14,10 @@ export function rollPassiveTablet(
   level: number,
 ): TabletSpec.Passive {
   return {
-    kind: "passive",
+    kind: "tablet-passive",
+    rarity: "magic",
     uuid: crypto.randomUUID(),
-    rotate: 0,
-    affixes: Affix.rollAffixes(rng, passiveAffixes, ["passive"], level),
+    affixes: Affix.rollAffixes(rng, passiveAffixes, ["tablet-passive"], level),
   };
 }
 
@@ -39,16 +39,18 @@ export const tabletOptions = [
 
 export function createTablet(kind: TabletKind, slot: number): MockTablet {
   return {
-    kind: "skill",
+    kind: "tablet-skill",
+    rarity: "magic",
     uuid: `mock-tablet-${slot}-${kind}`,
     skill: kind,
-    rotate: 0,
+    affixes: [],
   };
 }
 
 export function createSupportTablet(slot: number): TabletSpec.SupportSkill {
   return {
-    kind: "support-skill",
+    kind: "tablet-support-skill",
+    rarity: "magic",
     uuid: `mock-tablet-${slot}-cast-rate-support`,
     rotate: 0,
     delta: [[1, 0]],
@@ -58,9 +60,9 @@ export function createSupportTablet(slot: number): TabletSpec.SupportSkill {
 
 export function createPassiveTablet(slot: number): TabletSpec.Passive {
   return {
-    kind: "passive",
+    kind: "tablet-passive",
+    rarity: "magic",
     uuid: `mock-tablet-${slot}-max-hp`,
-    rotate: 0,
     affixes: [{ id: "maxHp", tier: 0, param: 10 }],
   };
 }
