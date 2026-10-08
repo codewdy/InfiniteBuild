@@ -401,27 +401,25 @@ function createSlot(
       : tablet.kind === "tablet-support-skill" ? "support-skill" : "support-passive";
     const stone = assetIcon(iconName);
     icon.append(stone);
-    if (tablet.kind === "tablet-passive") {
-      icon.classList.add("passive-tablet-icon");
-      stone.classList.add("passive-tablet-center");
-      for (let quadrant = 0; quadrant < 4; quadrant++) {
-        const affix = tablet.affixes[quadrant];
-        const segment = document.createElement("span");
-        segment.className = "passive-affix-slot";
-        segment.dataset.quadrant = String(quadrant);
-        segment.dataset.empty = String(!affix);
-        if (affix) {
-          segment.dataset.affix = affix.id;
-          segment.dataset.tier = String(affix.tier);
-        }
-        const border = assetIcon(affix
-          ? passiveAffixIcons[affix.id] ?? iconAssets["passive-quarter-empty"]
-          : iconAssets["passive-quarter-empty"]);
-        border.classList.add("passive-affix-icon");
-        border.style.transform = `rotate(${quadrant * 90}deg)`;
-        segment.append(border);
-        icon.append(segment);
+    icon.classList.add("affixed-tablet-icon");
+    stone.classList.add("tablet-center");
+    for (let quadrant = 0; quadrant < 4; quadrant++) {
+      const affix = tablet.affixes[quadrant];
+      const segment = document.createElement("span");
+      segment.className = "tablet-affix-slot";
+      segment.dataset.quadrant = String(quadrant);
+      segment.dataset.empty = String(!affix);
+      if (affix) {
+        segment.dataset.affix = affix.id;
+        segment.dataset.tier = String(affix.tier);
       }
+      const border = assetIcon(affix
+        ? passiveAffixIcons[affix.id] ?? iconAssets["passive-quarter-empty"]
+        : iconAssets["passive-quarter-empty"]);
+      border.classList.add("tablet-affix-icon");
+      border.style.transform = `rotate(${quadrant * 90}deg)`;
+      segment.append(border);
+      icon.append(segment);
     }
     if ("rotate" in tablet) icon.style.transform = `rotate(${tablet.rotate}deg)`;
   } else {
