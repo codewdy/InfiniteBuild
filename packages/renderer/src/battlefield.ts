@@ -390,7 +390,8 @@ export class Battlefield {
       // Alternating direction makes neighboring edges identical without editing the PNG.
       tile.anchor.set(mirrored ? 1 : 0, 1);
       tile.scale.set(mirrored ? -scale : scale, scale);
-      tile.position.set(Math.round(index * tileWidth - phase), height);
+      const bottom = height + Math.max(0, texture.orig.height * scale - height) / 2;
+      tile.position.set(Math.round(index * tileWidth - phase), Math.round(bottom));
     }
   }
 

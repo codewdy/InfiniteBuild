@@ -1,4 +1,5 @@
-import { Battlefield } from "@infinite-build/renderer";
+import { Battlefield, loadBattlefieldIcons } from "@infinite-build/renderer";
+import type { IconName } from "@infinite-build/renderer";
 import type { BattlefieldResult } from "@infinite-build/renderer";
 import {
   Battle,
@@ -31,6 +32,32 @@ function element<T extends HTMLElement>(id: string): T {
 
 const canvas = element<HTMLCanvasElement>("battlefield");
 const battlefield = await Battlefield.create(canvas);
+const iconAssets = await loadBattlefieldIcons();
+
+function assetIcon(name: IconName): SVGSVGElement {
+  const asset = iconAssets[name];
+  const [x, y, width, height] = asset.frame;
+  const size = Math.max(width, height);
+  const namespace = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(namespace, "svg");
+  svg.classList.add("asset-icon");
+  svg.setAttribute("viewBox", `0 0 ${size} ${size}`);
+  svg.setAttribute("aria-hidden", "true");
+  const crop = document.createElementNS(namespace, "svg");
+  crop.setAttribute("x", String((size - width) / 2));
+  crop.setAttribute("y", String((size - height) / 2));
+  crop.setAttribute("width", String(width));
+  crop.setAttribute("height", String(height));
+  crop.setAttribute("viewBox", `${x} ${y} ${width} ${height}`);
+  crop.setAttribute("overflow", "hidden");
+  const image = document.createElementNS(namespace, "image");
+  image.setAttribute("href", asset.image);
+  image.setAttribute("width", String(asset.imageWidth));
+  image.setAttribute("height", String(asset.imageHeight));
+  crop.append(image);
+  svg.append(crop);
+  return svg;
+}
 window.addEventListener("pagehide", () => battlefield.destroy(), { once: true });
 const play = element<HTMLButtonElement>("play");
 const step = element<HTMLButtonElement>("step");
@@ -47,14 +74,14 @@ const inventoryCapacity = gameData.playerDefinition.inventoryCapacity;
 const lootNames: Record<PlayerState["pendingLoot"][number]["loot"]["kind"], string> = {
   "tablet-skill": "技能石板",
   "tablet-passive": "被动石板",
-  "tablet-support-skill": "技能辅助石板",
-  "tablet-support-passive": "被动辅助石板",
+  "tablet-support-skill": "辅助石板",
+  "tablet-support-passive": "辅助石板",
 };
 let round = 1;
 function tabletName(tablet: TabletSpec.Tablet): string {
-  if (tablet.kind === "tablet-passive") return "生命石板";
+  if (tablet.kind === "tablet-passive") return "被动石板";
   if (tablet.kind !== "tablet-skill") {
-    return tablet.kind === "tablet-support-skill" ? "技能急速" : "被动辅助石板";
+    return "辅助石板";
   }
   return (
     tabletOptions.find((option) => option.kind === tablet.skill)?.name ??
@@ -217,14 +244,14 @@ const hasteButton = document.createElement("button");
 hasteButton.type = "button";
 hasteButton.className = "add-tablet";
 hasteButton.dataset.skill = "tablet-support-skill";
-hasteButton.textContent = "＋ 新增技能急速";
+hasteButton.textContent = "＋ 新增辅助石板";
 hasteButton.title =
   "辅助箭头方向的技能石板，持续施放速率提升(add) 50%。右键旋转方向。";
 hasteButton.addEventListener("click", () => {
   const state = game.getState();
   const tablet = createSupportTablet(state.inventory.length);
   tablet.uuid = crypto.randomUUID();
-  addTabletToInventory(state, tablet, "技能急速已加入背包");
+  addTabletToInventory(state, tablet, "辅助石板已加入背包");
 });
 element("tablet-add-actions").append(hasteButton);
 
@@ -232,13 +259,13 @@ const lifeButton = document.createElement("button");
 lifeButton.type = "button";
 lifeButton.className = "add-tablet";
 lifeButton.dataset.skill = "tablet-passive";
-lifeButton.textContent = "＋ 新增生命石板";
+lifeButton.textContent = "＋ 新增被动石板";
 lifeButton.title = "装备后最大生命值 +10。";
 lifeButton.addEventListener("click", () => {
   const state = game.getState();
   const tablet = createPassiveTablet(state.inventory.length);
   tablet.uuid = crypto.randomUUID();
-  addTabletToInventory(state, tablet, "生命石板已加入背包");
+  addTabletToInventory(state, tablet, "被动石板已加入背包");
 });
 element("tablet-add-actions").append(lifeButton);
 
@@ -352,6 +379,9 @@ function createSlot(
       ].join("\n");
     }
   }
+  if (tablet?.kind === "tablet-support-skill" || tablet?.kind === "tablet-support-passive") {
+    slot.title += `\n辅助对象：${tablet.kind === "tablet-support-skill" ? "技能石板" : "被动石板"}`;
+  }
   if (tablet) slot.title += `\n稀有度：${tablet.rarity === "rare" ? "稀有" : "魔法"}`;
   if (sources.length) slot.title += `\n被辅助：来自槽位 ${sources.join("、")}`;
   const index = document.createElement("span");
@@ -363,53 +393,21 @@ function createSlot(
   const icon = document.createElement("span");
   icon.className = "tablet-icon";
   icon.setAttribute("aria-hidden", "true");
-  if (tablet?.kind === "tablet-skill" && tablet.skill === "fireball") {
-    icon.innerHTML =
-      '<svg viewBox="0 0 48 48" fill="none"><path d="M27 5c2 10-9 12-5 21 2-5 6-6 8-11 7 6 11 12 8 20-3 10-20 12-26 3C3 25 19 20 17 11c5 3 6 7 6 10 6-5 4-11 4-16Z" fill="currentColor"/><path d="M25 26c0 5-7 7-5 13 2 5 10 3 10-2 0-4-3-7-5-11Z" fill="#fff0bd"/></svg>';
-  } else if (
-    tablet &&
-    (tablet.kind === "tablet-support-skill" || tablet.kind === "tablet-support-passive")
-  ) {
-    icon.innerHTML =
-      '<svg viewBox="0 0 48 48" fill="none"><path d="m24 5 19 19-19 19L5 24Z" stroke="currentColor" stroke-width="2"/><path d="M12 24h24m-9-9 9 9-9 9" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    icon.style.transform = `rotate(${tablet.rotate}deg)`;
-  } else if (tablet) {
-    icon.innerHTML =
-      '<svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="17" stroke="currentColor" stroke-width="2"/><circle cx="24" cy="24" r="11" stroke="currentColor" opacity=".45"/><path d="m24 5 5 14 14 5-14 5-5 14-5-14-14-5 14-5Z" fill="currentColor"/><circle cx="24" cy="24" r="4" fill="#f4eaff"/></svg>';
+  if (tablet) {
+    const iconName: IconName = tablet.kind === "tablet-skill"
+      ? (tablet.skill === "nova" ? "nova" : "fireball")
+      : tablet.kind === "tablet-passive" ? "passive"
+      : tablet.kind === "tablet-support-skill" ? "support-skill" : "support-passive";
+    icon.append(assetIcon(iconName));
+    if ("rotate" in tablet) icon.style.transform = `rotate(${tablet.rotate}deg)`;
   } else {
-    icon.innerHTML =
-      '<svg viewBox="0 0 48 48" fill="none"><path d="M24 16v16M16 24h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+    icon.classList.add("empty-slot-icon");
+    icon.textContent = "+";
   }
   const name = document.createElement("span");
   name.className = "slot-name";
-  name.textContent = tablet ? tabletName(tablet).replace("石板", "") : "空槽位";
+  name.textContent = tablet ? tabletName(tablet) : "空槽位";
   slot.append(index, icon, name);
-  if (tablet?.kind === "tablet-passive") {
-    const affixes = document.createElement("span");
-    affixes.className = "tablet-affixes";
-    for (const affix of tablet.affixes) {
-      const line = document.createElement("span");
-      line.textContent = affixText(tablet, affix);
-      affixes.append(line);
-    }
-    slot.append(affixes);
-  }
-  if (
-    tablet &&
-    (tablet.kind === "tablet-support-skill" || tablet.kind === "tablet-support-passive")
-  ) {
-    const directions = document.createElement("span");
-    directions.className = "support-directions";
-    directions.setAttribute("aria-hidden", "true");
-    for (const [x, y] of tablet.delta) {
-      const [dx, dy] = TabletMap.rotateVec(x, y, tablet.rotate);
-      const arrow = document.createElement("span");
-      arrow.textContent = dx === 0 && dy === 0 ? "●" : "→";
-      arrow.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
-      directions.append(arrow);
-    }
-    slot.append(directions);
-  }
   if (sources.length) {
     const badge = document.createElement("span");
     badge.className = "support-badge";
@@ -545,7 +543,7 @@ function renderTablets(): void {
     const name = document.createElement("strong");
     name.textContent = lootNames[loot.kind];
     const description = document.createElement("span");
-    description.textContent = `${loot.rarity === "magic" ? "魔法" : "稀有"} · 等级 ${loot.level}`;
+    description.textContent = `${loot.rarity === "magic" ? "魔法" : "稀有"} · 等级 ${loot.level}${loot.kind === "tablet-support-skill" ? " · 辅助技能" : loot.kind === "tablet-support-passive" ? " · 辅助被动" : ""}`;
     details.append(name, description);
     const amount = document.createElement("strong");
     amount.textContent = `× ${count}`;
@@ -563,7 +561,9 @@ function renderTablets(): void {
       });
       actions.append(button);
     }
-    row.append(details, amount, actions);
+    const chest = assetIcon("pending");
+    chest.classList.add("pending-loot-icon");
+    row.append(chest, details, amount, actions);
     return row;
   });
   if (rows.length === 0) {

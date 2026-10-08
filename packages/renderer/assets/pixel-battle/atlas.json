@@ -1323,6 +1323,342 @@
         42.0,
         177
       ]
+    },
+    "fantasy-victory": {
+      "image": "fantasy-icons.png",
+      "frame": [
+        42,
+        62,
+        385,
+        345
+      ],
+      "size": [
+        385,
+        385
+      ],
+      "alignment": "center"
+    },
+    "fantasy-defeat": {
+      "image": "fantasy-icons.png",
+      "frame": [
+        465,
+        85,
+        337,
+        338
+      ],
+      "size": [
+        338,
+        338
+      ],
+      "alignment": "center"
+    },
+    "fantasy-xp": {
+      "image": "fantasy-icons.png",
+      "frame": [
+        877,
+        93,
+        327,
+        320
+      ],
+      "size": [
+        327,
+        327
+      ],
+      "alignment": "center"
+    },
+    "fantasy-fireball": {
+      "image": "fantasy-icons.png",
+      "frame": [
+        38,
+        460,
+        369,
+        342
+      ],
+      "size": [
+        369,
+        369
+      ],
+      "alignment": "center"
+    },
+    "fantasy-nova": {
+      "image": "fantasy-icons.png",
+      "frame": [
+        450,
+        457,
+        370,
+        348
+      ],
+      "size": [
+        370,
+        370
+      ],
+      "alignment": "center"
+    },
+    "fantasy-passive": {
+      "image": "fantasy-icons.png",
+      "frame": [
+        865,
+        459,
+        357,
+        343
+      ],
+      "size": [
+        357,
+        357
+      ],
+      "alignment": "center"
+    },
+    "fantasy-support-skill": {
+      "image": "fantasy-icons.png",
+      "frame": [
+        39,
+        850,
+        373,
+        348
+      ],
+      "size": [
+        373,
+        373
+      ],
+      "alignment": "center"
+    },
+    "fantasy-support-passive": {
+      "image": "fantasy-icons.png",
+      "frame": [
+        457,
+        852,
+        356,
+        345
+      ],
+      "size": [
+        356,
+        356
+      ],
+      "alignment": "center"
+    },
+    "fantasy-pending": {
+      "image": "fantasy-icons.png",
+      "frame": [
+        863,
+        879,
+        352,
+        309
+      ],
+      "size": [
+        352,
+        352
+      ],
+      "alignment": "center"
+    },
+    "fantasy-fireball-0": {
+      "image": "fantasy-effects.png",
+      "frame": [
+        55,
+        161,
+        258,
+        154
+      ],
+      "size": [
+        400,
+        300
+      ],
+      "alignment": "center"
+    },
+    "fantasy-fireball-1": {
+      "image": "fantasy-effects.png",
+      "frame": [
+        393,
+        128,
+        298,
+        198
+      ],
+      "size": [
+        400,
+        300
+      ],
+      "alignment": "center"
+    },
+    "fantasy-fireball-2": {
+      "image": "fantasy-effects.png",
+      "frame": [
+        736,
+        103,
+        326,
+        242
+      ],
+      "size": [
+        400,
+        300
+      ],
+      "alignment": "center"
+    },
+    "fantasy-fireball-3": {
+      "image": "fantasy-effects.png",
+      "frame": [
+        1122,
+        129,
+        274,
+        194
+      ],
+      "size": [
+        400,
+        300
+      ],
+      "alignment": "center"
+    },
+    "fantasy-nova-0": {
+      "image": "fantasy-effects.png",
+      "frame": [
+        56,
+        409,
+        265,
+        264
+      ],
+      "size": [
+        400,
+        400
+      ],
+      "alignment": "center"
+    },
+    "fantasy-nova-1": {
+      "image": "fantasy-effects.png",
+      "frame": [
+        390,
+        392,
+        300,
+        289
+      ],
+      "size": [
+        400,
+        400
+      ],
+      "alignment": "center"
+    },
+    "fantasy-nova-2": {
+      "image": "fantasy-effects.png",
+      "frame": [
+        734,
+        372,
+        326,
+        323
+      ],
+      "size": [
+        400,
+        400
+      ],
+      "alignment": "center"
+    },
+    "fantasy-nova-3": {
+      "image": "fantasy-effects.png",
+      "frame": [
+        1111,
+        396,
+        296,
+        283
+      ],
+      "size": [
+        400,
+        400
+      ],
+      "alignment": "center"
+    },
+    "fantasy-attack-0": {
+      "image": "fantasy-effects.png",
+      "frame": [
+        91,
+        807,
+        195,
+        160
+      ],
+      "size": [
+        400,
+        360
+      ],
+      "alignment": "center"
+    },
+    "fantasy-attack-1": {
+      "image": "fantasy-effects.png",
+      "frame": [
+        404,
+        741,
+        283,
+        253
+      ],
+      "size": [
+        400,
+        360
+      ],
+      "alignment": "center"
+    },
+    "fantasy-attack-2": {
+      "image": "fantasy-effects.png",
+      "frame": [
+        744,
+        736,
+        321,
+        287
+      ],
+      "size": [
+        400,
+        360
+      ],
+      "alignment": "center"
+    },
+    "fantasy-attack-3": {
+      "image": "fantasy-effects.png",
+      "frame": [
+        1157,
+        773,
+        231,
+        210
+      ],
+      "size": [
+        400,
+        360
+      ],
+      "alignment": "center"
+    },
+    "nova-shockwave": {
+      "image": "nova-shockwave.png",
+      "frame": [
+        81,
+        95,
+        1103,
+        1069
+      ],
+      "size": [
+        1103,
+        1103
+      ],
+      "alignment": "center"
+    },
+    "tablet-support": {
+      "image": "tablet-roles.png",
+      "frame": [
+        134,
+        142,
+        685,
+        632
+      ],
+      "size": [
+        685,
+        685
+      ],
+      "alignment": "center"
+    },
+    "tablet-passive": {
+      "image": "tablet-roles.png",
+      "frame": [
+        987,
+        99,
+        687,
+        695
+      ],
+      "size": [
+        695,
+        695
+      ],
+      "alignment": "center"
     }
   },
   "characters": {
@@ -1515,27 +1851,43 @@
   },
   "effects": {
     "fireball": [
-      "fireball-0",
-      "fireball-1",
-      "fireball-2"
+      "fantasy-fireball-0",
+      "fantasy-fireball-1",
+      "fantasy-fireball-2",
+      "fantasy-fireball-3"
     ],
     "nova": [
-      "nova-ring"
+      "nova-shockwave"
+    ],
+    "attack": [
+      "fantasy-attack-0",
+      "fantasy-attack-1",
+      "fantasy-attack-2",
+      "fantasy-attack-3"
     ]
   },
-  "background": "background-forest.png",
+  "background": "fantasy-forest.png",
   "settlement": {
     "emblems": {
-      "Victory": "settlement-victory",
-      "Defeat": "settlement-defeat"
+      "Victory": "fantasy-victory",
+      "Defeat": "fantasy-defeat"
     },
     "rewards": {
-      "skill": "settlement-skill",
-      "passive": "settlement-passive",
-      "support-skill": "settlement-support-skill",
-      "support-passive": "settlement-support-passive",
-      "pending": "settlement-pending",
-      "xp": "settlement-xp"
+      "skill": "fantasy-fireball",
+      "passive": "tablet-passive",
+      "support-skill": "tablet-support",
+      "support-passive": "tablet-support",
+      "pending": "fantasy-pending",
+      "xp": "fantasy-xp"
     }
+  },
+  "icons": {
+    "fireball": "fantasy-fireball",
+    "nova": "fantasy-nova",
+    "passive": "tablet-passive",
+    "support-skill": "tablet-support",
+    "support-passive": "tablet-support",
+    "pending": "fantasy-pending",
+    "xp": "fantasy-xp"
   }
 }

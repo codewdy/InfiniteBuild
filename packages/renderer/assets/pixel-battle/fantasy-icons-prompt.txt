@@ -1,0 +1,9 @@
+Use case: stylized-concept
+Asset type: transparent fantasy RPG UI icon atlas matching the provided game characters.
+Reference image: the attached blue mage, green slime and goblin sprite atlas defines the desired chunky chibi fantasy pixel illustration style, dark stepped outlines, jewel colors, rich but crisp highlight clusters.
+Create exactly NINE large separate icons, a spacious uniform THREE columns by THREE rows grid on genuinely transparent background. Each fits fully inside its equal square cell, ample empty gutters, no letters or numbers, no UI panels, no borders around cells.
+Read left-to-right:
+Top row: a golden victory crown over a tiny blue shield with laurel sprigs; a cracked desaturated red defeat shield with drooping cloth; a cluster of glowing mint-cyan XP crystals.
+Middle row: a thick blue-gray stone tablet engraved with an orange FIREBALL rune; a thick blue-gray stone tablet engraved with a violet circular NOVA rune; a thick blue-gray stone tablet engraved with an emerald HEART rune for passive health.
+Bottom row: a thick blue-gray stone tablet with a cyan RIGHT ARROW rune for skill support; a thick blue-gray stone tablet with a green RIGHT ARROW and tiny heart for passive support; a small rounded wooden treasure chest with gold fittings and a blue gem lock for pending loot.
+Use the same chunky dark outlines, cute exaggerated proportions, tangible depth and crisp colored pixel blocks as the character reference. Tablet silhouettes clearly related but rune shapes and colors distinctly readable at 32 pixels. Icons face viewer, orthographic slight top view, centered each cell. No smooth vector lines, no realistic textures, no text, no background checkerboard.

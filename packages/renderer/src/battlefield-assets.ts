@@ -6,6 +6,13 @@ export type CharacterTextures = {
   scale: number;
   animations: Record<CharacterAnimation, CharacterClip>;
 };
+export type IconName = "fireball" | "nova" | "passive" | "support-skill" | "support-passive" | "pending" | "xp";
+export type IconAsset = {
+  image: string;
+  frame: [number, number, number, number];
+  imageWidth: number;
+  imageHeight: number;
+};
 export type SettlementAssets = {
   emblems: Record<"Victory" | "Defeat", Texture>;
   rewards: Record<"skill" | "passive" | "support-skill" | "support-passive" | "pending" | "xp", Texture>;
@@ -15,6 +22,8 @@ export type BattlefieldAssets = {
   characters: Record<string, CharacterTextures>;
   fireball: Texture[];
   nova: Texture[];
+  attack: Texture[];
+  icons: Record<IconName, IconAsset>;
   settlement: SettlementAssets;
 };
 type AtlasManifest = {
@@ -31,7 +40,8 @@ type AtlasManifest = {
     scale: number;
     animations: Record<CharacterAnimation, { frames: string[]; durationMs: number; loop: boolean }>;
   }>;
-  effects: { fireball: string[]; nova: string[] };
+  effects: { fireball: string[]; nova: string[]; attack: string[] };
+  icons: Record<IconName, string>;
   settlement: {
     [K in keyof SettlementAssets]: Record<keyof SettlementAssets[K], string>;
   };
@@ -46,6 +56,11 @@ export function loadBattlefieldAssets(): Promise<BattlefieldAssets> {
     throw error;
   });
   return loading;
+}
+
+/** HTML UI and Pixi settlements share the same icon regions and source images. */
+export async function loadBattlefieldIcons(): Promise<Record<IconName, IconAsset>> {
+  return (await loadBattlefieldAssets()).icons;
 }
 
 async function loadAtlas(): Promise<BattlefieldAssets> {
@@ -103,6 +118,17 @@ async function loadAtlas(): Promise<BattlefieldAssets> {
     ])),
     fireball: manifest.effects.fireball.map(texture),
     nova: manifest.effects.nova.map(texture),
+    attack: manifest.effects.attack.map(texture),
+    icons: Object.fromEntries(Object.entries(manifest.icons).map(([name, key]) => {
+      const entry = manifest.frames[key]!;
+      const source = texture(key).source;
+      return [name, {
+        image: new URL(entry.image ?? manifest.image, base).href,
+        frame: entry.frame,
+        imageWidth: source.width,
+        imageHeight: source.height,
+      }];
+    })) as Record<IconName, IconAsset>,
     settlement: {
       emblems: Object.fromEntries(Object.entries(manifest.settlement.emblems).map(([kind, name]) => [kind, texture(name)])) as SettlementAssets["emblems"],
       rewards: Object.fromEntries(Object.entries(manifest.settlement.rewards).map(([kind, name]) => [kind, texture(name)])) as SettlementAssets["rewards"],

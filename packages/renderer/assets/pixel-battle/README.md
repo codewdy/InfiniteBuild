@@ -1,5 +1,20 @@
 # Pixel battle assets
 
+The active art direction is **chibi fantasy pixel illustration**: chunky dark outlines, readable exaggerated silhouettes, saturated jewel colors, and stepped pixel highlights. The character reference is `atlas.png`.
+
+`tablet-roles.png` contains the current support and passive tablet icons, generated with the built-in image_gen tool from `fantasy-icons.png`; the exact prompt is in `tablet-roles-prompt.txt`. Support tablets have a right-pointing stone silhouette and cyan arrow, with 0° pointing right and clockwise quarter-turns following the equipped rotation. Both support target types share this category icon; tooltips identify whether they support skill or passive tablets. Passive tablets have a symmetric emerald/gold enchantment rune, rather than a health-specific heart. Inventory, board and settlement all use these same manifest regions. Display categories are 技能石板, 辅助石板 and 被动石板; skill slots display only the skill name. Support and passive slots display only their category name under the icon, with detailed affixes and targeting information in hover tooltips.
+
+The rest of the active asset set now follows the same direction:
+
+- `fantasy-forest.png`: the moonlit forest battle background, with simplified foliage and a low-contrast clearing. Vertical centering keeps the tree line and clearing visible in wide battle viewports; horizontal scrolling still follows the player.
+- `fantasy-effects.png`: four active frames each for fireball and attack. Attack uses its own gold slash frames. Its original nova row is retained but superseded by the dedicated shockwave below.
+- `nova-shockwave.png`: a thin lavender/cyan pixel energy ring with an empty center, generated using the built-in image_gen tool with the exact prompt in `nova-shockwave-prompt.txt`. The renderer projects it into a ground ellipse at the caster's feet, expands horizontally in sync with the damage wave, and smoothly fades it in and out. A single stable texture avoids the silhouette jumps of the previous four ornate rune frames.
+- `fantasy-icons.png`: victory/defeat emblems, XP crystals, fireball/nova/passive/support tablets, and the pending-loot chest. The stone tablets share a silhouette while their rune shapes and colors distinguish their roles.
+
+All three were generated with the built-in image_gen tool from `atlas.png` as a style reference. Exact prompts are in `fantasy-forest-prompt.txt`, `fantasy-effects-prompt.txt`, and `fantasy-icons-prompt.txt`. Source PNGs retain their original pixels and alpha. `atlas.json` defines their crop regions and active mappings. `loadBattlefieldIcons()` exposes those same crop regions to the HTML inventory and tablet board, so they share art with Pixi settlement rewards; SVG viewport elements only crop the raster atlas and contain no drawn icon paths. Empty-slot marks and support-direction indicators remain interface controls.
+
+Earlier background, ring and settlement PNGs described below are retained as source history; active mappings use the `fantasy-*` assets above. Character animations and settlement timing/layout remain as described below.
+
 `atlas.png` is a 1254 × 1254 RGBA image generated with the built-in image_gen tool from the approved fantasy pixel-art preview. The generation prompt is recorded in `prompt.txt`.
 
 `atlas.json` describes the character animation clips, three fireball stages, and a standalone nova ring texture. The character textures use a shared logical canvas and a feet anchor; effects use a centered canvas. Image regions are intentionally specified individually because the generated sheets are not exact uniform grids. Optional frame offsets preserve the slime's airborne walk pose above the ground baseline.

@@ -11,11 +11,15 @@ export const createNova: EffectFactory = (event, context, duration) => {
   return {
     sprite, start: context.log.frame, duration,
     update(t, { x }) {
-      sprite.texture = frames[Math.min(frames.length - 1, Math.floor(t * frames.length))]!;
-      const pixels = Math.abs(x(center + radius * t) - x(center));
-      sprite.position.set(Math.round(x(center)), Math.round(context.sourceY));
-      sprite.scale.set(pixels * 2 / sprite.texture.orig.width);
-      sprite.alpha = 0.75 * Math.pow(1 - t, 0.8);
+      const progress = Math.max(0, Math.min(1, t));
+      sprite.texture = frames[Math.min(frames.length - 1, Math.floor(progress * frames.length))]!;
+      // Keep horizontal propagation aligned with the skill's damage wave.
+      const pixels = Math.abs(x(center + radius * progress) - x(center));
+      sprite.position.set(Math.round(x(center)), Math.round(context.sourceY + 18));
+      const scale = pixels * 2 / sprite.texture.orig.width;
+      sprite.scale.set(scale, scale * 0.32);
+      const entrance = Math.min(1, progress / 0.08);
+      sprite.alpha = 0.65 * entrance * (2 - entrance) * Math.pow(1 - progress, 0.85);
     },
   };
 };

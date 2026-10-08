@@ -311,20 +311,6 @@ pre {
 .item-slot[data-supported="true"] .support-badge {
   display: block;
 }
-.support-directions {
-  display: none;
-  gap: 5px;
-  font-size: 13px;
-  line-height: 1;
-  pointer-events: none;
-}
-.item-slot:hover .support-directions,
-.item-slot[data-support-source="true"] .support-directions {
-  display: flex;
-}
-.support-directions span {
-  display: inline-block;
-}
 .item-slot[data-selected="true"],
 .item-slot.drop-target {
   border: 1px solid #82e6ce;
@@ -356,33 +342,31 @@ pre {
   line-height: 0;
   pointer-events: none;
 }
-.tablet-icon svg {
+.tablet-icon > svg {
   width: 100%;
   height: auto;
-  filter: drop-shadow(0 0 8px currentColor);
+  filter: drop-shadow(0 2px 2px #080d1880);
 }
-.item-slot[data-skill="empty"] .tablet-icon svg {
-  filter: none;
+.asset-icon {
+  display: block;
+  aspect-ratio: 1;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+.empty-slot-icon {
+  font-size: 26px;
+  line-height: 1;
+  font-weight: 300;
+}
+.pending-loot-icon {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
 }
 .slot-name {
   font-size: 11px;
   line-height: 1.4;
   color: inherit;
-}
-.tablet-affixes {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  max-width: 100%;
-  font-size: 9px;
-  line-height: 1.3;
-  color: #bceadd;
-}
-.tablet-affixes span {
-  overflow-wrap: anywhere;
-}
-.item-slot[data-skill="tablet-passive"] .tablet-icon {
-  width: 30px;
 }
 #tablet-message {
   color: #82e6ce;
