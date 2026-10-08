@@ -11,9 +11,15 @@ body {
   margin: 0;
 }
 main {
-  max-width: 1200px;
   padding: 40px 24px;
-  margin: auto;
+}
+main > * {
+  max-width: 1152px;
+  margin-inline: auto;
+}
+main > .battlefield-panel {
+  max-width: none;
+  width: 100%;
 }
 header,
 .panel-title,
@@ -87,6 +93,28 @@ h2 {
 }
 .panel-title {
   margin-bottom: 16px;
+}
+.battlefield-viewport {
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+}
+.battlefield-stage {
+  position: relative;
+  flex: none;
+}
+.battlefield-stage canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
+}
+.resolution-control {
+  color: #92a3b9;
+  font-size: 13px;
+}
+.resolution-control select {
+  max-width: 100%;
 }
 canvas {
   display: block;

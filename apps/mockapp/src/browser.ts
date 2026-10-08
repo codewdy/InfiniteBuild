@@ -31,6 +31,37 @@ function element<T extends HTMLElement>(id: string): T {
 }
 
 const canvas = element<HTMLCanvasElement>("battlefield");
+const resolution = element<HTMLSelectElement>("resolution");
+const battlefieldViewport = element<HTMLDivElement>("battlefield-viewport");
+const battlefieldStage = element<HTMLDivElement>("battlefield-stage");
+function applyResolution(): void {
+  const selected = resolution.selectedOptions[0];
+  const dimensions = resolution.value.match(/^(\d+)x(\d+)$/);
+  const availableWidth = Math.max(1, battlefieldViewport.clientWidth);
+  const availableHeight = Math.max(1, window.innerHeight * 0.8);
+  const width = dimensions ? Number(dimensions[1]) : availableWidth;
+  const height = dimensions ? Number(dimensions[2]) : 290;
+  const scale = Math.min(1, availableWidth / width, availableHeight / height);
+  // Transform only the preview; Pixi keeps rendering at the selected dimensions.
+  canvas.style.width = `${width}px`;
+  canvas.style.height = `${height}px`;
+  canvas.style.transform = `scale(${scale})`;
+  battlefieldStage.style.width = `${width * scale}px`;
+  battlefieldStage.style.height = `${height * scale}px`;
+  canvas.setAttribute(
+    "aria-label",
+    `像素战场：角色与技能动画 · ${selected?.textContent ?? "自适应"}`,
+  );
+}
+applyResolution();
+resolution.addEventListener("change", applyResolution);
+window.addEventListener("resize", applyResolution);
+const viewportObserver = new ResizeObserver(applyResolution);
+viewportObserver.observe(battlefieldViewport);
+window.addEventListener("pagehide", () => {
+  viewportObserver.disconnect();
+  window.removeEventListener("resize", applyResolution);
+}, { once: true });
 const battlefield = await Battlefield.create(canvas);
 const iconAssets = await loadBattlefieldIcons();
 const passiveAffixIcons = await loadPassiveAffixIcons();

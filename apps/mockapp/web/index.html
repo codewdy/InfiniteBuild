@@ -44,10 +44,35 @@
         <div><span>累计死亡</span><strong id="deaths">0</strong></div>
       </section>
       <section class="panel battlefield-panel" aria-label="战场">
-        <canvas
-          id="battlefield"
-          aria-label="像素战场：角色与技能动画"
-        ></canvas>
+        <div class="panel-title">
+          <h2>战场</h2>
+          <label class="resolution-control" for="resolution">
+            Renderer 分辨率
+            <select id="resolution" aria-describedby="resolution-hint">
+              <option value="auto">自适应</option>
+              <optgroup label="手机 · 横屏">
+                <option value="800x360">Android · 800 × 360</option>
+                <option value="667x375">iPhone SE · 667 × 375</option>
+                <option value="844x390">iPhone 13 / 14 · 844 × 390</option>
+                <option value="852x393">iPhone 15 / 16 · 852 × 393</option>
+                <option value="932x430">iPhone Pro Max · 932 × 430</option>
+              </optgroup>
+              <optgroup label="桌面 · 横屏">
+                <option value="1366x768">768p · 1366 × 768</option>
+                <option value="1920x1080">1080p · 1920 × 1080</option>
+              </optgroup>
+            </select>
+          </label>
+        </div>
+        <p id="resolution-hint">尺寸单位为 CSS 像素；画布居中，超出窗口可用宽高时等比例缩小。</p>
+        <div class="battlefield-viewport" id="battlefield-viewport">
+          <div class="battlefield-stage" id="battlefield-stage">
+          <canvas
+            id="battlefield"
+            aria-label="像素战场：角色与技能动画"
+          ></canvas>
+          </div>
+        </div>
       </section>
       <div class="controls" aria-label="战斗操作">
         <button id="play" class="primary">播放</button
