@@ -1,6 +1,11 @@
 import { Assets, Rectangle, Texture } from "pixi.js";
 
-export type CharacterTextures = { idle: Texture; action: Texture };
+export type CharacterAnimation = "idle" | "walk" | "cast" | "attack" | "hit" | "death";
+export type CharacterClip = { frames: Texture[]; durationMs: number; loop: boolean };
+export type CharacterTextures = {
+  scale: number;
+  animations: Record<CharacterAnimation, CharacterClip>;
+};
 export type SettlementAssets = {
   emblems: Record<"Victory" | "Defeat", Texture>;
   rewards: Record<"skill" | "passive" | "support-skill" | "support-passive" | "pending" | "xp", Texture>;
@@ -20,8 +25,12 @@ type AtlasManifest = {
     frame: [number, number, number, number];
     size: [number, number];
     alignment: "feet" | "center";
+    offset?: [number, number];
   }>;
-  characters: Record<string, { idle: string; action: string }>;
+  characters: Record<string, {
+    scale: number;
+    animations: Record<CharacterAnimation, { frames: string[]; durationMs: number; loop: boolean }>;
+  }>;
   effects: { fireball: string[]; nova: string[] };
   settlement: {
     [K in keyof SettlementAssets]: Record<keyof SettlementAssets[K], string>;
@@ -67,8 +76,8 @@ async function loadAtlas(): Promise<BattlefieldAssets> {
       frame: new Rectangle(x, y, width, height),
       orig: new Rectangle(0, 0, canvasWidth, canvasHeight),
       trim: new Rectangle(
-        (canvasWidth - width) / 2,
-        entry.alignment === "feet" ? canvasHeight - height : (canvasHeight - height) / 2,
+        entry.offset?.[0] ?? (canvasWidth - width) / 2,
+        entry.offset?.[1] ?? (entry.alignment === "feet" ? canvasHeight - height : (canvasHeight - height) / 2),
         width,
         height,
       ),
@@ -82,7 +91,15 @@ async function loadAtlas(): Promise<BattlefieldAssets> {
   return {
     background,
     characters: Object.fromEntries(Object.entries(manifest.characters).map(([kind, poses]) => [
-      kind, { idle: texture(poses.idle), action: texture(poses.action) },
+      kind, {
+        scale: poses.scale,
+        animations: Object.fromEntries(Object.entries(poses.animations).map(([name, clip]) => {
+          if (!clip.frames.length || !Number.isFinite(clip.durationMs) || clip.durationMs <= 0) {
+            throw new Error(`Invalid character animation: ${kind}.${name}`);
+          }
+          return [name, { ...clip, frames: clip.frames.map(texture) }];
+        })) as CharacterTextures["animations"],
+      },
     ])),
     fireball: manifest.effects.fireball.map(texture),
     nova: manifest.effects.nova.map(texture),

@@ -2,7 +2,7 @@ import { Application, Container, Graphics, Rectangle, Sprite, Text } from "pixi.
 import { BattleResultOverlay } from "./battle-result.js";
 import type { BattlefieldResult } from "./battle-result.js";
 import { loadBattlefieldAssets } from "./battlefield-assets.js";
-import type { BattlefieldAssets, CharacterTextures } from "./battlefield-assets.js";
+import type { BattlefieldAssets, CharacterAnimation, CharacterTextures } from "./battlefield-assets.js";
 import { createSkillEffect } from "./effects/index.js";
 import type { SkillEffect } from "./effects/index.js";
 import type { BattleEvent, BattleLog } from "@infinite-build/core";
@@ -12,7 +12,13 @@ type View = {
   root: Container;
   body: Sprite;
   poses: CharacterTextures;
-  actionUntil: number;
+  action?: { kind: "cast" | "attack"; startedAt: number };
+  animation: CharacterAnimation;
+  facing: number;
+  walking: boolean;
+  walkAt: number;
+  walkUntil: number;
+  shadow: Graphics;
   health: Graphics;
   label: Text;
   from: number;
@@ -58,6 +64,9 @@ export class Battlefield {
   private origin = 0;
   private fromOrigin = 0;
   private destroyed = false;
+  private animationTime = 0;
+  private animationUpdatedAt = performance.now();
+  private animateUntil = 0;
 
   private constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -105,10 +114,12 @@ export class Battlefield {
 
   update(log: BattleLog, options: BattlefieldOptions): void {
     const now = performance.now();
+    this.advanceAnimations(now);
     // UI changes must not replay events or rewind effects when pausing.
     if (this.log === log) {
       this.frameOffset = this.subframe(now);
       this.timelineAt = now;
+      if (this.options.playing && !options.playing) this.animateUntil = this.animationTime;
       this.options = options;
       return;
     }
@@ -123,7 +134,14 @@ export class Battlefield {
         this.views.set(unit.id, view);
       }
       view.from += (view.position - view.from) * progress;
+      const displacement = unit.position - view.position;
+      const walking = Math.abs(displacement) > 0.001;
+      if (walking) view.facing = Math.sign(displacement);
+      if (walking && !view.walking) view.walkAt = this.animationTime;
+      if (walking) view.walkUntil = this.animationTime + 200;
+      view.walking = walking;
       view.position = unit.position;
+      if (unit.hp <= 0 && view.deadAt === undefined) view.deadAt = this.animationTime;
       view.label.text = unit.name;
       view.health.clear().rect(-19, -40, 38, 4).fill(0x25324b);
       const ratio = Math.max(0, Math.min(1, unit.hp / (unit.status.attributes.maxHp || 1)));
@@ -131,13 +149,18 @@ export class Battlefield {
     }
     const ids = new Set(log.units.map((unit) => unit.id));
     for (const [id, view] of this.views) {
-      if (!ids.has(id) && view.deadAt === undefined) view.deadAt = now;
+      if (!ids.has(id) && view.deadAt === undefined) view.deadAt = this.animationTime;
     }
     this.log = log;
     this.updatedAt = now;
     this.timelineAt = now;
     this.frameOffset = 0;
     this.options = options;
+    // A manual step plays its feedback once; a pause on the same log freezes it.
+    // Final death animations can finish while the settlement is displayed.
+    if (!options.playing || log.status !== "Running") {
+      this.animateUntil = this.animationTime + 800;
+    }
     this.updateSkillBars(log);
     this.effects = this.effects.filter((effect) => {
       if (log.frame - effect.start < effect.duration) return true;
@@ -149,7 +172,7 @@ export class Battlefield {
       if (event.kind === "Damage") {
         const view = this.views.get(event.dst);
         if (!view) continue;
-        view.hitAt = now;
+        if (event.damage > 0) view.hitAt = this.animationTime;
         const text = this.text(`−${Number(event.damage.toFixed(2))}`, 15, 0xffa1a6);
         text.style.fontWeight = "bold";
         text.anchor.set(0.5);
@@ -186,6 +209,8 @@ export class Battlefield {
     for (const effect of this.effects) effect.sprite.destroy();
     this.effects = [];
     this.log = undefined;
+    this.animationTime = this.animateUntil = 0;
+    this.animationUpdatedAt = performance.now();
     this.origin = this.fromOrigin = 0;
   }
 
@@ -294,12 +319,23 @@ export class Battlefield {
     return kind === "Player" ? height * 0.55 : height * (0.34 + (id % 4) * 0.115);
   }
 
+  private advanceAnimations(now: number): void {
+    const elapsed = Math.max(0, now - this.animationUpdatedAt);
+    this.animationUpdatedAt = now;
+    const speed = Math.max(1, Math.min(4, 200 / this.options.frameDuration));
+    if (this.options.playing && this.log?.status === "Running") {
+      this.animationTime += elapsed * speed;
+    } else {
+      this.animationTime = Math.min(this.animateUntil, this.animationTime + elapsed * speed);
+    }
+  }
+
   private createUnit(unit: Unit): View {
     const root = new Container();
     const poses = this.assets.characters[unit.kind] ?? this.assets.characters.Goblin!;
-    const body = new Sprite({ texture: poses.idle, roundPixels: true });
+    const body = new Sprite({ texture: poses.animations.idle.frames[0]!, roundPixels: true });
     body.anchor.set(0.5, 1);
-    body.scale.set(0.18);
+    body.scale.set(poses.scale);
     body.y = 20;
     const shadow = new Graphics().ellipse(0, 20, 20, 5).fill({ color: 0x000000, alpha: 0.25 });
     const health = new Graphics();
@@ -309,14 +345,26 @@ export class Battlefield {
     root.addChild(shadow, body, health, label);
     (unit.kind === "Player" ? this.playerLayer : this.actors).addChild(root);
     return {
-      root, body, poses, health, label,
+      root, body, poses, health, label, shadow,
       from: unit.position, position: unit.position, kind: unit.kind,
-      hitAt: -Infinity, actionUntil: 0,
+      hitAt: -Infinity, animation: "idle", facing: unit.kind === "Player" ? 1 : -1,
+      walking: false, walkAt: this.animationTime, walkUntil: this.animationTime,
     };
   }
 
   private addEffect(event: BattleEvent.Effect, previous?: BattleLog): void {
     const source = this.views.get(event.source);
+    if (source && source.deadAt === undefined) {
+      source.action = {
+        kind: event.skill === "attack" || event.effect === "attack" ? "attack" : "cast",
+        startedAt: this.animationTime,
+      };
+      const targetId = event.payload.to;
+      const target = typeof targetId === "number" ? this.views.get(targetId) : undefined;
+      if (target && target.position !== source.position) {
+        source.facing = Math.sign(target.position - source.position);
+      }
+    }
     const effect = createSkillEffect(event, {
       assets: this.assets,
       log: this.log!,
@@ -325,7 +373,6 @@ export class Battlefield {
       unitY: (id, kind) => this.unitY(id, kind),
     });
     if (!effect) return;
-    if (source) source.actionUntil = performance.now() + 280;
     this.effectsLayer.addChild(effect.sprite);
     this.effects.push(effect);
   }
@@ -349,6 +396,7 @@ export class Battlefield {
 
   private draw(): void {
     const now = performance.now();
+    this.advanceAnimations(now);
     this.drawTransition(now);
     this.resultOverlay.update(now, this.app.screen.width, this.app.screen.height);
     if (!this.log) return;
@@ -364,26 +412,8 @@ export class Battlefield {
     this.drawSkillBars(width, height);
     for (const [id, view] of this.views) {
       const position = view.from + (view.position - view.from) * progress;
-      const moving = Math.abs(view.position - view.from) > 0.001 && progress < 1;
-      const bounce = moving ? Math.sin(progress * Math.PI * 2) * 3 : Math.sin(now / 500 + id) * 1.2;
       view.root.position.set(Math.round(x(position)), Math.round(this.unitY(id, view.kind)));
-      const walking = moving && Math.floor(now / 160) % 2 === 1;
-      view.body.texture = now < view.actionUntil || walking ? view.poses.action : view.poses.idle;
-      view.body.y = 20 + Math.round(bounce);
-      view.body.scale.set(0.18);
-      const hit = Math.max(0, 1 - (now - view.hitAt) / 220);
-      view.body.tint = hit > 0.2 ? 0xffa0a8 : 0xffffff;
-      view.body.x = hit * Math.sin(now / 15) * 3;
-      if (view.deadAt !== undefined) {
-        const death = Math.min(1, (now - view.deadAt) / 450);
-        view.root.alpha = 1 - death;
-        view.body.rotation = death * 0.6;
-        view.body.scale.set(0.18 * (1 + death * 0.3), 0.18 * (1 - death * 0.65));
-        if (death === 1) {
-          view.root.destroy({ children: true });
-          this.views.delete(id);
-        }
-      }
+      this.drawUnit(view, id);
     }
     const subframe = this.subframe(now);
     for (const effect of this.effects) {
@@ -405,5 +435,50 @@ export class Battlefield {
       entry.text.alpha = Math.min(1, (1 - t) * 3);
       return true;
     });
+  }
+
+  private drawUnit(view: View, id: number): void {
+    const time = this.animationTime;
+    const clips = view.poses.animations;
+    let animation: CharacterAnimation = "idle";
+    let elapsed = time;
+    if (view.deadAt !== undefined) {
+      animation = "death";
+      elapsed = time - view.deadAt;
+    } else if (time - view.hitAt < clips.hit.durationMs) {
+      animation = "hit";
+      elapsed = time - view.hitAt;
+    } else if (view.action && time - view.action.startedAt < clips[view.action.kind].durationMs) {
+      animation = view.action.kind;
+      elapsed = time - view.action.startedAt;
+    } else if (view.walking && (this.options.playing || time < view.walkUntil)) {
+      animation = "walk";
+      elapsed = time - view.walkAt;
+    }
+    const clip = clips[animation];
+    const phase = Math.max(0, elapsed) / clip.durationMs;
+    const frame = Math.min(clip.frames.length - 1,
+      Math.floor((clip.loop ? phase % 1 : Math.min(phase, 1)) * clip.frames.length));
+    view.animation = animation;
+    view.body.texture = clip.frames[frame]!;
+    view.body.scale.set(view.poses.scale * view.facing, view.poses.scale);
+    view.body.rotation = 0;
+    view.body.x = 0;
+    view.body.y = 20 + (animation === "idle" ? Math.sin(time / 500 + id) : 0);
+    view.body.tint = animation === "hit" && elapsed < 100 ? 0xffa0a8 : 0xffffff;
+    view.health.visible = view.label.visible = animation !== "death";
+    if (animation === "attack") {
+      view.body.x = Math.sin(Math.min(1, phase) * Math.PI) * 7 * view.facing;
+    }
+    if (animation === "death") {
+      // Hold the fallen pose briefly, then fade it; never loop a death clip.
+      const fade = Math.max(0, Math.min(1, (elapsed - clip.durationMs) / 200));
+      view.root.alpha = 1 - fade;
+      view.shadow.alpha = 1 - fade;
+      if (fade === 1) {
+        view.root.destroy({ children: true });
+        this.views.delete(id);
+      }
+    }
   }
 }

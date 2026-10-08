@@ -243,20 +243,1274 @@
         318
       ],
       "alignment": "center"
+    },
+    "mage-walk-0": {
+      "image": "mage-animations.png",
+      "frame": [
+        49,
+        64,
+        217,
+        226
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        71.5,
+        74
+      ]
+    },
+    "mage-walk-1": {
+      "image": "mage-animations.png",
+      "frame": [
+        326,
+        64,
+        208,
+        226
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        76.0,
+        74
+      ]
+    },
+    "mage-walk-2": {
+      "image": "mage-animations.png",
+      "frame": [
+        585,
+        64,
+        215,
+        226
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        72.5,
+        74
+      ]
+    },
+    "mage-walk-3": {
+      "image": "mage-animations.png",
+      "frame": [
+        860,
+        64,
+        217,
+        226
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        71.5,
+        74
+      ]
+    },
+    "mage-cast-0": {
+      "image": "mage-animations.png",
+      "frame": [
+        19,
+        314,
+        224,
+        242
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        68.0,
+        58
+      ]
+    },
+    "mage-cast-1": {
+      "image": "mage-animations.png",
+      "frame": [
+        304,
+        329,
+        244,
+        227
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        58.0,
+        73
+      ]
+    },
+    "mage-cast-2": {
+      "image": "mage-animations.png",
+      "frame": [
+        563,
+        344,
+        292,
+        212
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        34.0,
+        88
+      ]
+    },
+    "mage-cast-3": {
+      "image": "mage-animations.png",
+      "frame": [
+        866,
+        345,
+        224,
+        211
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        68.0,
+        89
+      ]
+    },
+    "mage-attack-0": {
+      "image": "mage-animations.png",
+      "frame": [
+        28,
+        585,
+        226,
+        233
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        67.0,
+        66
+      ]
+    },
+    "mage-attack-1": {
+      "image": "mage-animations.png",
+      "frame": [
+        286,
+        598,
+        267,
+        219
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        46.5,
+        79
+      ]
+    },
+    "mage-attack-2": {
+      "image": "mage-animations.png",
+      "frame": [
+        580,
+        612,
+        282,
+        207
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        39.0,
+        93
+      ]
+    },
+    "mage-attack-3": {
+      "image": "mage-animations.png",
+      "frame": [
+        874,
+        604,
+        219,
+        215
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        70.5,
+        85
+      ]
+    },
+    "mage-hit-0": {
+      "image": "mage-animations.png",
+      "frame": [
+        24,
+        841,
+        242,
+        246
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        59.0,
+        54
+      ]
+    },
+    "mage-hit-1": {
+      "image": "mage-animations.png",
+      "frame": [
+        293,
+        862,
+        240,
+        225
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        60.0,
+        75
+      ]
+    },
+    "mage-hit-2": {
+      "image": "mage-animations.png",
+      "frame": [
+        593,
+        871,
+        235,
+        216
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        62.5,
+        84
+      ]
+    },
+    "mage-hit-3": {
+      "image": "mage-animations.png",
+      "frame": [
+        873,
+        865,
+        208,
+        222
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        76.0,
+        78
+      ]
+    },
+    "mage-death-0": {
+      "image": "mage-animations.png",
+      "frame": [
+        40,
+        1133,
+        235,
+        207
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        62.5,
+        93
+      ]
+    },
+    "mage-death-1": {
+      "image": "mage-animations.png",
+      "frame": [
+        302,
+        1172,
+        231,
+        168
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        64.5,
+        132
+      ]
+    },
+    "mage-death-2": {
+      "image": "mage-animations.png",
+      "frame": [
+        546,
+        1203,
+        288,
+        136
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        36.0,
+        163
+      ]
+    },
+    "mage-death-3": {
+      "image": "mage-animations.png",
+      "frame": [
+        847,
+        1230,
+        252,
+        110
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        54.0,
+        190
+      ]
+    },
+    "slime-walk-0": {
+      "image": "slime-animations.png",
+      "frame": [
+        50,
+        144,
+        237,
+        146
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        61.5,
+        152
+      ]
+    },
+    "slime-walk-1": {
+      "image": "slime-animations.png",
+      "frame": [
+        374,
+        52,
+        202,
+        238
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        79.0,
+        60
+      ]
+    },
+    "slime-walk-2": {
+      "image": "slime-animations.png",
+      "frame": [
+        654,
+        52,
+        259,
+        186
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        50.5,
+        60
+      ]
+    },
+    "slime-walk-3": {
+      "image": "slime-animations.png",
+      "frame": [
+        966,
+        173,
+        242,
+        119
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        59.0,
+        181
+      ]
+    },
+    "slime-cast-0": {
+      "image": "slime-animations.png",
+      "frame": [
+        43,
+        356,
+        239,
+        190
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        60.5,
+        110
+      ]
+    },
+    "slime-cast-1": {
+      "image": "slime-animations.png",
+      "frame": [
+        352,
+        306,
+        247,
+        236
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        56.5,
+        60
+      ]
+    },
+    "slime-cast-2": {
+      "image": "slime-animations.png",
+      "frame": [
+        636,
+        365,
+        331,
+        178
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        14.5,
+        119
+      ]
+    },
+    "slime-cast-3": {
+      "image": "slime-animations.png",
+      "frame": [
+        967,
+        354,
+        244,
+        192
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        58.0,
+        108
+      ]
+    },
+    "slime-attack-0": {
+      "image": "slime-animations.png",
+      "frame": [
+        57,
+        612,
+        212,
+        156
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        74.0,
+        141
+      ]
+    },
+    "slime-attack-1": {
+      "image": "slime-animations.png",
+      "frame": [
+        339,
+        599,
+        262,
+        171
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        49.0,
+        128
+      ]
+    },
+    "slime-attack-2": {
+      "image": "slime-animations.png",
+      "frame": [
+        629,
+        613,
+        329,
+        144
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        15.5,
+        142
+      ]
+    },
+    "slime-attack-3": {
+      "image": "slime-animations.png",
+      "frame": [
+        989,
+        603,
+        219,
+        168
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        70.5,
+        132
+      ]
+    },
+    "slime-hit-0": {
+      "image": "slime-animations.png",
+      "frame": [
+        52,
+        817,
+        210,
+        191
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        75.0,
+        109
+      ]
+    },
+    "slime-hit-1": {
+      "image": "slime-animations.png",
+      "frame": [
+        367,
+        838,
+        235,
+        170
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        62.5,
+        130
+      ]
+    },
+    "slime-hit-2": {
+      "image": "slime-animations.png",
+      "frame": [
+        665,
+        852,
+        232,
+        156
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        64.0,
+        144
+      ]
+    },
+    "slime-hit-3": {
+      "image": "slime-animations.png",
+      "frame": [
+        985,
+        839,
+        214,
+        169
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        73.0,
+        131
+      ]
+    },
+    "slime-death-0": {
+      "image": "slime-animations.png",
+      "frame": [
+        41,
+        1046,
+        258,
+        180
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        51.0,
+        120
+      ]
+    },
+    "slime-death-1": {
+      "image": "slime-animations.png",
+      "frame": [
+        350,
+        1083,
+        251,
+        143
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        54.5,
+        157
+      ]
+    },
+    "slime-death-2": {
+      "image": "slime-animations.png",
+      "frame": [
+        656,
+        1139,
+        248,
+        87
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        56.0,
+        213
+      ]
+    },
+    "slime-death-3": {
+      "image": "slime-animations.png",
+      "frame": [
+        963,
+        1145,
+        253,
+        81
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        53.5,
+        219
+      ]
+    },
+    "goblin-walk-0": {
+      "image": "goblin-animations.png",
+      "frame": [
+        35,
+        54,
+        236,
+        223
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        62.0,
+        76
+      ]
+    },
+    "goblin-walk-1": {
+      "image": "goblin-animations.png",
+      "frame": [
+        320,
+        55,
+        219,
+        222
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        70.5,
+        77
+      ]
+    },
+    "goblin-walk-2": {
+      "image": "goblin-animations.png",
+      "frame": [
+        582,
+        55,
+        235,
+        222
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        62.5,
+        77
+      ]
+    },
+    "goblin-walk-3": {
+      "image": "goblin-animations.png",
+      "frame": [
+        866,
+        52,
+        225,
+        226
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        67.5,
+        74
+      ]
+    },
+    "goblin-cast-0": {
+      "image": "goblin-animations.png",
+      "frame": [
+        35,
+        323,
+        228,
+        224
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        66.0,
+        75
+      ]
+    },
+    "goblin-cast-1": {
+      "image": "goblin-animations.png",
+      "frame": [
+        306,
+        318,
+        238,
+        229
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        61.0,
+        70
+      ]
+    },
+    "goblin-cast-2": {
+      "image": "goblin-animations.png",
+      "frame": [
+        582,
+        329,
+        265,
+        219
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        47.5,
+        81
+      ]
+    },
+    "goblin-cast-3": {
+      "image": "goblin-animations.png",
+      "frame": [
+        847,
+        323,
+        244,
+        224
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        58.0,
+        75
+      ]
+    },
+    "goblin-attack-0": {
+      "image": "goblin-animations.png",
+      "frame": [
+        26,
+        574,
+        236,
+        248
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        62.0,
+        49
+      ]
+    },
+    "goblin-attack-1": {
+      "image": "goblin-animations.png",
+      "frame": [
+        295,
+        583,
+        248,
+        240
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        56.0,
+        58
+      ]
+    },
+    "goblin-attack-2": {
+      "image": "goblin-animations.png",
+      "frame": [
+        573,
+        611,
+        293,
+        214
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        33.5,
+        86
+      ]
+    },
+    "goblin-attack-3": {
+      "image": "goblin-animations.png",
+      "frame": [
+        866,
+        606,
+        235,
+        218
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        62.5,
+        81
+      ]
+    },
+    "goblin-hit-0": {
+      "image": "goblin-animations.png",
+      "frame": [
+        21,
+        878,
+        254,
+        218
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        53.0,
+        81
+      ]
+    },
+    "goblin-hit-1": {
+      "image": "goblin-animations.png",
+      "frame": [
+        292,
+        869,
+        263,
+        227
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        48.5,
+        72
+      ]
+    },
+    "goblin-hit-2": {
+      "image": "goblin-animations.png",
+      "frame": [
+        593,
+        895,
+        237,
+        202
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        61.5,
+        98
+      ]
+    },
+    "goblin-hit-3": {
+      "image": "goblin-animations.png",
+      "frame": [
+        883,
+        868,
+        212,
+        228
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        74.0,
+        71
+      ]
+    },
+    "goblin-death-0": {
+      "image": "goblin-animations.png",
+      "frame": [
+        52,
+        1132,
+        206,
+        219
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        77.0,
+        70
+      ]
+    },
+    "goblin-death-1": {
+      "image": "goblin-animations.png",
+      "frame": [
+        298,
+        1173,
+        241,
+        181
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        59.5,
+        111
+      ]
+    },
+    "goblin-death-2": {
+      "image": "goblin-animations.png",
+      "frame": [
+        554,
+        1222,
+        258,
+        135
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        51.0,
+        160
+      ]
+    },
+    "goblin-death-3": {
+      "image": "goblin-animations.png",
+      "frame": [
+        829,
+        1239,
+        276,
+        123
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "alignment": "feet",
+      "offset": [
+        42.0,
+        177
+      ]
     }
   },
   "characters": {
     "Player": {
-      "idle": "mage-idle",
-      "action": "mage-action"
+      "scale": 0.27,
+      "animations": {
+        "walk": {
+          "frames": [
+            "mage-walk-0",
+            "mage-walk-1",
+            "mage-walk-2",
+            "mage-walk-3"
+          ],
+          "durationMs": 480,
+          "loop": true
+        },
+        "cast": {
+          "frames": [
+            "mage-cast-0",
+            "mage-cast-1",
+            "mage-cast-2",
+            "mage-cast-3"
+          ],
+          "durationMs": 360,
+          "loop": false
+        },
+        "attack": {
+          "frames": [
+            "mage-attack-0",
+            "mage-attack-1",
+            "mage-attack-2",
+            "mage-attack-3"
+          ],
+          "durationMs": 280,
+          "loop": false
+        },
+        "hit": {
+          "frames": [
+            "mage-hit-0",
+            "mage-hit-1",
+            "mage-hit-2",
+            "mage-hit-3"
+          ],
+          "durationMs": 240,
+          "loop": false
+        },
+        "death": {
+          "frames": [
+            "mage-death-0",
+            "mage-death-1",
+            "mage-death-2",
+            "mage-death-3"
+          ],
+          "durationMs": 600,
+          "loop": false
+        },
+        "idle": {
+          "frames": [
+            "mage-walk-0"
+          ],
+          "durationMs": 1000,
+          "loop": true
+        }
+      }
     },
     "Slime": {
-      "idle": "slime-idle",
-      "action": "slime-action"
+      "scale": 0.24,
+      "animations": {
+        "walk": {
+          "frames": [
+            "slime-walk-0",
+            "slime-walk-1",
+            "slime-walk-2",
+            "slime-walk-3"
+          ],
+          "durationMs": 480,
+          "loop": true
+        },
+        "cast": {
+          "frames": [
+            "slime-cast-0",
+            "slime-cast-1",
+            "slime-cast-2",
+            "slime-cast-3"
+          ],
+          "durationMs": 360,
+          "loop": false
+        },
+        "attack": {
+          "frames": [
+            "slime-attack-0",
+            "slime-attack-1",
+            "slime-attack-2",
+            "slime-attack-3"
+          ],
+          "durationMs": 280,
+          "loop": false
+        },
+        "hit": {
+          "frames": [
+            "slime-hit-0",
+            "slime-hit-1",
+            "slime-hit-2",
+            "slime-hit-3"
+          ],
+          "durationMs": 240,
+          "loop": false
+        },
+        "death": {
+          "frames": [
+            "slime-death-0",
+            "slime-death-1",
+            "slime-death-2",
+            "slime-death-3"
+          ],
+          "durationMs": 600,
+          "loop": false
+        },
+        "idle": {
+          "frames": [
+            "slime-walk-0"
+          ],
+          "durationMs": 1000,
+          "loop": true
+        }
+      }
     },
     "Goblin": {
-      "idle": "goblin-idle",
-      "action": "goblin-action"
+      "scale": 0.27,
+      "animations": {
+        "walk": {
+          "frames": [
+            "goblin-walk-0",
+            "goblin-walk-1",
+            "goblin-walk-2",
+            "goblin-walk-3"
+          ],
+          "durationMs": 480,
+          "loop": true
+        },
+        "cast": {
+          "frames": [
+            "goblin-cast-0",
+            "goblin-cast-1",
+            "goblin-cast-2",
+            "goblin-cast-3"
+          ],
+          "durationMs": 360,
+          "loop": false
+        },
+        "attack": {
+          "frames": [
+            "goblin-attack-0",
+            "goblin-attack-1",
+            "goblin-attack-2",
+            "goblin-attack-3"
+          ],
+          "durationMs": 280,
+          "loop": false
+        },
+        "hit": {
+          "frames": [
+            "goblin-hit-0",
+            "goblin-hit-1",
+            "goblin-hit-2",
+            "goblin-hit-3"
+          ],
+          "durationMs": 240,
+          "loop": false
+        },
+        "death": {
+          "frames": [
+            "goblin-death-0",
+            "goblin-death-1",
+            "goblin-death-2",
+            "goblin-death-3"
+          ],
+          "durationMs": 600,
+          "loop": false
+        },
+        "idle": {
+          "frames": [
+            "goblin-walk-0"
+          ],
+          "durationMs": 1000,
+          "loop": true
+        }
+      }
     }
   },
   "effects": {

@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: production transparent pixel-art character animation sprite sheet.
+Input image 1 is a STYLE AND CHARACTER IDENTITY reference only. Make a NEW sheet for ONLY the blue-hatted white-haired mage in the reference; do not include the goblin, slime, fireballs or other standalone effects.
+Exactly 4 columns by 5 rows, 20 separate full-body sprites, uniformly sized equal cells, all facing RIGHT. Transparent background, no grid, no lettering, no labels. Keep every pose fully inside its own cell with generous transparent gutter. Consistent body size and same horizontal pivot and ground baseline across cells. Same blue hat, blue cape and robe, brown boots and wooden cyan crystal staff, same crisp pixel clusters and dark outlines as reference.
+Each row is a left-to-right four-frame animation:
+Row 1 WALK: left-foot contact, passing, right-foot contact, passing, cape sways, staff steady. Seamless cycle.
+Row 2 CAST: staff raises, charge at tip, extends forward releasing magic, recovery. No detached projectile.
+Row 3 ATTACK: pulls staff back, swings it forward, fully extended staff strike, recovers.
+Row 4 HIT: sudden backward recoil, strongest flinch eyes shut, regains footing, almost upright.
+Row 5 DEATH: knees buckle, collapses sideways, lies low on ground, final still fallen mage with hat and staff on ground. No gore. Do not stand upright again.
+Critical: 4 equal columns and 5 equal rows; exactly twenty sprites, not a contact sheet with captions. Genuine transparent alpha. Match reference identity.
