@@ -9,4 +9,5 @@ export type PlayerDefinition = {
   defaultState: PlayerState;
   loot: Loot.Definition;
   levelXP: number[];
+  inventoryCapacity: number;
 };

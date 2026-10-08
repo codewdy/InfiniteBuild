@@ -1,6 +1,7 @@
 import type { GameData } from "./game-data.js";
 import { RandomGenerator } from "./random-generator.js";
 import { PlayerManager } from "./player/manager.js";
+import type { BattleSettlement } from "./player/manager.js";
 import type { BattleSpec } from "./battle/battle.js";
 import type { PlayerState } from "./player/state.js";
 import { stateValidate } from "./player/state-validate.js";
@@ -52,16 +53,18 @@ export class Game {
     return structuredClone(this.activeBattle);
   }
 
-  battleResult(result: Game.BattleResult): void {
+  battleResult(result: Game.BattleResult): BattleSettlement {
     if (!this.activeBattle || this.activeBattle.uuid !== result.uuid) {
       throw new Error("Battle result does not match the active battle.");
     }
-    this.state = this.playerManager.settleBattle(
+    const settlement = this.playerManager.settleBattle(
       this.activeBattle.spec,
       result,
       this.state,
     );
+    this.state = settlement.player;
     this.activeBattle = undefined;
+    return structuredClone(settlement);
   }
 
   getState(): PlayerState {

@@ -4,6 +4,14 @@ import type { BattleSpec } from "../battle/battle.js";
 import type { GameData } from "../game-data.js";
 import type { Game } from "../game.js";
 import type { PlayerState } from "./state.js";
+import type { Item } from "./item/item.js";
+
+export type BattleSettlement = {
+  player: PlayerState;
+  items: Item[];
+  pendingLoot: Loot.LootItem[];
+  xpGain: number;
+};
 
 export class PlayerManager {
   constructor(
@@ -12,34 +20,60 @@ export class PlayerManager {
   ) {}
 
   initPlayer(): PlayerState {
-    return structuredClone(this.data.playerDefinition.defaultState);
+    const player = structuredClone(this.data.playerDefinition.defaultState);
+    while (player.inventory.length < this.data.playerDefinition.inventoryCapacity) {
+      player.inventory.push(null);
+    }
+    return player;
   }
   settleBattle(
     battle: BattleSpec,
     result: Game.BattleResult,
     player: PlayerState,
-  ): PlayerState {
+  ): BattleSettlement {
     const next = structuredClone(player);
-    this.loot(result, next);
+    const { items, pendingLoot } = this.loot(result, next);
     this.gainXP(battle, result, next);
-    return next;
+    return { player: next, items, pendingLoot, xpGain: next.xp - player.xp };
   }
-  loot(result: Game.BattleResult, player: PlayerState): void {
-    if (result.result !== "Victory") return;
-    const items = Loot.generateLoots(this.data, this.rng, player).map((loot) =>
-      Loot.generateLoot(this.data, this.rng, loot),
-    );
+  loot(
+    result: Game.BattleResult,
+    player: PlayerState,
+  ): Pick<BattleSettlement, "items" | "pendingLoot"> {
+    const items: Item[] = [];
+    const pendingLoot: Loot.LootItem[] = [];
+    if (result.result !== "Victory") return { items, pendingLoot };
+    const loots = Loot.generateLoots(this.data, this.rng, player);
+    const capacity = this.data.playerDefinition.inventoryCapacity;
     let slot = 0;
-    for (const item of items) {
-      while (
-        slot < player.inventory.length &&
-        player.inventory[slot] !== null
-      ) {
+    for (const loot of loots) {
+      while (slot < capacity && player.inventory[slot] != null) {
         slot += 1;
       }
+      if (slot >= capacity) {
+        this.addPendingLoot(player.pendingLoot, loot);
+        pendingLoot.push(loot);
+        continue;
+      }
+      const item = Loot.generateLoot(this.data, this.rng, loot);
       player.inventory[slot] = item;
+      items.push(item);
       slot += 1;
     }
+    return { items, pendingLoot };
+  }
+  private addPendingLoot(
+    pendingLoot: PlayerState["pendingLoot"],
+    loot: Loot.LootItem,
+  ): void {
+    const stack = pendingLoot.find(
+      (entry) =>
+        entry.loot.kind === loot.kind &&
+        entry.loot.rarity === loot.rarity &&
+        entry.loot.level === loot.level,
+    );
+    if (stack) stack.count += 1;
+    else pendingLoot.push({ loot: { ...loot }, count: 1 });
   }
   gainXP(
     battle: BattleSpec,

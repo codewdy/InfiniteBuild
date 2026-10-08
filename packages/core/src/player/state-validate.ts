@@ -99,7 +99,16 @@ namespace validator {
     }
     return undefined;
   }
-  export const validators = { inventory, tablet };
+  export function pendingLoot(
+    src: PlayerState,
+    dst: PlayerState,
+  ): string | undefined {
+    if (!deepEqual(src.pendingLoot, dst.pendingLoot)) {
+      return "Pending loot must not change.";
+    }
+    return undefined;
+  }
+  export const validators = { inventory, tablet, pendingLoot };
 }
 
 export function stateValidate(

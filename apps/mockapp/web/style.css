@@ -533,3 +533,47 @@ pre {
   background: #482432;
   box-shadow: 0 0 18px #ff819419;
 }
+
+.pending-loot {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid #2c3950;
+}
+#pending-loot-list {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.pending-loot-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid #416292;
+  border-radius: 8px;
+  background: #17243a;
+}
+.pending-loot-item div {
+  display: grid;
+  gap: 4px;
+}
+.pending-loot-item span,
+.pending-loot-empty {
+  color: #a4b1c8;
+  font-size: 13px;
+}
+.pending-loot-item[data-rarity="rare"] {
+  border-color: #89703b;
+  background: #2c281e;
+}
+.pending-loot-item[data-rarity="rare"] strong {
+  color: #edce85;
+}
+.add-tablet:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: none;
+}

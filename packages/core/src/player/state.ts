@@ -4,6 +4,7 @@ import type { UnitSkills } from "../battle/combat/skill-trigger.js";
 import { Status } from "../battle/combat/status.js";
 import { tabletRun } from "./tablet/runner.js";
 import type { Inventory } from "./item/inventory.js";
+import type { Loot } from "./loot.js";
 
 export type PlayerCombatProfile = {
   move: PlayerState["move"];
@@ -23,6 +24,10 @@ export type PlayerState = {
   };
   tablets: TabletSpec.Slot[];
   inventory: Inventory;
+  pendingLoot: {
+    loot: Loot.LootItem;
+    count: number;
+  }[];
 };
 
 export function derivePlayerCombatProfile(

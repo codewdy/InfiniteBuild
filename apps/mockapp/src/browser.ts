@@ -41,6 +41,7 @@ const skillNames = Object.fromEntries(
   Object.entries(gameData.skillDefinitions).map(([id, definition]) => [id, definition.name]),
 );
 const game = new Game(gameData);
+const inventoryCapacity = gameData.playerDefinition.inventoryCapacity;
 let round = 1;
 function tabletName(tablet: TabletSpec.Tablet): string {
   if (tablet.kind === "passive") return "生命石板";
@@ -171,6 +172,24 @@ trash.addEventListener("click", () => {
     tabletMessage.textContent = "将石板拖入垃圾箱，或先选中石板再点击垃圾箱。";
 });
 
+function addTabletToInventory(
+  state: PlayerState,
+  tablet: TabletSpec.Tablet,
+  message: string,
+): void {
+  const empty = state.inventory.findIndex(
+    (item, index) => index < inventoryCapacity && item === null,
+  );
+  if (empty < 0) {
+    tabletMessage.textContent = "背包已满，请先装备或删除石板腾出空间。";
+    tabletMessage.dataset.error = "true";
+    return;
+  }
+  state.inventory[empty] = { kind: "tablet", uuid: tablet.uuid, tablet };
+  selectedUuid = undefined;
+  submitState(state, "force", message);
+}
+
 for (const option of tabletOptions) {
   const button = document.createElement("button");
   button.type = "button";
@@ -186,12 +205,7 @@ for (const option of tabletOptions) {
       skill: option.kind,
       rotate: 0,
     };
-    const item = { kind: "tablet" as const, uuid: tablet.uuid, tablet };
-    const empty = state.inventory.indexOf(null);
-    if (empty < 0) state.inventory.push(item);
-    else state.inventory[empty] = item;
-    selectedUuid = undefined;
-    submitState(state, "force", `${option.name}已加入背包`);
+    addTabletToInventory(state, tablet, `${option.name}已加入背包`);
   });
   element("tablet-add-actions").append(button);
 }
@@ -207,12 +221,7 @@ hasteButton.addEventListener("click", () => {
   const state = game.getState();
   const tablet = createSupportTablet(state.inventory.length);
   tablet.uuid = crypto.randomUUID();
-  const item = { kind: "tablet" as const, uuid: tablet.uuid, tablet };
-  const empty = state.inventory.indexOf(null);
-  if (empty < 0) state.inventory.push(item);
-  else state.inventory[empty] = item;
-  selectedUuid = undefined;
-  submitState(state, "force", "技能急速已加入背包");
+  addTabletToInventory(state, tablet, "技能急速已加入背包");
 });
 element("tablet-add-actions").append(hasteButton);
 
@@ -226,12 +235,7 @@ lifeButton.addEventListener("click", () => {
   const state = game.getState();
   const tablet = createPassiveTablet(state.inventory.length);
   tablet.uuid = crypto.randomUUID();
-  const item = { kind: "tablet" as const, uuid: tablet.uuid, tablet };
-  const empty = state.inventory.indexOf(null);
-  if (empty < 0) state.inventory.push(item);
-  else state.inventory[empty] = item;
-  selectedUuid = undefined;
-  submitState(state, "force", "生命石板已加入背包");
+  addTabletToInventory(state, tablet, "生命石板已加入背包");
 });
 element("tablet-add-actions").append(lifeButton);
 
@@ -248,14 +252,9 @@ for (const option of passiveTabletOptions) {
   button.addEventListener("click", () => {
     const state = game.getState();
     const tablet = rollPassiveTablet(passiveRng, option.level);
-    const item = { kind: "tablet" as const, uuid: tablet.uuid, tablet };
-    const empty = state.inventory.indexOf(null);
-    if (empty < 0) state.inventory.push(item);
-    else state.inventory[empty] = item;
-    selectedUuid = undefined;
-    submitState(
+    addTabletToInventory(
       state,
-      "force",
+      tablet,
       `${option.name}被动石板（等级 ${option.level}）已加入背包`,
     );
   });
@@ -492,7 +491,7 @@ function createSlot(
 function renderTablets(): void {
   if (draggingUuid) return;
   const state = game.getState();
-  const key = JSON.stringify([state.tablets, state.inventory, selectedUuid]);
+  const key = JSON.stringify([state.tablets, state.inventory, state.pendingLoot, selectedUuid]);
   if (key === renderedLoadout) return;
   renderedLoadout = key;
   const supportedBy = new Map<number, number[]>();
@@ -520,12 +519,45 @@ function renderTablets(): void {
     ),
   );
   element("inventory-list").replaceChildren(
-    ...Array.from({ length: state.inventory.length + 1 }, (_, index) =>
+    ...Array.from({ length: inventoryCapacity }, (_, index) =>
       createSlot(state, { area: "inventory", index }),
     ),
   );
-  element("inventory-count").textContent =
-    `${state.inventory.filter((item) => item !== null).length} 块石板`;
+  const used = state.inventory.slice(0, inventoryCapacity).filter((item) => item !== null).length;
+  element("inventory-count").textContent = `${used} / ${inventoryCapacity} 格`;
+  element("tablet-add-actions").querySelectorAll<HTMLButtonElement>("button").forEach((button) => {
+    button.disabled = used >= inventoryCapacity;
+  });
+  const lootNames: Record<PlayerState["pendingLoot"][number]["loot"]["kind"], string> = {
+    "tablet-skill": "技能石板",
+    "tablet-passive": "被动石板",
+    "tablet-support-skill": "技能辅助石板",
+    "tablet-support-passive": "被动辅助石板",
+  };
+  element("pending-loot-count").textContent =
+    `${state.pendingLoot.reduce((total, entry) => total + entry.count, 0)} 件`;
+  const rows = state.pendingLoot.map(({ loot, count }) => {
+    const row = document.createElement("li");
+    row.className = "pending-loot-item";
+    row.dataset.rarity = loot.rarity;
+    const details = document.createElement("div");
+    const name = document.createElement("strong");
+    name.textContent = lootNames[loot.kind];
+    const description = document.createElement("span");
+    description.textContent = `${loot.rarity === "magic" ? "魔法" : "稀有"} · 等级 ${loot.level}`;
+    details.append(name, description);
+    const amount = document.createElement("strong");
+    amount.textContent = `× ${count}`;
+    row.append(details, amount);
+    return row;
+  });
+  if (rows.length === 0) {
+    const empty = document.createElement("li");
+    empty.className = "pending-loot-empty";
+    empty.textContent = "暂无待领取掉落";
+    rows.push(empty);
+  }
+  element("pending-loot-list").replaceChildren(...rows);
   updateSupportPreview(supportPreview);
 }
 

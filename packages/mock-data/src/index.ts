@@ -23,6 +23,7 @@ const supportTablet = createSupportTablet(TabletMap.idSize + 4);
 const passiveTablet = createPassiveTablet(TabletMap.idSize + 5);
 
 export const playerState: PlayerState = {
+  pendingLoot: [],
   inventory: [
     ...(["fireball", "nova", "fireball", "nova"] as const).map(
       (kind, index) => {
@@ -55,6 +56,7 @@ export const gameData: GameData = {
   },
   playerDefinition: {
     defaultState: playerState,
+    inventoryCapacity: 20,
     levelXP: [0, 100, 300, 600, 1000],
     loot: {
       min: 1,
