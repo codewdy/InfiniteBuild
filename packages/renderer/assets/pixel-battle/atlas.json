@@ -1659,6 +1659,76 @@
         695
       ],
       "alignment": "center"
+    },
+    "passive-quarter-attack": {
+      "image": "passive-affix-quarters.png",
+      "frame": [
+        16,
+        15,
+        706,
+        694
+      ],
+      "size": [
+        706,
+        706
+      ],
+      "alignment": "center"
+    },
+    "passive-quarter-maxHp": {
+      "image": "passive-affix-quarters.png",
+      "frame": [
+        738,
+        15,
+        705,
+        694
+      ],
+      "size": [
+        705,
+        705
+      ],
+      "alignment": "center"
+    },
+    "passive-quarter-empty": {
+      "image": "passive-affix-quarters.png",
+      "frame": [
+        1459,
+        15,
+        705,
+        694
+      ],
+      "size": [
+        705,
+        705
+      ],
+      "alignment": "center"
+    },
+    "tablet-passive-magic": {
+      "image": "passive-rarities.png",
+      "frame": [
+        106,
+        118,
+        669,
+        675
+      ],
+      "size": [
+        675,
+        675
+      ],
+      "alignment": "center"
+    },
+    "tablet-passive-rare": {
+      "image": "passive-rarities.png",
+      "frame": [
+        993,
+        118,
+        669,
+        675
+      ],
+      "size": [
+        675,
+        675
+      ],
+      "alignment": "center"
     }
   },
   "characters": {
@@ -1888,10 +1958,19 @@
     "support-skill": "tablet-support",
     "support-passive": "tablet-support",
     "pending": "fantasy-pending",
-    "xp": "fantasy-xp"
+    "xp": "fantasy-xp",
+    "passive-quarter-empty": "passive-quarter-empty",
+    "passive-magic": "tablet-passive-magic",
+    "passive-rare": "tablet-passive-rare"
   },
   "skillTablets": {
     "fireball": "fantasy-fireball",
     "nova": "fantasy-nova"
+  },
+  "affixIcons": {
+    "attack": "passive-quarter-attack",
+    "attackPercent": "passive-quarter-attack",
+    "maxHp": "passive-quarter-maxHp",
+    "maxHpPercent": "passive-quarter-maxHp"
   }
 }

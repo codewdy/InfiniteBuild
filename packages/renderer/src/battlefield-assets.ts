@@ -6,7 +6,7 @@ export type CharacterTextures = {
   scale: number;
   animations: Record<CharacterAnimation, CharacterClip>;
 };
-export type IconName = "fireball" | "nova" | "passive" | "support-skill" | "support-passive" | "pending" | "xp";
+export type IconName = "fireball" | "nova" | "passive" | "passive-magic" | "passive-rare" | "passive-quarter-empty" | "support-skill" | "support-passive" | "pending" | "xp";
 export type IconAsset = {
   image: string;
   frame: [number, number, number, number];
@@ -24,6 +24,7 @@ export type BattlefieldAssets = {
   nova: Texture[];
   attack: Texture[];
   icons: Record<IconName, IconAsset>;
+  affixIcons: Record<string, IconAsset>;
   skillTablets: Record<string, Texture>;
   settlement: SettlementAssets;
 };
@@ -43,6 +44,7 @@ type AtlasManifest = {
   }>;
   effects: { fireball: string[]; nova: string[]; attack: string[] };
   icons: Record<IconName, string>;
+  affixIcons: Record<string, string>;
   skillTablets: Record<string, string>;
   settlement: {
     [K in keyof SettlementAssets]: Record<keyof SettlementAssets[K], string>;
@@ -63,6 +65,10 @@ export function loadBattlefieldAssets(): Promise<BattlefieldAssets> {
 /** HTML UI and Pixi settlements share the same icon regions and source images. */
 export async function loadBattlefieldIcons(): Promise<Record<IconName, IconAsset>> {
   return (await loadBattlefieldAssets()).icons;
+}
+
+export async function loadPassiveAffixIcons(): Promise<Record<string, IconAsset>> {
+  return (await loadBattlefieldAssets()).affixIcons;
 }
 
 async function loadAtlas(): Promise<BattlefieldAssets> {
@@ -105,6 +111,16 @@ async function loadAtlas(): Promise<BattlefieldAssets> {
     if (!result) throw new Error(`Missing battle texture: ${name}`);
     return result;
   };
+  const iconAsset = (key: string): IconAsset => {
+    const entry = manifest.frames[key]!;
+    const source = texture(key).source;
+    return {
+      image: new URL(entry.image ?? manifest.image, base).href,
+      frame: entry.frame,
+      imageWidth: source.width,
+      imageHeight: source.height,
+    };
+  };
   return {
     background,
     characters: Object.fromEntries(Object.entries(manifest.characters).map(([kind, poses]) => [
@@ -122,16 +138,8 @@ async function loadAtlas(): Promise<BattlefieldAssets> {
     nova: manifest.effects.nova.map(texture),
     attack: manifest.effects.attack.map(texture),
     skillTablets: Object.fromEntries(Object.entries(manifest.skillTablets).map(([skill, name]) => [skill, texture(name)])),
-    icons: Object.fromEntries(Object.entries(manifest.icons).map(([name, key]) => {
-      const entry = manifest.frames[key]!;
-      const source = texture(key).source;
-      return [name, {
-        image: new URL(entry.image ?? manifest.image, base).href,
-        frame: entry.frame,
-        imageWidth: source.width,
-        imageHeight: source.height,
-      }];
-    })) as Record<IconName, IconAsset>,
+    icons: Object.fromEntries(Object.entries(manifest.icons).map(([name, key]) => [name, iconAsset(key)])) as Record<IconName, IconAsset>,
+    affixIcons: Object.fromEntries(Object.entries(manifest.affixIcons).map(([name, key]) => [name, iconAsset(key)])),
     settlement: {
       emblems: Object.fromEntries(Object.entries(manifest.settlement.emblems).map(([kind, name]) => [kind, texture(name)])) as SettlementAssets["emblems"],
       rewards: Object.fromEntries(Object.entries(manifest.settlement.rewards).map(([kind, name]) => [kind, texture(name)])) as SettlementAssets["rewards"],

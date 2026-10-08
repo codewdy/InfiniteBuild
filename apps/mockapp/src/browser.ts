@@ -1,5 +1,5 @@
-import { Battlefield, loadBattlefieldIcons } from "@infinite-build/renderer";
-import type { IconName } from "@infinite-build/renderer";
+import { Battlefield, loadBattlefieldIcons, loadPassiveAffixIcons } from "@infinite-build/renderer";
+import type { IconName, IconAsset } from "@infinite-build/renderer";
 import type { BattlefieldResult } from "@infinite-build/renderer";
 import {
   Battle,
@@ -33,9 +33,10 @@ function element<T extends HTMLElement>(id: string): T {
 const canvas = element<HTMLCanvasElement>("battlefield");
 const battlefield = await Battlefield.create(canvas);
 const iconAssets = await loadBattlefieldIcons();
+const passiveAffixIcons = await loadPassiveAffixIcons();
 
-function assetIcon(name: IconName): SVGSVGElement {
-  const asset = iconAssets[name];
+function assetIcon(name: IconName | IconAsset): SVGSVGElement {
+  const asset = typeof name === "string" ? iconAssets[name] : name;
   const [x, y, width, height] = asset.frame;
   const size = Math.max(width, height);
   const namespace = "http://www.w3.org/2000/svg";
@@ -278,7 +279,7 @@ for (const option of passiveTabletOptions) {
   button.className = "add-tablet";
   button.dataset.skill = "tablet-passive";
   button.textContent = `＋ ${option.name}被动石板`;
-  button.title = `等级 ${option.level} · 随机生成 1–2 条生命词缀，最高 T${option.level === 1 ? 1 : option.level === 20 ? 3 : 5}`;
+  button.title = `等级 ${option.level} · 随机生成 1–2 条攻击或生命词缀，最高 T${option.level === 1 ? 1 : option.level === 20 ? 3 : 5}`;
   button.addEventListener("click", () => {
     const state = game.getState();
     const tablet = rollPassiveTablet(passiveRng, option.level);
@@ -396,9 +397,32 @@ function createSlot(
   if (tablet) {
     const iconName: IconName = tablet.kind === "tablet-skill"
       ? (tablet.skill === "nova" ? "nova" : "fireball")
-      : tablet.kind === "tablet-passive" ? "passive"
+      : tablet.kind === "tablet-passive" ? (tablet.rarity === "rare" ? "passive-rare" : "passive-magic")
       : tablet.kind === "tablet-support-skill" ? "support-skill" : "support-passive";
-    icon.append(assetIcon(iconName));
+    const stone = assetIcon(iconName);
+    icon.append(stone);
+    if (tablet.kind === "tablet-passive") {
+      icon.classList.add("passive-tablet-icon");
+      stone.classList.add("passive-tablet-center");
+      for (let quadrant = 0; quadrant < 4; quadrant++) {
+        const affix = tablet.affixes[quadrant];
+        const segment = document.createElement("span");
+        segment.className = "passive-affix-slot";
+        segment.dataset.quadrant = String(quadrant);
+        segment.dataset.empty = String(!affix);
+        if (affix) {
+          segment.dataset.affix = affix.id;
+          segment.dataset.tier = String(affix.tier);
+        }
+        const border = assetIcon(affix
+          ? passiveAffixIcons[affix.id] ?? iconAssets["passive-quarter-empty"]
+          : iconAssets["passive-quarter-empty"]);
+        border.classList.add("passive-affix-icon");
+        border.style.transform = `rotate(${quadrant * 90}deg)`;
+        segment.append(border);
+        icon.append(segment);
+      }
+    }
     if ("rotate" in tablet) icon.style.transform = `rotate(${tablet.rotate}deg)`;
   } else {
     icon.classList.add("empty-slot-icon");

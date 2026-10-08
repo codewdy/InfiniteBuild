@@ -13,6 +13,33 @@ export const passiveAffixes: GameData["affixDefinition"]["tablet"]["passive"] =
       countWeight: [0, 1, 1],
     },
     pool: {
+      attack: {
+        tag: ["tablet-passive"],
+        name: "攻击力",
+        description: (param) => `攻击力 +${formatValue(param)}`,
+        tier: [
+          { min: 2, max: 4 },
+          { min: 5, max: 8 },
+          { min: 10, max: 15 },
+          { min: 18, max: 25 },
+          { min: 30, max: 40 },
+        ],
+        apply: (_ctx, param) => ({ attributes: { attack: { base: param } } }),
+      },
+      attackPercent: {
+        tag: ["tablet-passive"],
+        name: "攻击力提升",
+        description: (param) =>
+          `攻击力提升(add) ${formatValue(param * 100)}%`,
+        tier: [
+          { min: 0.05, max: 0.1 },
+          { min: 0.1, max: 0.15 },
+          { min: 0.15, max: 0.25 },
+          { min: 0.25, max: 0.35 },
+          { min: 0.35, max: 0.5 },
+        ],
+        apply: (_ctx, param) => ({ attributes: { attack: { inc: param } } }),
+      },
       maxHp: {
         tag: ["tablet-passive"],
         name: "最大生命值",

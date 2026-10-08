@@ -1,0 +1,5 @@
+Use case: precise-object-edit.
+Recolor ONLY the decorative rune trim in this two-icon pixel-art passive tablet atlas.
+LEFT MAGIC icon: replace silver-white rune bands, diamond border and round gem settings with saturated BLUE trim, cobalt shadows and bright sky-blue highlights.
+RIGHT RARE icon: replace purple rune bands, diamond border and round gem settings with GOLD trim, amber shadows and bright warm gold highlights.
+Keep BOTH icons' current identical simple shape, stone silhouette, gem positions and ornament layout unchanged. Emerald gems remain green, stone remains blue-gray. No crown, no additional corner gems or caps, no new decorations. Do not add glowing effects or change sizing, spacing or alignment. Preserve crisp chunky pixel illustration and transparent background. Exactly two icons side-by-side. This is only a trim color change: BLUE magic, GOLD rare.

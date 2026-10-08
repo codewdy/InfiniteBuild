@@ -21,6 +21,16 @@ export { passiveAffixes, supportSkillAffixes } from "./affixes.js";
 
 const supportTablet = createSupportTablet(TabletMap.idSize + 4);
 const passiveTablet = createPassiveTablet(TabletMap.idSize + 5);
+const previewPassiveTablet = {
+  ...createPassiveTablet(TabletMap.idSize + 6),
+  rarity: "rare" as const,
+  affixes: [
+    { id: "attack", tier: 0, param: 3 },
+    { id: "attackPercent", tier: 0, param: 0.1 },
+    { id: "maxHp", tier: 0, param: 10 },
+    { id: "maxHpPercent", tier: 0, param: 0.1 },
+  ],
+};
 
 export const playerState: PlayerState = {
   pendingLoot: [],
@@ -30,7 +40,7 @@ export const playerState: PlayerState = {
     ),
     supportTablet,
     passiveTablet,
-    null,
+    previewPassiveTablet,
   ],
   level: 1,
   xp: 0,
