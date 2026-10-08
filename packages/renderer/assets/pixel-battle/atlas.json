@@ -1889,5 +1889,9 @@
     "support-passive": "tablet-support",
     "pending": "fantasy-pending",
     "xp": "fantasy-xp"
+  },
+  "skillTablets": {
+    "fireball": "fantasy-fireball",
+    "nova": "fantasy-nova"
   }
 }

@@ -50,7 +50,14 @@ export class Battlefield {
   private readonly overlay = new Container();
   private readonly skillLayer = new Container();
   private readonly resultOverlay: BattleResultOverlay;
-  private readonly skillBars: { progress: number; track: Graphics; label: Text; color: number }[] = [];
+  private readonly skillBars: {
+    progress: number;
+    castRate: number;
+    root: Container;
+    icon: Sprite;
+    shade: Sprite;
+    mask: Graphics;
+  }[] = [];
   private readonly clip = new Graphics();
   private readonly views = new Map<number, View>();
   private readonly observer: ResizeObserver;
@@ -61,6 +68,9 @@ export class Battlefield {
   private updatedAt = 0;
   private timelineAt = 0;
   private frameOffset = 0;
+  private skillFrameOffset = 0;
+  private skillTimelineAt = 0;
+  private skillProgressPlaying = false;
   private origin = 0;
   private fromOrigin = 0;
   private destroyed = false;
@@ -118,6 +128,11 @@ export class Battlefield {
     // UI changes must not replay events or rewind effects when pausing.
     if (this.log === log) {
       this.frameOffset = this.subframe(now);
+      this.skillFrameOffset = this.skillSubframe(now);
+      this.skillTimelineAt = now;
+      if (this.options.playing !== options.playing) {
+        this.skillProgressPlaying = options.playing;
+      }
       this.timelineAt = now;
       if (this.options.playing && !options.playing) this.animateUntil = this.animationTime;
       this.options = options;
@@ -155,6 +170,10 @@ export class Battlefield {
     this.updatedAt = now;
     this.timelineAt = now;
     this.frameOffset = 0;
+    this.skillFrameOffset = log.status === "Running" ? 0 : 1;
+    this.skillTimelineAt = now;
+    // A manual step also plays one complete sweep; pausing freezes its position.
+    this.skillProgressPlaying = log.status === "Running";
     this.options = options;
     // A manual step plays its feedback once; a pause on the same log freezes it.
     // Final death animations can finish while the settlement is displayed.
@@ -209,6 +228,8 @@ export class Battlefield {
     for (const effect of this.effects) effect.sprite.destroy();
     this.effects = [];
     this.log = undefined;
+    this.skillFrameOffset = 0;
+    this.skillProgressPlaying = false;
     this.animationTime = this.animateUntil = 0;
     this.animationUpdatedAt = performance.now();
     this.origin = this.fromOrigin = 0;
@@ -267,46 +288,62 @@ export class Battlefield {
     for (const event of log.events) {
       if (event.kind !== "PlayerSkillProgress") continue;
       const progress = Math.max(0, Math.min(1, event.progress));
-      const color = event.skill === "nova" ? 0xc49aff : 0xffbb73;
-      const track = new Graphics();
+      const texture = this.assets.skillTablets[event.skill] ?? this.assets.settlement.rewards.skill;
+      const root = new Container();
+      const icon = new Sprite({ texture, roundPixels: true });
+      const shade = new Sprite({ texture, tint: 0x000000, alpha: 0.68, roundPixels: true });
+      const mask = new Graphics();
+      icon.anchor.set(0.5);
+      shade.anchor.set(0.5);
+      shade.mask = mask;
       const name = this.options.skillNames?.[event.skill] ?? "未知技能";
-      const label = this.text(`${name}  ${Math.round(progress * 100)}%`, 11, 0xe6ecfa);
-      this.skillLayer.addChild(track, label);
-      this.skillBars.push({ progress, track, label, color });
+      root.label = `${name} ${Math.round(progress * 100)}% (${event.uuid})`;
+      root.addChild(icon, shade, mask);
+      this.skillLayer.addChild(root);
+      this.skillBars.push({ progress, castRate: event.castRate, root, icon, shade, mask });
     }
   }
 
-  private drawSkillBars(width: number, height: number): void {
+  private drawSkillBars(width: number, height: number, frameProgress: number): void {
     const padding = 12;
     const gap = 8;
-    const itemWidth = Math.min(116, Math.max(1, width - padding * 2));
+    const itemWidth = Math.min(44, Math.max(1, width - padding * 2));
     const columns = Math.max(1, Math.min(this.skillBars.length, Math.floor((width - padding * 2 + gap) / (itemWidth + gap))));
     const rows = Math.ceil(this.skillBars.length / columns);
     for (const [index, bar] of this.skillBars.entries()) {
+      // The log is the end of this frame. Sweep forward by castRate to reach it.
+      const accumulated = bar.progress - bar.castRate * (1 - frameProgress);
+      const progress = frameProgress >= 1 || bar.castRate === 0
+        ? bar.progress : ((accumulated % 1) + 1) % 1;
       const x = padding + (index % columns) * (itemWidth + gap);
-      const y = height - padding - (rows - Math.floor(index / columns)) * 32;
-      const centerX = x + 12;
-      const centerY = y + 16;
-      const radius = 12;
-      bar.track.clear().circle(centerX, centerY, radius).fill(0x34425a);
-      if (bar.progress >= 1) {
-        bar.track.circle(centerX, centerY, radius).fill(bar.color);
-      } else if (bar.progress > 0) {
-        // Start at twelve o'clock and fill clockwise using the logged cast progress.
-        bar.track.moveTo(centerX, centerY)
-          .arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * bar.progress)
-          .closePath().fill(bar.color);
+      const y = height - padding - (rows - Math.floor(index / columns)) * (itemWidth + gap) + gap;
+      bar.root.position.set(x + itemWidth / 2, y + itemWidth / 2);
+      bar.icon.width = bar.icon.height = itemWidth;
+      bar.shade.width = bar.shade.height = itemWidth;
+      // The dark copy preserves the stone's transparent silhouette. The sector
+      // reveals it clockwise from twelve o'clock as the logged progress fills.
+      const radius = itemWidth / Math.SQRT2 + 1;
+      bar.mask.clear();
+      bar.shade.visible = progress < 1;
+      if (progress <= 0) {
+        bar.mask.circle(0, 0, radius).fill(0xffffff);
+      } else if (progress < 1) {
+        bar.mask.moveTo(0, 0)
+          .arc(0, 0, radius, -Math.PI / 2 + Math.PI * 2 * progress, Math.PI * 1.5)
+          .closePath().fill(0xffffff);
       }
-      bar.track.circle(centerX, centerY, radius).stroke({ color: bar.color, width: 1, alpha: 0.7 });
-      bar.label.position.set(x + 30, y + 9);
-      bar.label.scale.set(1);
-      bar.label.scale.set(Math.min(1, Math.max(1, itemWidth - 30) / bar.label.width));
     }
   }
 
   private subframe(now: number): number {
     return Math.min(1, this.frameOffset + (this.options.playing
       ? Math.max(0, now - this.timelineAt) / this.options.frameDuration
+      : 0));
+  }
+
+  private skillSubframe(now: number): number {
+    return Math.min(1, this.skillFrameOffset + (this.skillProgressPlaying
+      ? Math.max(0, now - this.skillTimelineAt) / this.options.frameDuration
       : 0));
   }
 
@@ -410,7 +447,7 @@ export class Battlefield {
     const x = (position: number) => left + (position - origin + 2) / (this.options.vision + 4) * (right - left);
     this.drawBackground(origin, width, height, (right - left) / (this.options.vision + 4));
     this.clip.clear().rect(0, 0, width, height).fill(0xffffff);
-    this.drawSkillBars(width, height);
+    this.drawSkillBars(width, height, this.skillSubframe(now));
     for (const [id, view] of this.views) {
       const position = view.from + (view.position - view.from) * progress;
       view.root.position.set(Math.round(x(position)), Math.round(this.unitY(id, view.kind)));

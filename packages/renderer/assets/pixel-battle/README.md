@@ -2,6 +2,10 @@
 
 The active art direction is **chibi fantasy pixel illustration**: chunky dark outlines, readable exaggerated silhouettes, saturated jewel colors, and stepped pixel highlights. The character reference is `atlas.png`.
 
+The battle skill-progress HUD uses `skillTablets` mappings from the same atlas as inventory icons. Each equipped skill instance has its own tablet with a dark duplicate clipped by a pie-sector mask: 0% is fully shaded, progress reveals the icon clockwise from the top, and 100% is fully visible. The overlay follows the tablet's alpha silhouette and contains no separate percentage label. HUD resets destroy display objects while retaining shared textures.
+
+Each logged skill progress is the endpoint of its displayed frame. During that frame, the HUD advances from `progress - castRate` to `progress`, wrapping at one (including multiple wraps for rates above one). Manual steps play one sweep, pause/resume preserves the fraction already shown, and the next log supplies the authoritative endpoint.
+
 `tablet-roles.png` contains the current support and passive tablet icons, generated with the built-in image_gen tool from `fantasy-icons.png`; the exact prompt is in `tablet-roles-prompt.txt`. Support tablets have a right-pointing stone silhouette and cyan arrow, with 0° pointing right and clockwise quarter-turns following the equipped rotation. Both support target types share this category icon; tooltips identify whether they support skill or passive tablets. Passive tablets have a symmetric emerald/gold enchantment rune, rather than a health-specific heart. Inventory, board and settlement all use these same manifest regions. Display categories are 技能石板, 辅助石板 and 被动石板; skill slots display only the skill name. Support and passive slots display only their category name under the icon, with detailed affixes and targeting information in hover tooltips.
 
 The rest of the active asset set now follows the same direction:

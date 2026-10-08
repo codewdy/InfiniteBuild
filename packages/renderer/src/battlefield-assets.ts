@@ -24,6 +24,7 @@ export type BattlefieldAssets = {
   nova: Texture[];
   attack: Texture[];
   icons: Record<IconName, IconAsset>;
+  skillTablets: Record<string, Texture>;
   settlement: SettlementAssets;
 };
 type AtlasManifest = {
@@ -42,6 +43,7 @@ type AtlasManifest = {
   }>;
   effects: { fireball: string[]; nova: string[]; attack: string[] };
   icons: Record<IconName, string>;
+  skillTablets: Record<string, string>;
   settlement: {
     [K in keyof SettlementAssets]: Record<keyof SettlementAssets[K], string>;
   };
@@ -119,6 +121,7 @@ async function loadAtlas(): Promise<BattlefieldAssets> {
     fireball: manifest.effects.fireball.map(texture),
     nova: manifest.effects.nova.map(texture),
     attack: manifest.effects.attack.map(texture),
+    skillTablets: Object.fromEntries(Object.entries(manifest.skillTablets).map(([skill, name]) => [skill, texture(name)])),
     icons: Object.fromEntries(Object.entries(manifest.icons).map(([name, key]) => {
       const entry = manifest.frames[key]!;
       const source = texture(key).source;
