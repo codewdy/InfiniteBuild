@@ -1,11 +1,7 @@
-Use case: stylized-concept
-Asset type: transparent production pixel-art character animation sheet.
-Input image is a STYLE AND IDENTITY reference. Create a NEW sheet ONLY for the green slime in reference, no other characters.
-Exactly 4 columns x 5 rows, twenty separate full-body sprites. Consistent size, center pivot and floor baseline inside each equal cell; generous transparent gutter. All poses face RIGHT. Match green translucent jelly, cute dark eyes, bright highlights and dark pixel outlines. Genuine transparent background, no text, no grid, no ground shadow.
-Left to right four animation frames per row:
-Row 1 WALK: squashed preparing jump, stretching upward, rounded airborne hop, squashed landing. Loop.
-Row 2 CAST: gathering bubbles, lifting glowing green bubble, leaning forward releasing energy from mouth, recovering. Keep any glow close to body.
-Row 3 ATTACK: compresses back, lunges forward, fully elongated headbutt with angry face, recovery.
-Row 4 HIT: recoils back, jelly splashes and compresses, wobbles unevenly, recovers.
-Row 5 DEATH: loses shape, collapses halfway, flattens into small puddle with closed eyes, final still low green puddle. No upright recovery.
-Each sprite complete inside its cell, equal cell grid 4 columns 5 rows, no extra sprites. Match original game's pixel art style.
+Create a transparent 4-column × 5-row animation atlas of the reference green slime: translucent jelly, cute dark eyes, bright highlights and dark pixel outlines. All 20 complete poses face right, share scale, center pivot and ground baseline, and fit inside equal cells with generous gutters.
+Each row progresses left to right:
+Walk: squash for jump, stretch upward, rounded airborne hop, squash on landing; looping cycle.
+Cast: gather bubbles, lift glowing green bubble, lean forward to release energy, recover; highlights stay close to body.
+Attack: compress backward, lunge forward, elongated headbutt with angry face, recover.
+Hit: recoil, splash and compress, wobble unevenly, recover.
+Death: lose shape, collapse halfway, flatten with closed eyes, rest as a low green puddle.

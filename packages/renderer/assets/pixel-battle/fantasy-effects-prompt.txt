@@ -1,8 +1,4 @@
-Use case: stylized-concept
-Asset type: production transparent game VFX sprite atlas, 4 columns by 3 rows.
-Reference image defines chunky chibi fantasy pixel art palette and pixel clusters. Create effects only, no characters, no UI, no text.
-Exactly twelve separated sprites in a regular spacious FOUR columns THREE rows grid, transparent alpha background, no grid lines or checkerboard. Same center per cell; keep complete effects inside cells with wide margins, no overlapping cells.
-Row 1: four frames of an orange-gold FIREBALL flying RIGHT, white-yellow core at right, chunky orange and red flame trail to left, flickering ember pixels. Similar overall size each frame, distinct flame shapes.
-Row 2: four frames of a violet magical NOVA circular shockwave ring seen straight-on, a full clean symmetrical ring with OPEN TRANSPARENT center, a few stepped sparkle pixels along edge; energy grows bright then dissipates. Each ring same outer diameter so the game can scale it smoothly. No filled disk, no perspective ellipse.
-Row 3: four frames of a physical ATTACK impact slash, a thick curved white-gold crescent from upper left to lower right with small gold sparks, progresses from short anticipation arc to strongest broad slash then two dissipating sparks. No ring here.
-Style: dark stepped outer edges, crisp intentionally blocky highlights, limited coherent saturated palettes, chunky and readable at small size. Match the reference game's pixel illustration rendering. No diffuse airbrush haze, no realism, no symbols or text.
+Create a transparent fantasy RPG effect atlas in a 4-column × 3-row grid. Use chunky chibi pixel illustration matching the character reference, dark stepped edges and crisp saturated highlights. Center each complete effect within its cell with generous gutters.
+Row 1: four right-moving orange-gold fireball frames, bright core at right and flickering flame trail at left.
+Row 2: four front-facing violet nova rings, with transparent centers and equal outer diameters, brightening then dissipating.
+Row 3: four white-gold attack slash frames: short anticipation arc, broad sweeping crescent, fading slash, final sparks.

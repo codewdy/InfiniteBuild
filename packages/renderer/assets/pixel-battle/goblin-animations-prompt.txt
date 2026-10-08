@@ -1,11 +1,7 @@
-Use case: stylized-concept
-Asset type: transparent production pixel-art character animation sprite sheet.
-Input image is STYLE AND CHARACTER IDENTITY reference only. Make a NEW sheet ONLY for the green goblin wearing brown leather, red scarf, carrying a curved silver short sword in reference. No mage, slime or detached effects.
-Exactly four equal columns by five equal rows, twenty separate full-body sprites; all facing RIGHT (mirror reference facing). Consistent character size, same horizontal pivot and ground baseline within each cell, generous transparent gutters. Crisp retro pixel clusters, dark outline, olive green skin, yellow eyes, large ears. Transparent alpha background. No captions, letters, grid or ground shadow.
-Each row contains a four-frame animation left to right:
-Row 1 WALK: left foot contact, passing, right foot contact, passing; sword down, red scarf sways, seamless loop.
-Row 2 CAST: raises free hand, small glowing amber energy in hand, thrusts hand forward, recovery. Sword stays in other hand; no detached projectile.
-Row 3 ATTACK: sword winds back, sword sweeps forward, full forward strike, recovery; distinct weapon angles.
-Row 4 HIT: recoils backward, strongest flinch eyes closed, regains footing, upright recovery.
-Row 5 DEATH: knees buckle, falls sideways, almost prone, completely prone goblin with sword on ground. No gore and no standing recovery.
-Every sprite must fit completely in its own cell. Four columns, five rows, twenty sprites only. Preserve character identity and pixel art rendering of reference.
+Create a transparent 4-column × 5-row animation atlas of the reference goblin: olive-green skin, yellow eyes, large ears, brown leather, red scarf and curved silver short sword. Use crisp pixel clusters and dark outlines. All 20 full-body poses face right, share body scale, horizontal pivot and ground baseline, and fit inside equal cells with generous gutters.
+Each row progresses left to right:
+Walk: left-foot contact, passing, right-foot contact, passing; sword lowered and scarf swaying in a loop.
+Cast: raise free hand, gather amber light in hand, thrust hand forward, recover; sword held in other hand.
+Attack: sword windup, forward sweep, full strike, recovery.
+Hit: recoil, strongest flinch with closed eyes, regain footing, upright recovery.
+Death: knees buckle, fall sideways, nearly prone, resting prone with sword on ground.
