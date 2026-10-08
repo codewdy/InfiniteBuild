@@ -108,6 +108,7 @@ h2 {
   top: 0;
   left: 0;
   transform-origin: top left;
+  touch-action: none;
 }
 .resolution-control {
   color: #92a3b9;

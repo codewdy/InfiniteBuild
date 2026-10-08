@@ -53,7 +53,7 @@ async function snapshot(directory) {
   return files.sort().join("\n");
 }
 
-const sourceDirectories = ["packages/core/src", "packages/mock-data/src", "packages/renderer/src", "apps/mockapp/src"];
+const sourceDirectories = ["packages/core/src", "packages/mock-data/src", "packages/renderer/src", "packages/ui/src", "apps/mockapp/src"];
 const sourceSnapshot = () => Promise.all(sourceDirectories.map((path) => snapshot(resolve(workspace, path))));
 let sources = (await sourceSnapshot()).join("\n");
 const webSnapshot = async () => (await Promise.all([
@@ -84,6 +84,7 @@ const watcher = setInterval(async () => {
   }
 }, 500);
 const roots = {
+  "/ui/": resolve(workspace, "packages/ui/dist"),
   "/renderer/": rendererRoot,
   "/app/": resolve(base, "dist"),
   "/core/": resolve(base, "../../packages/core/dist"),

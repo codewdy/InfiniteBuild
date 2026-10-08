@@ -11,6 +11,7 @@
   "dependencies": {
     "@infinite-build/core": "workspace:*",
     "@infinite-build/mock-data": "workspace:*",
-    "@infinite-build/renderer": "workspace:*"
+    "@infinite-build/renderer": "workspace:*",
+    "@infinite-build/ui": "workspace:*"
   }
 }

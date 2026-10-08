@@ -29,6 +29,9 @@ importers:
       '@infinite-build/renderer':
         specifier: workspace:*
         version: link:../../packages/renderer
+      '@infinite-build/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
 
   packages/core:
     dependencies:
@@ -50,6 +53,18 @@ importers:
       '@infinite-build/core':
         specifier: workspace:*
         version: link:../core
+      pixi.js:
+        specifier: ^8.22.0
+        version: 8.22.0
+
+  packages/ui:
+    dependencies:
+      '@infinite-build/core':
+        specifier: workspace:*
+        version: link:../core
+      '@infinite-build/renderer':
+        specifier: workspace:*
+        version: link:../renderer
       pixi.js:
         specifier: ^8.22.0
         version: 8.22.0

@@ -118,6 +118,11 @@ export class Battlefield {
     return view;
   }
 
+  /** Mount application UI above the battlefield and settlement layers. */
+  mountOverlay(view: Container): void {
+    this.app.stage.addChild(view);
+  }
+
   private text(value: string, size: number, fill: number): Text {
     return new Text({ text: value, style: { fontFamily: "system-ui, sans-serif", fontSize: size, fill } });
   }

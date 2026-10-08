@@ -1,4 +1,5 @@
-import { Battlefield, loadBattlefieldIcons, loadPassiveAffixIcons } from "@infinite-build/renderer";
+import { GameUI } from "@infinite-build/ui";
+import { loadBattlefieldIcons, loadPassiveAffixIcons } from "@infinite-build/renderer";
 import type { IconName, IconAsset } from "@infinite-build/renderer";
 import type { BattlefieldResult } from "@infinite-build/renderer";
 import {
@@ -62,7 +63,8 @@ window.addEventListener("pagehide", () => {
   viewportObserver.disconnect();
   window.removeEventListener("resize", applyResolution);
 }, { once: true });
-const battlefield = await Battlefield.create(canvas);
+const gameUI = await GameUI.create(canvas, { onMoveTablet: moveTablet });
+const battlefield = gameUI.battlefield;
 const iconAssets = await loadBattlefieldIcons();
 const passiveAffixIcons = await loadPassiveAffixIcons();
 
@@ -90,7 +92,7 @@ function assetIcon(name: IconName | IconAsset): SVGSVGElement {
   svg.append(crop);
   return svg;
 }
-window.addEventListener("pagehide", () => battlefield.destroy(), { once: true });
+window.addEventListener("pagehide", () => gameUI.destroy(), { once: true });
 const play = element<HTMLButtonElement>("play");
 const step = element<HTMLButtonElement>("step");
 const speed = element<HTMLSelectElement>("speed");
@@ -644,6 +646,7 @@ let totalDamage = 0;
 let playerPosition = 0;
 let timer: number | undefined;
 function render(): void {
+  gameUI.update(game.getState(), inventoryCapacity);
   renderTablets();
   element("player-state").textContent = JSON.stringify(
     game.getState(),
