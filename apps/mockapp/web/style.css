@@ -17,10 +17,6 @@ main > * {
   max-width: 1152px;
   margin-inline: auto;
 }
-main > .battlefield-panel {
-  max-width: none;
-  width: 100%;
-}
 header,
 .panel-title,
 .controls {
