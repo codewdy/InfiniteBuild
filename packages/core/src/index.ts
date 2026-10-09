@@ -17,6 +17,7 @@ export { PassiveTablet } from "./player/tablet/passive.js";
 export type { PlayerState, PlayerCombatProfile } from "./player/state.js";
 export { derivePlayerCombatProfile } from "./player/state.js";
 export { Tablet } from "./player/tablet/tablet.js";
+export type { TabletDefinition } from "./player/tablet/definition.js";
 export { TabletSpec } from "./player/tablet/spec.js";
 export { TabletMap } from "./player/tablet/map.js";
 export { tabletRun } from "./player/tablet/runner.js";

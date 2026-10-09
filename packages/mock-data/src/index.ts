@@ -78,6 +78,11 @@ export const gameData: GameData = {
     },
   },
   playerDefinition: {
+    tablet: {
+      targetSelection: {
+        adjacent: { delta: [1, 0] },
+      },
+    },
     defaultState: playerState,
     inventoryCapacity: 20,
     levelXP: [0, 100, 300, 600, 1000],

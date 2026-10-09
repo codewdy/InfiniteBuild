@@ -53,7 +53,7 @@ export function createSupportTablet(slot: number): TabletSpec.SupportSkill {
     rarity: "magic",
     uuid: `mock-tablet-${slot}-cast-rate-support`,
     rotate: 0,
-    delta: [[1, 0]],
+    targetSelection: "adjacent",
     affixes: [{ id: "onUpdateCastRate", tier: 0, param: 0.5 }],
   };
 }

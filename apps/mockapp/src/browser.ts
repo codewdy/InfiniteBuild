@@ -6,6 +6,7 @@ import {
   Battle,
   Game,
   TabletMap,
+  TabletSpec,
   RandomGenerator,
   derivePlayerCombatProfile,
 } from "@infinite-build/core";
@@ -13,7 +14,6 @@ import type {
   BattleLog,
   BattleSettlement,
   PlayerState,
-  TabletSpec,
 } from "@infinite-build/core";
 import {
   battleSpec,
@@ -642,15 +642,14 @@ function renderTablets(): void {
       (tablet.kind !== "tablet-support-skill" && tablet.kind !== "tablet-support-passive")
     )
       return;
-    for (const [x, y] of tablet.delta) {
-      const target = TabletMap.move(source, x, y, tablet.rotate);
-      const targetKind = tablet.kind === "tablet-support-skill" ? "tablet-skill" : "tablet-passive";
-      if (target === undefined || state.tablets[target]?.kind !== targetKind)
-        continue;
-      const sources = supportedBy.get(target) ?? [];
-      if (!sources.includes(source)) sources.push(source);
-      supportedBy.set(target, sources);
-    }
+    const [x, y] = TabletSpec.getSupportDelta(gameData, tablet);
+    const target = TabletMap.move(source, x, y, tablet.rotate);
+    const targetKind = tablet.kind === "tablet-support-skill" ? "tablet-skill" : "tablet-passive";
+    if (target === undefined || state.tablets[target]?.kind !== targetKind)
+      return;
+    const sources = supportedBy.get(target) ?? [];
+    if (!sources.includes(source)) sources.push(source);
+    supportedBy.set(target, sources);
   });
   tabletBoard.replaceChildren(
     ...TabletMap.pos2Id.flatMap((row) =>

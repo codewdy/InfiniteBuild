@@ -11,15 +11,15 @@ export namespace TabletSpec {
     kind: "tablet-skill";
     skill: string;
   };
-  export type SupportSkill = Item.ItemBase & {
-    kind: "tablet-support-skill";
+  export type Support = Item.ItemBase & {
     rotate: TabletMap.Rotate;
-    delta: SupportTablet.Delta[];
+    targetSelection: string;
   };
-  export type SupportPassive = Item.ItemBase & {
+  export type SupportSkill = Support & {
+    kind: "tablet-support-skill";
+  };
+  export type SupportPassive = Support & {
     kind: "tablet-support-passive";
-    rotate: TabletMap.Rotate;
-    delta: SupportTablet.Delta[];
   };
   export type Passive = Item.ItemBase & {
     kind: "tablet-passive";
@@ -32,6 +32,20 @@ export namespace TabletSpec {
     "tablet-support-passive",
     "tablet-passive",
   ];
+
+  export function getSupportDelta(
+    game: GameData,
+    tablet: Support,
+  ): SupportTablet.Delta {
+    const selection =
+      game.playerDefinition.tablet.targetSelection[tablet.targetSelection];
+    if (!selection) {
+      throw new Error(
+        `Unknown tablet target selection: ${tablet.targetSelection}`,
+      );
+    }
+    return selection.delta;
+  }
 
   export function buildTablet(
     game: GameData,
@@ -52,7 +66,7 @@ export namespace TabletSpec {
       case "tablet-support-skill":
         return new SupportTablet(
           ctx,
-          tablet.delta,
+          [getSupportDelta(game, tablet)],
           "tablet-skill",
           tablet.affixes,
         );
@@ -61,7 +75,7 @@ export namespace TabletSpec {
       case "tablet-support-passive":
         return new SupportTablet(
           ctx,
-          tablet.delta,
+          [getSupportDelta(game, tablet)],
           "tablet-passive",
           tablet.affixes,
         );

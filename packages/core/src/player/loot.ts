@@ -65,11 +65,17 @@ export namespace Loot {
         break;
       case "tablet-support-skill":
       case "tablet-support-passive": {
+        const targetSelection = rng.choice(
+          Object.keys(data.playerDefinition.tablet.targetSelection),
+        );
+        if (targetSelection === undefined) {
+          throw new Error("No tablet target selections available for loot.");
+        }
         tablet = {
           ...base,
           kind: loot.kind,
           rotate: 0,
-          delta: [[1, 0]],
+          targetSelection,
           affixes: Affix.rollAffixes(
             rng,
             data.affixDefinition.tablet.support,
