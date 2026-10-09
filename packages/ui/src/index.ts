@@ -1,7 +1,9 @@
+import { PendingLootView } from "./pending-loot.js";
+import type { PendingLootItem } from "./pending-loot.js";
 import { describeTablet, TabletTooltipView } from "./tablet-tooltip.js";
 import { createTabletArt, loadTabletArt } from "./tablet-art.js";
 import type { TabletArt } from "./tablet-art.js";
-import { Container, Graphics, Point, Rectangle, Sprite } from "pixi.js";
+import { Container, Graphics, Point, Rectangle, Sprite, Text } from "pixi.js";
 import { loadDrawerAssets } from "./drawer-assets.js";
 import type { DrawerAssets } from "./drawer-assets.js";
 import { TabletMap } from "@infinite-build/core";
@@ -19,6 +21,10 @@ const STACKED_INVENTORY_COLUMNS = 5;
 const SECTION_GAP = 12;
 const INVENTORY_X = BOARD_SIZE + SECTION_GAP;
 const PANEL_PADDING = 16;
+const TAB_ICON_SIZE = 64;
+const TAB_GAP = 12;
+const TAB_BAR_HEIGHT = 80;
+const TAB_RAIL_WIDTH = 80;
 const BATTLEFIELD_MIN_ASPECT = 16 / 9;
 const BATTLEFIELD_MAX_ASPECT = 21 / 9;
 const BATTLEFIELD_HEIGHT_FRACTION = 1 / 3;
@@ -31,11 +37,16 @@ export type GameUIOptions = {
   onMoveTablet?: (uuid: string, target: SlotLocation) => void;
   /** The host rotates the support tablet clockwise and validates the new state. */
   onRotateTablet?: (uuid: string) => void;
+  /** The host generates claimed items and supplies the updated player state. */
+  onClaimLoot?: (loot: PendingLootItem, count?: number) => void;
 };
 
 /** Game screen composition with host-controlled inventory changes. */
 export class GameUI {
   private readonly root = new Container();
+  private readonly pendingLoot: PendingLootView;
+  private readonly tabs = new Container();
+  private activeTab: "tablets" | "loot" = "tablets";
   private readonly background: Sprite;
   private readonly panel = new Container();
   private readonly boardPanel = new Container();
@@ -74,6 +85,7 @@ export class GameUI {
     private readonly art: TabletArt,
     private readonly backgrounds: DrawerAssets,
   ) {
+    this.pendingLoot = new PendingLootView(art.icons, backgrounds.randomSkill, options.onClaimLoot);
     this.panel.addChild(this.boardPanel, this.inventoryPanel);
     this.panel.eventMode = "static";
     this.panel.on("pointertap", event => {
@@ -82,7 +94,7 @@ export class GameUI {
     this.background = new Sprite(backgrounds.background);
     this.background.anchor.set(0.5);
     this.background.eventMode = "none";
-    this.root.addChild(this.background, this.panel, this.tooltip, this.clip);
+    this.root.addChild(this.background, this.panel, this.pendingLoot, this.tabs, this.tooltip, this.clip);
     this.root.mask = this.clip;
     battlefield.mountOverlay(this.root);
     this.observer = new ResizeObserver(() => this.layout());
@@ -109,11 +121,12 @@ export class GameUI {
   }
 
   update(state: PlayerState, inventoryCapacity: number): void {
-    const key = JSON.stringify([state.tablets, state.inventory, inventoryCapacity]);
+    const key = JSON.stringify([state.tablets, state.inventory, state.pendingLoot, inventoryCapacity]);
     if (key === this.contentKey) return;
     this.contentKey = key;
     this.state = state;
     this.capacity = inventoryCapacity;
+    this.pendingLoot.update(state, inventoryCapacity);
     const selection = this.tooltipSelection;
     this.renderPanel();
     if (selection) {
@@ -234,7 +247,7 @@ export class GameUI {
   }
 
   private rotateTablet(uuid: string, lockTooltip = true): void {
-    if (this.drag || !this.options.onRotateTablet) return;
+    if (this.activeTab === "loot" || this.drag || !this.options.onRotateTablet) return;
     const slot = this.slots.find(({ location }) => {
       const tablet = this.state?.[location.area][location.index];
       return tablet?.uuid === uuid && "rotate" in tablet;
@@ -263,7 +276,7 @@ export class GameUI {
   }
 
   private readonly onContextMenu = (event: MouseEvent): void => {
-    if (this.drag || !this.options.onRotateTablet) return;
+    if (this.activeTab === "loot" || this.drag || !this.options.onRotateTablet) return;
     if (this.pointerInTooltip(event, false)) {
       event.preventDefault();
       return;
@@ -293,7 +306,7 @@ export class GameUI {
   private readonly onPointerDown = (event: PointerEvent): void => {
     this.suppressTooltipTap = false;
     this.pointerButton = event.button;
-    if (this.pointerInTooltip(event)) return;
+    if (this.activeTab === "loot" || this.pointerInTooltip(event)) return;
     if (event.button !== 0 || this.drag || !this.options.onMoveTablet) return;
     const point = this.pointerPosition(event);
     const source = this.slotAt(point);
@@ -349,7 +362,8 @@ export class GameUI {
 
   private readonly onKeyDown = (event: KeyboardEvent): void => {
     if (event.key !== "Escape") return;
-    if (this.drag) this.cancelDrag();
+    if (this.activeTab === "loot") this.pendingLoot.closeMenu();
+    else if (this.drag) this.cancelDrag();
     else if (this.tooltip.visible) this.hideTooltip();
   };
 
@@ -363,11 +377,68 @@ export class GameUI {
     }
   };
 
+  private renderTabs(width: number): void {
+    for (const child of this.tabs.removeChildren()) child.destroy({ children: true });
+    this.panel.visible = this.activeTab === "tablets";
+    this.pendingLoot.visible = this.activeTab === "loot";
+    const total = this.state?.pendingLoot.reduce((sum, entry) => sum + entry.count, 0) ?? 0;
+    const landscape = width >= this.canvas.clientHeight;
+    const barWidth = TAB_ICON_SIZE * 2 + TAB_GAP;
+    this.tabs.scale.set(landscape ? Math.max(0.001, Math.min(1, (this.uiHeight - 32) / barWidth)) : 1);
+    this.canvas.title = "";
+    this.tabs.position.set(landscape ? 8 : (width - barWidth) / 2,
+      landscape ? 16 : this.uiHeight - TAB_BAR_HEIGHT + 8);
+    const entries = [["tablets", "石板"], ["loot", "领取战利品"]] as const;
+    entries.forEach(([tab, label], index) => {
+      const selected = this.activeTab === tab;
+      const button = new Container();
+      button.position.set(landscape ? 0 : index * (TAB_ICON_SIZE + TAB_GAP), landscape ? index * (TAB_ICON_SIZE + TAB_GAP) : 0);
+      button.eventMode = "static";
+      button.interactiveChildren = false;
+      button.cursor = "pointer";
+      button.hitArea = new Rectangle(0, 0, TAB_ICON_SIZE, TAB_ICON_SIZE);
+      button.addChild(new Graphics().roundRect(0, 0, TAB_ICON_SIZE, TAB_ICON_SIZE, 8)
+        .fill(selected ? 0x36545b : 0x16282e)
+        .stroke({ color: selected ? 0xb5d9c1 : 0x516768, width: 1 }));
+      button.label = label;
+      const icon = new Sprite(this.backgrounds.tabs[tab]);
+      icon.anchor.set(0.5);
+      icon.position.set(TAB_ICON_SIZE / 2);
+      icon.width = icon.height = TAB_ICON_SIZE;
+      icon.alpha = selected ? 1 : 0.75;
+      button.addChild(icon);
+      if (tab === "loot" && total > 0) {
+        const badgeWidth = total > 99 ? 30 : 24;
+        button.addChild(new Graphics().roundRect(TAB_ICON_SIZE - badgeWidth, 0, badgeWidth, 22, 10)
+          .fill(0xb04e38).stroke({ color: 0xf6cc87, width: 1 }));
+        const count = new Text({ text: total > 99 ? "99+" : String(total), resolution: 2,
+          style: { fontFamily: "system-ui, sans-serif", fontSize: 12, fontWeight: "bold", fill: 0xffefca } });
+        count.anchor.set(0.5);
+        count.position.set(TAB_ICON_SIZE - badgeWidth / 2, 11);
+        button.addChild(count);
+      }
+      button.on("pointerover", () => { this.canvas.title = label; });
+      button.on("pointerout", () => { this.canvas.title = ""; });
+      button.on("pointertap", event => {
+        event.stopPropagation();
+        if (event.button !== 0 || this.activeTab === tab) return;
+        this.cancelDrag();
+        this.hideTooltip();
+        this.pendingLoot.closeMenu();
+        this.activeTab = tab;
+        this.renderTabs(this.canvas.clientWidth);
+      });
+      this.tabs.addChild(button);
+    });
+  }
+
   private layout(): void {
     this.cancelDrag();
     this.hideTooltip();
     const width = Math.max(1, this.canvas.clientWidth);
-    const stacked = width < 700;
+    const canvasHeight = Math.max(1, this.canvas.clientHeight);
+    const landscape = width >= canvasHeight;
+    const stacked = !landscape;
     const inventoryColumns = stacked ? STACKED_INVENTORY_COLUMNS : INVENTORY_COLUMNS;
     const inventoryRows = Math.ceil(INVENTORY_COLUMNS * INVENTORY_ROWS / inventoryColumns);
     const inventoryWidth = GRID_PADDING * 2 + SLOT_STEP * inventoryColumns - SLOT_GAP;
@@ -385,15 +456,20 @@ export class GameUI {
         GRID_PADDING + Math.floor(index / inventoryColumns) * SLOT_STEP,
       );
     });
-    const canvasHeight = Math.max(1, this.canvas.clientHeight);
     // Choose the height closest to one third while preserving the aspect limits.
     const battlefieldHeight = Math.max(width / BATTLEFIELD_MAX_ASPECT,
       Math.min(canvasHeight * BATTLEFIELD_HEIGHT_FRACTION, width / BATTLEFIELD_MIN_ASPECT));
     const height = Math.max(1, canvasHeight - battlefieldHeight);
     this.uiHeight = height;
+    const panelX = landscape ? TAB_RAIL_WIDTH : 0;
+    const panelWidth = Math.max(1, width - panelX);
+    const panelHeight = Math.max(1, height - (landscape ? 0 : TAB_BAR_HEIGHT));
+    this.pendingLoot.position.set(panelX, 0);
+    this.pendingLoot.layout(panelWidth, panelHeight);
+    this.renderTabs(width);
     const scale = Math.max(0.001, Math.min(1,
-      (width - PANEL_PADDING * 2) / contentWidth,
-      (height - PANEL_PADDING * 2) / contentHeight,
+      (panelWidth - PANEL_PADDING * 2) / contentWidth,
+      (panelHeight - PANEL_PADDING * 2) / contentHeight,
     ));
     this.battlefield.setViewport(width, battlefieldHeight);
     this.root.position.set(0, battlefieldHeight);
@@ -401,7 +477,7 @@ export class GameUI {
     this.background.scale.set(backgroundScale);
     this.background.position.set(width / 2, height / 2);
     this.panel.scale.set(scale);
-    this.panel.position.set((width - contentWidth * scale) / 2, (height - contentHeight * scale) / 2);
+    this.panel.position.set(panelX + (panelWidth - contentWidth * scale) / 2, (panelHeight - contentHeight * scale) / 2);
     this.panel.hitArea = new Rectangle(0, 0, contentWidth, contentHeight);
     this.inventoryPanel.position.set(stacked ? (contentWidth - inventoryWidth) / 2 : INVENTORY_X, stacked ? BOARD_SIZE + SECTION_GAP : 0);
     this.clip.clear().rect(0, 0, width, height).fill(0xffffff);

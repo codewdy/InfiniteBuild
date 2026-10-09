@@ -409,24 +409,6 @@ pre {
   width: 100%;
   height: 100%;
 }
-.tablet-affix-slot[data-tier]::after {
-  content: "";
-  position: absolute;
-  inset: 1px;
-  border: 2px solid var(--affix-tier-color, #c3cbd6);
-  border-radius: inherit;
-  box-shadow: 0 0 0 1px #000, inset 0 0 0 1px #000;
-  pointer-events: none;
-}
-.tablet-affix-slot[data-tier="0"] { --affix-tier-color: #c3cbd6; }
-.tablet-affix-slot[data-tier="1"] { --affix-tier-color: #65d88a; }
-.tablet-affix-slot[data-tier="2"] { --affix-tier-color: #61b5ff; }
-.tablet-affix-slot[data-tier="3"] { --affix-tier-color: #bf83ff; }
-.tablet-affix-slot[data-tier="4"] { --affix-tier-color: #ffc45e; }
-.tablet-affix-slot[data-quadrant="0"] { border-top-left-radius: 10px; }
-.tablet-affix-slot[data-quadrant="1"] { border-top-right-radius: 10px; }
-.tablet-affix-slot[data-quadrant="2"] { border-bottom-right-radius: 10px; }
-.tablet-affix-slot[data-quadrant="3"] { border-bottom-left-radius: 10px; }
 .tablet-affix-slot[data-quadrant="0"] { left: 0; top: 0; }
 .tablet-affix-slot[data-quadrant="1"] { right: 0; top: 0; }
 .tablet-affix-slot[data-quadrant="2"] { right: 0; bottom: 0; }

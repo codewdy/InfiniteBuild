@@ -1,4 +1,4 @@
-import { Assets, Container, Graphics, Rectangle, Sprite, Texture } from "pixi.js";
+import { Assets, Container, Rectangle, Sprite, Texture } from "pixi.js";
 import type { TabletSpec } from "@infinite-build/core";
 import { loadBattlefieldIcons, loadPassiveAffixIcons } from "@infinite-build/renderer";
 import type { IconAsset, IconName } from "@infinite-build/renderer";
@@ -43,8 +43,6 @@ export async function loadTabletArt(): Promise<TabletArt> {
   };
 }
 
-const tierColors = [0xc3cbd6, 0x65d88a, 0x61b5ff, 0xbf83ff, 0xffc45e];
-
 /** Same composition as mockapp: four rotated quarters underneath a 70% center. */
 export function createTabletArt(tablet: TabletSpec.Tablet, assets: TabletArt, size: number): Container {
   const art = new Container();
@@ -61,22 +59,6 @@ export function createTabletArt(tablet: TabletSpec.Tablet, assets: TabletArt, si
     sprite.width = sprite.height = half;
     sprite.angle = quadrant * 90;
     quarter.addChild(sprite);
-    if (affix) {
-      // Rotate the top-left rounded border into the corresponding outer corner.
-      const border = new Graphics();
-      const inset = size / 72;
-      const radius = Math.min(half / 2, size * 10 / 72);
-      const outline = () => border.moveTo(inset + radius, inset)
-        .lineTo(half - inset, inset).lineTo(half - inset, half - inset)
-        .lineTo(inset, half - inset).lineTo(inset, inset + radius)
-        .quadraticCurveTo(inset, inset, inset + radius, inset).closePath();
-      outline().stroke({ color: 0x000000, width: size * 4 / 72 });
-      outline().stroke({ color: tierColors[affix.tier] ?? tierColors[0], width: size * 2 / 72 });
-      border.pivot.set(half / 2);
-      border.position.set(half / 2);
-      border.angle = quadrant * 90;
-      quarter.addChild(border);
-    }
     art.addChild(quarter);
   }
   const icon: IconName = tablet.kind === "tablet-skill"

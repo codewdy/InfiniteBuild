@@ -32,8 +32,39 @@ const previewPassiveTablet = {
   ],
 };
 
+// One four-affix stone per tier provides samples of different affix tiers.
+const tierPreviewTablets = Array.from({ length: 5 }, (_, tier) => ({
+  ...createPassiveTablet(TabletMap.idSize + 7 + tier),
+  rarity: "rare" as const,
+  affixes: ["attack", "attackPercent", "maxHp", "maxHpPercent"].map((id) => {
+    const range = passiveAffixes.pool[id]!.tier[tier]!;
+    return { id, tier, param: (range.min + range.max) / 2 };
+  }),
+}));
+
 export const playerState: PlayerState = {
-  pendingLoot: [],
+  // 108 distinct stacks exercise pagination on both phone and desktop layouts.
+  pendingLoot: [
+    { loot: { kind: "tablet-skill", rarity: "magic", level: 1 }, count: 3 },
+    { loot: { kind: "tablet-passive", rarity: "rare", level: 1 }, count: 4 },
+    { loot: { kind: "tablet-support-skill", rarity: "magic", level: 1 }, count: 10 },
+    { loot: { kind: "tablet-skill", rarity: "rare", level: 10 }, count: 2 },
+    { loot: { kind: "tablet-skill", rarity: "magic", level: 20 }, count: 5 },
+    { loot: { kind: "tablet-passive", rarity: "magic", level: 1 }, count: 6 },
+    { loot: { kind: "tablet-passive", rarity: "magic", level: 20 }, count: 3 },
+    { loot: { kind: "tablet-passive", rarity: "rare", level: 40 }, count: 2 },
+    { loot: { kind: "tablet-support-skill", rarity: "rare", level: 10 }, count: 2 },
+    { loot: { kind: "tablet-support-passive", rarity: "magic", level: 1 }, count: 4 },
+    { loot: { kind: "tablet-support-passive", rarity: "rare", level: 20 }, count: 2 },
+    { loot: { kind: "tablet-support-passive", rarity: "magic", level: 40 }, count: 3 },
+    ...[2, 3, 4, 5, 8, 12, 15, 25, 30, 35, 45, 50].flatMap((level, levelIndex) =>
+      (["tablet-skill", "tablet-passive", "tablet-support-skill", "tablet-support-passive"] as const)
+        .flatMap((kind, kindIndex) => (["magic", "rare"] as const).map((rarity, rarityIndex) => ({
+          loot: { kind, rarity, level },
+          count: 1 + (levelIndex + kindIndex + rarityIndex) % 5,
+        }))),
+    ),
+  ],
   inventory: [
     ...(["fireball", "nova", "fireball", "nova"] as const).map(
       (kind, index) => createTablet(kind, TabletMap.idSize + index),
@@ -41,6 +72,7 @@ export const playerState: PlayerState = {
     supportTablet,
     passiveTablet,
     previewPassiveTablet,
+    ...tierPreviewTablets,
   ],
   level: 1,
   xp: 0,

@@ -140,6 +140,10 @@ const gameUI = await GameUI.create(canvas, {
   gameData,
   onMoveTablet: moveTablet,
   onRotateTablet: rotateTablet,
+  onClaimLoot: (loot, count) => {
+    const opened = game.openLoots(loot, count);
+    submitState(opened.player, "validate", `已领取 ${opened.items.length} 件战利品`);
+  },
 });
 const battlefield = gameUI.battlefield;
 const iconAssets = await loadBattlefieldIcons();
