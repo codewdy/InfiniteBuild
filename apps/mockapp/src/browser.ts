@@ -1,5 +1,5 @@
 import { GameUI } from "@infinite-build/ui";
-import { loadBattlefieldIcons, loadPassiveAffixIcons, resolveSupportTabletIcon } from "@infinite-build/renderer";
+import { loadBattlefieldIcons, loadPassiveAffixIcons, resolveSupportTabletIcon, supportTabletScale } from "@infinite-build/renderer";
 import type { IconName, IconAsset } from "@infinite-build/renderer";
 import type { BattlefieldResult } from "@infinite-build/renderer";
 import {
@@ -551,7 +551,13 @@ function createSlot(
       icon.append(segment);
     }
     if ("rotate" in tablet && appearance) {
-      stone.style.transform = `rotate(${tablet.rotate + appearance.angle}deg) scale(${appearance.scale})`;
+      const [, , width, height] = iconAssets[appearance.icon].frame;
+      const [, , referenceWidth, referenceHeight] = iconAssets["support-skill"].frame;
+      const scale = supportTabletScale(
+        { width, height }, { width: referenceWidth, height: referenceHeight },
+      );
+      const [dx, dy] = TabletMap.rotateVec(...appearance.offset, tablet.rotate);
+      stone.style.transform = `translate(${dx * 100}%, ${dy * 100}%) rotate(${tablet.rotate + appearance.angle}deg) scale(${scale.x}, ${scale.y})`;
     }
   } else {
     icon.classList.add("empty-slot-icon");

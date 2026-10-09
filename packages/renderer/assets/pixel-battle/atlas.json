@@ -1885,30 +1885,30 @@
       "alignment": "center"
     },
     "support-diagonalPair-magic": {
-      "image": "support-diagonalPair.png",
+      "image": "support-diagonalPair-v2.png",
       "frame": [
-        51,
+        52,
         120,
-        710,
-        783
+        709,
+        784
       ],
       "size": [
-        783,
-        783
+        784,
+        784
       ],
       "alignment": "center"
     },
     "support-diagonalPair-rare": {
-      "image": "support-diagonalPair.png",
+      "image": "support-diagonalPair-v2.png",
       "frame": [
-        819,
+        820,
         120,
-        710,
-        783
+        708,
+        784
       ],
       "size": [
-        783,
-        783
+        784,
+        784
       ],
       "alignment": "center"
     }

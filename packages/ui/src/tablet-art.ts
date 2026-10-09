@@ -1,6 +1,6 @@
 import { Assets, Container, Rectangle, Sprite, Texture } from "pixi.js";
-import { TabletSpec, type GameData } from "@infinite-build/core";
-import { loadBattlefieldIcons, loadPassiveAffixIcons, resolveSupportTabletIcon } from "@infinite-build/renderer";
+import { TabletMap, TabletSpec, type GameData } from "@infinite-build/core";
+import { loadBattlefieldIcons, loadPassiveAffixIcons, resolveSupportTabletIcon, supportTabletScale } from "@infinite-build/renderer";
 import type { IconAsset, IconName } from "@infinite-build/renderer";
 
 export type TabletArt = {
@@ -49,15 +49,18 @@ export function createSupportTabletArt(
   rarity: TabletSpec.Tablet["rarity"],
   icons: TabletArt["icons"],
   size: number,
-  rotation = 0,
+  rotation: TabletMap.Rotate = 0,
   targets?: readonly (readonly [number, number])[],
 ): Container {
   const art = new Container();
   const appearance = resolveSupportTabletIcon(targets, kind, rarity);
   const stone = new Sprite(icons[appearance.icon]);
   stone.anchor.set(0.5);
-  stone.position.set(size / 2);
-  stone.width = stone.height = size * appearance.scale;
+  const [dx, dy] = TabletMap.rotateVec(...appearance.offset, rotation);
+  stone.position.set(size * (0.5 + dx), size * (0.5 + dy));
+  const scale = supportTabletScale(stone.texture.frame, icons["support-skill"].frame);
+  stone.width = size * scale.x;
+  stone.height = size * scale.y;
   stone.angle = rotation + appearance.angle;
   art.addChild(stone);
   return art;
