@@ -1,5 +1,5 @@
 import { GameUI } from "@infinite-build/ui";
-import { loadBattlefieldIcons, loadPassiveAffixIcons } from "@infinite-build/renderer";
+import { loadBattlefieldIcons, loadPassiveAffixIcons, resolveSupportTabletIcon } from "@infinite-build/renderer";
 import type { IconName, IconAsset } from "@infinite-build/renderer";
 import type { BattlefieldResult } from "@infinite-build/renderer";
 import {
@@ -19,6 +19,7 @@ import {
   battleSpec,
   createPassiveTablet,
   createSupportTablet,
+  supportTabletOptions,
   gameData,
   tabletOptions,
   passiveTabletOptions,
@@ -364,20 +365,21 @@ for (const option of tabletOptions) {
   element("tablet-add-actions").append(button);
 }
 
-const hasteButton = document.createElement("button");
-hasteButton.type = "button";
-hasteButton.className = "add-tablet";
-hasteButton.dataset.skill = "tablet-support-skill";
-hasteButton.textContent = "＋ 新增辅助石板";
-hasteButton.title =
-  "辅助箭头方向的技能石板，持续施放速率提升(add) 50%。右键旋转方向。";
-hasteButton.addEventListener("click", () => {
-  const state = game.getState();
-  const tablet = createSupportTablet(state.inventory.length);
-  tablet.uuid = crypto.randomUUID();
-  addTabletToInventory(state, tablet, "辅助石板已加入背包");
-});
-element("tablet-add-actions").append(hasteButton);
+for (const option of supportTabletOptions) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "add-tablet";
+  button.dataset.skill = "tablet-support-skill";
+  button.textContent = `＋ ${option.name}辅助`;
+  button.title = "辅助标记方向的技能石板，持续施放速率提升(add) 50%。右键旋转方向。";
+  button.addEventListener("click", () => {
+    const state = game.getState();
+    const tablet = createSupportTablet(state.inventory.length, option.id);
+    tablet.uuid = crypto.randomUUID();
+    addTabletToInventory(state, tablet, `${option.name}辅助石板已加入背包`);
+  });
+  element("tablet-add-actions").append(button);
+}
 
 const lifeButton = document.createElement("button");
 lifeButton.type = "button";
@@ -523,7 +525,10 @@ function createSlot(
       ? (tablet.rarity === "normal" ? skill : `${skill}-${tablet.rarity}`)
       : tablet.kind === "tablet-passive" ? (tablet.rarity === "rare" ? "passive-rare" : "passive-magic")
       : tablet.rarity === "rare" ? "support-rare" : tablet.kind === "tablet-support-skill" ? "support-skill" : "support-passive";
-    const stone = assetIcon(iconName);
+    const appearance = "rotate" in tablet
+      ? resolveSupportTabletIcon(TabletSpec.getSupportDelta(gameData, tablet), tablet.kind, tablet.rarity)
+      : undefined;
+    const stone = assetIcon(appearance?.icon ?? iconName);
     icon.append(stone);
     icon.classList.add("affixed-tablet-icon");
     stone.classList.add("tablet-center");
@@ -545,7 +550,9 @@ function createSlot(
       segment.append(border);
       icon.append(segment);
     }
-    if ("rotate" in tablet) stone.style.transform = `rotate(${tablet.rotate}deg)`;
+    if ("rotate" in tablet && appearance) {
+      stone.style.transform = `rotate(${tablet.rotate + appearance.angle}deg) scale(${appearance.scale})`;
+    }
   } else {
     icon.classList.add("empty-slot-icon");
     icon.textContent = "+";

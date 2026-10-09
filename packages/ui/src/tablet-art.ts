@@ -1,6 +1,6 @@
 import { Assets, Container, Rectangle, Sprite, Texture } from "pixi.js";
-import type { TabletSpec } from "@infinite-build/core";
-import { loadBattlefieldIcons, loadPassiveAffixIcons } from "@infinite-build/renderer";
+import { TabletSpec, type GameData } from "@infinite-build/core";
+import { loadBattlefieldIcons, loadPassiveAffixIcons, resolveSupportTabletIcon } from "@infinite-build/renderer";
 import type { IconAsset, IconName } from "@infinite-build/renderer";
 
 export type TabletArt = {
@@ -43,26 +43,28 @@ export async function loadTabletArt(): Promise<TabletArt> {
   };
 }
 
-/** Shared rarity-colored support arrow for inventory and pending loot. */
+/** Pixel stone arrows share the original support tablet style and rarity colors. */
 export function createSupportTabletArt(
   kind: "tablet-support-skill" | "tablet-support-passive",
   rarity: TabletSpec.Tablet["rarity"],
   icons: TabletArt["icons"],
   size: number,
   rotation = 0,
+  targets?: readonly (readonly [number, number])[],
 ): Container {
   const art = new Container();
-  const stone = new Sprite(icons[rarity === "rare" ? "support-rare" : kind === "tablet-support-skill" ? "support-skill" : "support-passive"]);
+  const appearance = resolveSupportTabletIcon(targets, kind, rarity);
+  const stone = new Sprite(icons[appearance.icon]);
   stone.anchor.set(0.5);
   stone.position.set(size / 2);
-  stone.width = stone.height = size;
-  stone.angle = rotation;
+  stone.width = stone.height = size * appearance.scale;
+  stone.angle = rotation + appearance.angle;
   art.addChild(stone);
   return art;
 }
 
 /** Same composition as mockapp: four rotated quarters underneath a 70% center. */
-export function createTabletArt(tablet: TabletSpec.Tablet, assets: TabletArt, size: number): Container {
+export function createTabletArt(tablet: TabletSpec.Tablet, assets: TabletArt, size: number, gameData: GameData): Container {
   const art = new Container();
   art.eventMode = "none";
   art.pivot.set(size / 2);
@@ -81,7 +83,7 @@ export function createTabletArt(tablet: TabletSpec.Tablet, assets: TabletArt, si
   }
   if (tablet.kind === "tablet-support-skill" || tablet.kind === "tablet-support-passive") {
     const center = createSupportTabletArt(tablet.kind, tablet.rarity, assets.icons, size * 0.7,
-      "rotate" in tablet ? tablet.rotate : 0);
+      tablet.rotate, TabletSpec.getSupportDelta(gameData, tablet));
     center.position.set(size * 0.15);
     art.addChild(center);
     return art;

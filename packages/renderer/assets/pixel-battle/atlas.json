@@ -1799,6 +1799,118 @@
         370
       ],
       "alignment": "center"
+    },
+    "support-distant-magic": {
+      "image": "support-distant.png",
+      "frame": [
+        52,
+        293,
+        713,
+        438
+      ],
+      "size": [
+        713,
+        713
+      ],
+      "alignment": "center"
+    },
+    "support-distant-rare": {
+      "image": "support-distant.png",
+      "frame": [
+        811,
+        293,
+        721,
+        438
+      ],
+      "size": [
+        721,
+        721
+      ],
+      "alignment": "center"
+    },
+    "support-line-magic": {
+      "image": "support-line.png",
+      "frame": [
+        88,
+        203,
+        662,
+        652
+      ],
+      "size": [
+        662,
+        662
+      ],
+      "alignment": "center"
+    },
+    "support-line-rare": {
+      "image": "support-line.png",
+      "frame": [
+        824,
+        203,
+        651,
+        652
+      ],
+      "size": [
+        652,
+        652
+      ],
+      "alignment": "center"
+    },
+    "support-opposite-magic": {
+      "image": "support-opposite.png",
+      "frame": [
+        16,
+        287,
+        738,
+        457
+      ],
+      "size": [
+        738,
+        738
+      ],
+      "alignment": "center"
+    },
+    "support-opposite-rare": {
+      "image": "support-opposite.png",
+      "frame": [
+        783,
+        287,
+        738,
+        457
+      ],
+      "size": [
+        738,
+        738
+      ],
+      "alignment": "center"
+    },
+    "support-diagonalPair-magic": {
+      "image": "support-diagonalPair.png",
+      "frame": [
+        51,
+        120,
+        710,
+        783
+      ],
+      "size": [
+        783,
+        783
+      ],
+      "alignment": "center"
+    },
+    "support-diagonalPair-rare": {
+      "image": "support-diagonalPair.png",
+      "frame": [
+        819,
+        120,
+        710,
+        783
+      ],
+      "size": [
+        783,
+        783
+      ],
+      "alignment": "center"
     }
   },
   "characters": {
@@ -2036,7 +2148,15 @@
     "fireball-magic": "fireball-magic",
     "fireball-rare": "fireball-rare",
     "nova-magic": "nova-magic",
-    "nova-rare": "nova-rare"
+    "nova-rare": "nova-rare",
+    "support-distant-magic": "support-distant-magic",
+    "support-distant-rare": "support-distant-rare",
+    "support-line-magic": "support-line-magic",
+    "support-line-rare": "support-line-rare",
+    "support-opposite-magic": "support-opposite-magic",
+    "support-opposite-rare": "support-opposite-rare",
+    "support-diagonalPair-magic": "support-diagonalPair-magic",
+    "support-diagonalPair-rare": "support-diagonalPair-rare"
   },
   "skillTablets": {
     "fireball": "fantasy-fireball",

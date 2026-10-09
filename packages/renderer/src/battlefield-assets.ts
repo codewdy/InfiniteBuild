@@ -6,7 +6,8 @@ export type CharacterTextures = {
   scale: number;
   animations: Record<CharacterAnimation, CharacterClip>;
 };
-export type IconName = "fireball" | "nova" | "fireball-magic" | "fireball-rare" | "nova-magic" | "nova-rare" | "passive" | "passive-magic" | "passive-rare" | "passive-quarter-empty" | "support-skill" | "support-passive" | "support-rare" | "pending" | "xp";
+export type SupportDirectionIconName = `support-${"distant" | "line" | "opposite" | "diagonalPair"}-${"magic" | "rare"}`;
+export type IconName = SupportDirectionIconName | "fireball" | "nova" | "fireball-magic" | "fireball-rare" | "nova-magic" | "nova-rare" | "passive" | "passive-magic" | "passive-rare" | "passive-quarter-empty" | "support-skill" | "support-passive" | "support-rare" | "pending" | "xp";
 export type IconAsset = {
   image: string;
   frame: [number, number, number, number];

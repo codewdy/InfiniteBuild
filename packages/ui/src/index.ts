@@ -146,7 +146,7 @@ export class GameUI {
     slot.addChild(new Graphics().roundRect(0, 0, SLOT_SIZE, SLOT_SIZE, 8)
       .fill({ color, alpha: tablet ? 0.7 : 0.4 }).stroke({ color: tablet ? 0x60717f : 0x3b4b54, width: 1, alpha: 0.7 }));
     if (tablet) {
-      const artwork = createTabletArt(tablet, this.art, 72);
+      const artwork = createTabletArt(tablet, this.art, 72, this.options.gameData);
       artwork.position.set(SLOT_SIZE / 2);
       slot.addChild(artwork);
     }

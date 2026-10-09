@@ -37,8 +37,9 @@ export namespace TabletSpec {
     game: GameData,
     tablet: Support,
   ): SupportTablet.Delta[] {
-    const selection =
-      game.playerDefinition.tablet.targetSelection[tablet.targetSelection];
+    const selection = game.playerDefinition.tablet.targetSelection.find(
+      (selection) => selection.id === tablet.targetSelection,
+    );
     if (!selection) {
       throw new Error(
         `Unknown tablet target selection: ${tablet.targetSelection}`,

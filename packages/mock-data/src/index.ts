@@ -3,12 +3,16 @@ import {
   createPassiveTablet,
   createSupportTablet,
   createTablet,
+  supportTabletOptions,
+  tabletDefinition,
 } from "./tablets.js";
 export {
   createPassiveTablet,
   createSupportTablet,
   createTablet,
   tabletOptions,
+  supportTabletOptions,
+  tabletDefinition,
 } from "./tablets.js";
 export { rollPassiveTablet, passiveTabletOptions } from "./tablets.js";
 export type { MockTablet, TabletKind } from "./tablets.js";
@@ -57,6 +61,9 @@ export const playerState: PlayerState = {
     passiveTablet,
     previewPassiveTablet,
     ...tierPreviewTablets,
+    ...supportTabletOptions.slice(1).map(({ id }, index) =>
+      createSupportTablet(TabletMap.idSize + 12 + index, id),
+    ),
   ],
   level: 1,
   xp: 0,
@@ -78,11 +85,7 @@ export const gameData: GameData = {
     },
   },
   playerDefinition: {
-    tablet: {
-      targetSelection: {
-        adjacent: { delta: [[1, 0]] },
-      },
-    },
+    tablet: tabletDefinition,
     defaultState: playerState,
     inventoryCapacity: 20,
     levelXP: [0, 100, 300, 600, 1000],
