@@ -7,6 +7,10 @@ import { createSkillEffect } from "./effects/index.js";
 import type { SkillEffect } from "./effects/index.js";
 import type { BattleEvent, BattleLog } from "@infinite-build/core";
 
+// Preserve the original character proportions at the reference battlefield height.
+const UNIT_REFERENCE_HEIGHT = 290;
+const UNIT_SIZE_FACTOR = 0.75;
+
 type Unit = BattleLog["units"][number];
 type View = {
   root: Container;
@@ -40,6 +44,9 @@ export type BattlefieldOptions = {
 export class Battlefield {
   private readonly app = new Application();
   private readonly scene = new Container();
+  private readonly viewport = new Container();
+  private readonly viewportClip = new Graphics();
+  private viewportSize?: { width: number; height: number };
   private readonly transitionLayer = new Container();
   private transition?: { snapshot: Sprite; startedAt: number };
   private readonly background = new Container();
@@ -111,7 +118,10 @@ export class Battlefield {
     world.mask = view.clip;
     // Keep the player above skill effects and floating damage text.
     view.scene.addChild(view.background, world, view.clip, view.overlay, view.skillLayer, view.playerLayer);
-    view.app.stage.addChild(view.scene, view.transitionLayer, view.resultOverlay);
+    view.viewport.addChild(view.scene, view.transitionLayer, view.resultOverlay);
+    view.viewport.mask = view.viewportClip;
+    view.app.stage.addChild(view.viewport, view.viewportClip);
+    view.viewportClip.rect(0, 0, view.app.screen.width, view.app.screen.height).fill(0xffffff);
     view.observer.observe(canvas);
     view.app.ticker.add(() => view.draw());
     canvas.dataset.renderer = "pixi";
@@ -122,6 +132,15 @@ export class Battlefield {
   mountOverlay(view: Container): void {
     this.app.stage.addChild(view);
   }
+
+  /** Restrict battlefield presentation while leaving room for UI on the same canvas. */
+  setViewport(width: number, height: number): void {
+    this.viewportSize = { width: Math.max(1, width), height: Math.max(1, height) };
+    this.viewportClip.clear().rect(0, 0, this.viewportSize.width, this.viewportSize.height).fill(0xffffff);
+  }
+
+  private get width(): number { return this.viewportSize?.width ?? this.app.screen.width; }
+  private get height(): number { return this.viewportSize?.height ?? this.app.screen.height; }
 
   private text(value: string, size: number, fill: number): Text {
     return new Text({ text: value, style: { fontFamily: "system-ui, sans-serif", fontSize: size, fill } });
@@ -201,7 +220,7 @@ export class Battlefield {
         text.style.fontWeight = "bold";
         text.anchor.set(0.5);
         this.overlay.addChild(text);
-        this.damage.push({ text, position: view.position, y: this.unitY(event.dst, view.kind) - 45, start: now });
+        this.damage.push({ text, position: view.position, y: this.unitY(event.dst, view.kind) / this.height, start: now });
       }
     }
   }
@@ -217,7 +236,7 @@ export class Battlefield {
       this.draw();
       const snapshot = new Sprite(this.app.renderer.generateTexture({
         target: this.scene,
-        frame: new Rectangle(0, 0, this.app.screen.width, this.app.screen.height),
+        frame: new Rectangle(0, 0, this.width, this.height),
         resolution: this.app.renderer.resolution,
       }));
       this.transitionLayer.addChild(snapshot);
@@ -269,8 +288,8 @@ export class Battlefield {
     const fadeIn = Math.max(0, progress * 2 - 1);
     const smooth = (value: number) => value * value * (3 - 2 * value);
     this.transition.snapshot.alpha = 1 - smooth(fadeOut);
-    this.transition.snapshot.width = this.app.screen.width;
-    this.transition.snapshot.height = this.app.screen.height;
+    this.transition.snapshot.width = this.width;
+    this.transition.snapshot.height = this.height;
     this.scene.alpha = smooth(fadeIn);
   }
 
@@ -281,6 +300,7 @@ export class Battlefield {
       Math.max(1, this.canvas.clientHeight),
       Math.min(window.devicePixelRatio || 1, 2),
     );
+    this.viewportClip.clear().rect(0, 0, this.width, this.height).fill(0xffffff);
   }
 
   private clearSkillBars(): void {
@@ -356,8 +376,10 @@ export class Battlefield {
     return Math.min(1, Math.max(0, (now - this.updatedAt) / Math.min(this.options.frameDuration, 250)));
   }
 
+  private get unitScale(): number { return this.height / UNIT_REFERENCE_HEIGHT * UNIT_SIZE_FACTOR; }
+
   private unitY(id: number, kind: string): number {
-    const height = this.app.screen.height;
+    const height = this.height;
     return kind === "Player" ? height * 0.55 : height * (0.34 + (id % 4) * 0.115);
   }
 
@@ -407,12 +429,15 @@ export class Battlefield {
         source.facing = Math.sign(target.position - source.position);
       }
     }
+    const unitY = (id: number, kind: string) => this.unitY(id, kind);
+    const battlefield = this;
     const effect = createSkillEffect(event, {
       assets: this.assets,
       log: this.log!,
       previous,
-      sourceY: this.unitY(event.source, source?.kind ?? "Player"),
-      unitY: (id, kind) => this.unitY(id, kind),
+      get sourceY() { return unitY(event.source, source?.kind ?? "Player"); },
+      get unitScale() { return battlefield.unitScale; },
+      unitY,
     });
     if (!effect) return;
     this.effectsLayer.addChild(effect.sprite);
@@ -441,12 +466,12 @@ export class Battlefield {
     const now = performance.now();
     this.advanceAnimations(now);
     this.drawTransition(now);
-    this.resultOverlay.update(now, this.app.screen.width, this.app.screen.height);
+    this.resultOverlay.update(now, this.width, this.height);
     if (!this.log) return;
     const progress = this.progress(now);
     const origin = this.fromOrigin + (this.origin - this.fromOrigin) * progress;
-    const width = this.app.screen.width;
-    const height = this.app.screen.height;
+    const width = this.width;
+    const height = this.height;
     const left = Math.min(48, width * 0.1);
     const right = width - left;
     const x = (position: number) => left + (position - origin + 2) / (this.options.vision + 4) * (right - left);
@@ -474,13 +499,15 @@ export class Battlefield {
     this.damage = this.damage.filter((entry) => {
       const t = (now - entry.start) / 850;
       if (t >= 1) { entry.text.destroy(); return false; }
-      entry.text.position.set(x(entry.position), entry.y - t * 30);
+      entry.text.scale.set(this.unitScale);
+      entry.text.position.set(x(entry.position), entry.y * height - (45 + t * 30) * this.unitScale);
       entry.text.alpha = Math.min(1, (1 - t) * 3);
       return true;
     });
   }
 
   private drawUnit(view: View, id: number): void {
+    view.root.scale.set(this.unitScale);
     const time = this.animationTime;
     const clips = view.poses.animations;
     let animation: CharacterAnimation = "idle";

@@ -11,12 +11,12 @@ export const createFireball: EffectFactory = (event, context, duration) => {
   const frames = context.assets.fireball;
   const sprite = new Sprite({ texture: frames[0]!, roundPixels: true });
   sprite.anchor.set(0.75, 0.5);
-  sprite.scale.set(0.16);
-  const targetY = context.unitY(to, target.kind);
   let targetPosition = target.position;
   return {
     sprite, start: context.log.frame, duration,
     update(t, { x, targetPosition: position }) {
+      const targetY = context.unitY(to, target.kind);
+      sprite.scale.set(0.16 * context.unitScale);
       targetPosition = position(to) ?? targetPosition;
       sprite.texture = frames[Math.min(frames.length - 1, Math.floor(t * frames.length))]!;
       const y = context.sourceY + (targetY - context.sourceY) * t;

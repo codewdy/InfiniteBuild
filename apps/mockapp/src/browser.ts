@@ -40,8 +40,9 @@ function applyResolution(): void {
   const dimensions = resolution.value.match(/^(\d+)x(\d+)$/);
   const availableWidth = Math.max(1, battlefieldViewport.clientWidth);
   const availableHeight = Math.max(1, window.innerHeight * 0.8);
-  const width = dimensions ? Number(dimensions[1]) : availableWidth;
-  const height = dimensions ? Number(dimensions[2]) : 290;
+  const mobile = window.matchMedia("(max-width: 700px)").matches;
+  const width = dimensions ? Number(dimensions[1]) : mobile ? 390 : 1024;
+  const height = dimensions ? Number(dimensions[2]) : mobile ? 844 : 768;
   const scale = Math.min(1, availableWidth / width, availableHeight / height);
   // Transform only the preview; Pixi keeps rendering at the selected dimensions.
   canvas.style.width = `${width}px`;

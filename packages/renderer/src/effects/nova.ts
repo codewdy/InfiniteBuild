@@ -15,7 +15,7 @@ export const createNova: EffectFactory = (event, context, duration) => {
       sprite.texture = frames[Math.min(frames.length - 1, Math.floor(progress * frames.length))]!;
       // Keep horizontal propagation aligned with the skill's damage wave.
       const pixels = Math.abs(x(center + radius * progress) - x(center));
-      sprite.position.set(Math.round(x(center)), Math.round(context.sourceY + 18));
+      sprite.position.set(Math.round(x(center)), Math.round(context.sourceY + 18 * context.unitScale));
       const scale = pixels * 2 / sprite.texture.orig.width;
       sprite.scale.set(scale, scale * 0.32);
       const entrance = Math.min(1, progress / 0.08);

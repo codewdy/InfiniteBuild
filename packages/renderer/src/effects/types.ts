@@ -19,6 +19,7 @@ export type EffectCreateContext = {
   log: BattleLog;
   previous?: BattleLog;
   sourceY: number;
+  unitScale: number;
   unitY: (id: number, kind: string) => number;
 };
 

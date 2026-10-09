@@ -50,27 +50,27 @@
           <label class="resolution-control" for="resolution">
             Renderer 分辨率
             <select id="resolution" aria-describedby="resolution-hint">
-              <option value="auto">自适应</option>
-              <optgroup label="手机 · 横屏">
-                <option value="800x360" selected>Android · 800 × 360</option>
-                <option value="667x375">iPhone SE · 667 × 375</option>
-                <option value="844x390">iPhone 13 / 14 · 844 × 390</option>
-                <option value="852x393">iPhone 15 / 16 · 852 × 393</option>
-                <option value="932x430">iPhone Pro Max · 932 × 430</option>
+              <option value="auto" selected>自适应</option>
+              <optgroup label="手机 · 竖屏">
+                <option value="360x800">Android · 360 × 800</option>
+                <option value="375x667">iPhone SE · 375 × 667</option>
+                <option value="390x844">iPhone 13 / 14 · 390 × 844</option>
+                <option value="393x852">iPhone 15 / 16 · 393 × 852</option>
+                <option value="430x932">iPhone Pro Max · 430 × 932</option>
               </optgroup>
-              <optgroup label="桌面 · 横屏">
-                <option value="1366x768">768p · 1366 × 768</option>
-                <option value="1920x1080">1080p · 1920 × 1080</option>
+              <optgroup label="桌面 · 4:3">
+                <option value="1024x768">4:3 · 1024 × 768</option>
+                <option value="1440x1080">4:3 · 1440 × 1080</option>
               </optgroup>
             </select>
           </label>
         </div>
-        <p id="resolution-hint">尺寸单位为 CSS 像素；画布居中，超出窗口可用宽高时等比例缩小。</p>
+        <p id="resolution-hint">自适应模式：手机竖屏，桌面 4:3。尺寸单位为 CSS 像素；超出窗口可用宽高时等比例缩小。</p>
         <div class="battlefield-viewport" id="battlefield-viewport">
           <div class="battlefield-stage" id="battlefield-stage">
           <canvas
             id="battlefield"
-            aria-label="像素战场：角色与技能动画"
+            aria-label="像素战场、石板盘和背包"
           ></canvas>
           </div>
         </div>
