@@ -642,14 +642,15 @@ function renderTablets(): void {
       (tablet.kind !== "tablet-support-skill" && tablet.kind !== "tablet-support-passive")
     )
       return;
-    const [x, y] = TabletSpec.getSupportDelta(gameData, tablet);
-    const target = TabletMap.move(source, x, y, tablet.rotate);
     const targetKind = tablet.kind === "tablet-support-skill" ? "tablet-skill" : "tablet-passive";
-    if (target === undefined || state.tablets[target]?.kind !== targetKind)
-      return;
-    const sources = supportedBy.get(target) ?? [];
-    if (!sources.includes(source)) sources.push(source);
-    supportedBy.set(target, sources);
+    for (const [x, y] of TabletSpec.getSupportDelta(gameData, tablet)) {
+      const target = TabletMap.move(source, x, y, tablet.rotate);
+      if (target === undefined || state.tablets[target]?.kind !== targetKind)
+        continue;
+      const sources = supportedBy.get(target) ?? [];
+      if (!sources.includes(source)) sources.push(source);
+      supportedBy.set(target, sources);
+    }
   });
   tabletBoard.replaceChildren(
     ...TabletMap.pos2Id.flatMap((row) =>

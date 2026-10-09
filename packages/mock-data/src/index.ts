@@ -80,7 +80,7 @@ export const gameData: GameData = {
   playerDefinition: {
     tablet: {
       targetSelection: {
-        adjacent: { delta: [1, 0] },
+        adjacent: { delta: [[1, 0]] },
       },
     },
     defaultState: playerState,

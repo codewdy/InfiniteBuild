@@ -56,12 +56,9 @@ export function describeTablet(
     lines,
     supportTargets:
       "rotate" in tablet
-        ? [
-            TabletMap.rotateVec(
-              ...TabletSpec.getSupportDelta(gameData, tablet),
-              tablet.rotate,
-            ),
-          ]
+        ? TabletSpec.getSupportDelta(gameData, tablet).map(([x, y]) =>
+            TabletMap.rotateVec(x, y, tablet.rotate),
+          )
         : undefined,
   };
 }

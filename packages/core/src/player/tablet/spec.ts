@@ -36,7 +36,7 @@ export namespace TabletSpec {
   export function getSupportDelta(
     game: GameData,
     tablet: Support,
-  ): SupportTablet.Delta {
+  ): SupportTablet.Delta[] {
     const selection =
       game.playerDefinition.tablet.targetSelection[tablet.targetSelection];
     if (!selection) {
@@ -66,7 +66,7 @@ export namespace TabletSpec {
       case "tablet-support-skill":
         return new SupportTablet(
           ctx,
-          [getSupportDelta(game, tablet)],
+          getSupportDelta(game, tablet),
           "tablet-skill",
           tablet.affixes,
         );
@@ -75,7 +75,7 @@ export namespace TabletSpec {
       case "tablet-support-passive":
         return new SupportTablet(
           ctx,
-          [getSupportDelta(game, tablet)],
+          getSupportDelta(game, tablet),
           "tablet-passive",
           tablet.affixes,
         );
