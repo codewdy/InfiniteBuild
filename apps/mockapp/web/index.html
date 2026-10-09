@@ -51,6 +51,7 @@
             Renderer 分辨率
             <select id="resolution" aria-describedby="resolution-hint">
               <option value="auto" selected>自适应</option>
+              <option value="custom">自定义 · 拖动调整</option>
               <optgroup label="手机 · 竖屏">
                 <option value="360x800">Android · 360 × 800</option>
                 <option value="375x667">iPhone SE · 375 × 667</option>
@@ -66,12 +67,19 @@
           </label>
         </div>
         <p id="resolution-hint">自适应模式：手机竖屏，桌面 4:3。尺寸单位为 CSS 像素；超出窗口可用宽高时等比例缩小。</p>
+        <div id="custom-resolution" class="custom-resolution" hidden>
+          <label>宽 <input id="custom-width" type="number" min="256" max="2560" value="1024" step="1" /> px</label>
+          <label>高 <input id="custom-height" type="number" min="320" max="2560" value="768" step="1" /> px</label>
+          <label>预览缩放 <input id="custom-zoom" type="range" min="10" max="200" value="100" step="1" /> <output id="custom-zoom-value">100%</output></label>
+          <p>拖动画布右下角调整宽高；方向键每次调整 10 px，按住 Shift 调整 50 px。高度会为下方 UI 保留空间。</p>
+        </div>
         <div class="battlefield-viewport" id="battlefield-viewport">
           <div class="battlefield-stage" id="battlefield-stage">
           <canvas
             id="battlefield"
             aria-label="像素战场、石板盘和背包"
           ></canvas>
+          <button id="resolution-resize" class="resolution-resize" type="button" aria-label="调整画布尺寸：拖动或使用方向键" title="拖动调整画布尺寸" hidden>⤡</button>
           </div>
         </div>
       </section>

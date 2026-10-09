@@ -21,6 +21,7 @@ const INVENTORY_X = BOARD_SIZE + SECTION_GAP;
 const PANEL_PADDING = 16;
 const BATTLEFIELD_MIN_ASPECT = 16 / 9;
 const BATTLEFIELD_MAX_ASPECT = 21 / 9;
+const BATTLEFIELD_HEIGHT_FRACTION = 1 / 3;
 
 export type SlotLocation = { area: "tablets" | "inventory"; index: number };
 export type GameUIOptions = {
@@ -385,8 +386,9 @@ export class GameUI {
       );
     });
     const canvasHeight = Math.max(1, this.canvas.clientHeight);
+    // Choose the height closest to one third while preserving the aspect limits.
     const battlefieldHeight = Math.max(width / BATTLEFIELD_MAX_ASPECT,
-      Math.min(canvasHeight / 2, width / BATTLEFIELD_MIN_ASPECT));
+      Math.min(canvasHeight * BATTLEFIELD_HEIGHT_FRACTION, width / BATTLEFIELD_MIN_ASPECT));
     const height = Math.max(1, canvasHeight - battlefieldHeight);
     this.uiHeight = height;
     const scale = Math.max(0.001, Math.min(1,
