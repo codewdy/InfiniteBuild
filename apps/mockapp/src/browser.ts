@@ -63,7 +63,11 @@ window.addEventListener("pagehide", () => {
   viewportObserver.disconnect();
   window.removeEventListener("resize", applyResolution);
 }, { once: true });
-const gameUI = await GameUI.create(canvas, { onMoveTablet: moveTablet });
+const gameUI = await GameUI.create(canvas, {
+  gameData,
+  onMoveTablet: moveTablet,
+  onRotateTablet: rotateTablet,
+});
 const battlefield = gameUI.battlefield;
 const iconAssets = await loadBattlefieldIcons();
 const passiveAffixIcons = await loadPassiveAffixIcons();
@@ -197,6 +201,15 @@ function moveTablet(uuid: string, target: SlotLocation): void {
   setTablet(state, target, tablet);
   selectedUuid = undefined;
   submitState(state);
+}
+
+function rotateTablet(uuid: string): void {
+  const state = game.getState();
+  const tablet = [...state.tablets, ...state.inventory].find(item => item?.uuid === uuid);
+  if (!tablet || !("rotate" in tablet)) return;
+  const rotations = [0, 90, 180, 270] as const;
+  tablet.rotate = rotations[(rotations.indexOf(tablet.rotate) + 1) % rotations.length]!;
+  submitState(state, "validate", `${tabletName(tablet)}已旋转至 ${tablet.rotate}°`);
 }
 
 function discardTablet(uuid: string): void {
@@ -454,7 +467,7 @@ function createSlot(
       segment.append(border);
       icon.append(segment);
     }
-    if ("rotate" in tablet) icon.style.transform = `rotate(${tablet.rotate}deg)`;
+    if ("rotate" in tablet) stone.style.transform = `rotate(${tablet.rotate}deg)`;
   } else {
     icon.classList.add("empty-slot-icon");
     icon.textContent = "+";
@@ -472,17 +485,7 @@ function createSlot(
   }
   const rotate = () => {
     if (!tablet || draggingUuid) return;
-    const nextState = game.getState();
-    const current = tabletAt(nextState, location);
-    if (!current || current.uuid !== tablet.uuid || !("rotate" in current)) return;
-    const rotations = [0, 90, 180, 270] as const;
-    current.rotate =
-      rotations[(rotations.indexOf(current.rotate) + 1) % rotations.length]!;
-    submitState(
-      nextState,
-      "validate",
-      `${tabletName(current)}已旋转至 ${current.rotate}°`,
-    );
+    rotateTablet(tablet.uuid);
   };
   slot.addEventListener("contextmenu", (event) => {
     if (!tablet || !("rotate" in tablet)) return;

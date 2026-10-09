@@ -50,7 +50,6 @@ export function createTabletArt(tablet: TabletSpec.Tablet, assets: TabletArt, si
   const art = new Container();
   art.eventMode = "none";
   art.pivot.set(size / 2);
-  art.angle = "rotate" in tablet ? tablet.rotate : 0;
   const half = size / 2;
   for (let quadrant = 0; quadrant < 4; quadrant++) {
     const affix = tablet.affixes[quadrant];
@@ -86,6 +85,7 @@ export function createTabletArt(tablet: TabletSpec.Tablet, assets: TabletArt, si
     : tablet.kind === "tablet-support-skill" ? "support-skill" : "support-passive";
   const center = new Sprite(assets.icons[icon]);
   center.anchor.set(0.5);
+  center.angle = "rotate" in tablet ? tablet.rotate : 0;
   center.position.set(size / 2);
   center.width = center.height = size * 0.7;
   art.addChild(center);
