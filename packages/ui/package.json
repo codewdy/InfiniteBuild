@@ -7,7 +7,8 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./assets/*": "./assets/*"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json"
@@ -16,5 +17,9 @@
     "@infinite-build/core": "workspace:*",
     "@infinite-build/renderer": "workspace:*",
     "pixi.js": "^8.22.0"
-  }
+  },
+  "files": [
+    "dist",
+    "assets"
+  ]
 }

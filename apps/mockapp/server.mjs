@@ -9,6 +9,7 @@ const base = fileURLToPath(new URL(".", import.meta.url));
 const workspace = resolve(base, "../..");
 const mockDataRequire = createRequire(resolve(workspace, "packages/mock-data/package.json"));
 const rendererRoot = resolve(workspace, "packages/renderer");
+const uiRoot = resolve(workspace, "packages/ui");
 const rendererRequire = createRequire(resolve(rendererRoot, "package.json"));
 const clients = new Set();
 let revision = 0;
@@ -59,6 +60,7 @@ let sources = (await sourceSnapshot()).join("\n");
 const webSnapshot = async () => (await Promise.all([
   snapshot(resolve(base, "web")),
   snapshot(resolve(rendererRoot, "assets")),
+  snapshot(resolve(uiRoot, "assets")),
 ])).join("\n");
 let web = await webSnapshot();
 let checking = false;
@@ -84,7 +86,7 @@ const watcher = setInterval(async () => {
   }
 }, 500);
 const roots = {
-  "/ui/": resolve(workspace, "packages/ui/dist"),
+  "/ui/": uiRoot,
   "/renderer/": rendererRoot,
   "/app/": resolve(base, "dist"),
   "/core/": resolve(base, "../../packages/core/dist"),
@@ -123,7 +125,7 @@ const server = createServer(async (request, response) => {
       if (prefix) {
         const root = roots[prefix];
         const candidate = resolve(root, pathname.slice(prefix.length));
-        const extensions = prefix === "/renderer/" && pathname.startsWith("/renderer/assets/")
+        const extensions = ["/renderer/", "/ui/"].includes(prefix) && pathname.startsWith(`${prefix}assets/`)
           ? [".png", ".json"] : [".js", ".mjs"];
         if (candidate.startsWith(`${root}/`) && extensions.includes(extname(candidate))) filename = candidate;
       }

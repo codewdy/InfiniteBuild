@@ -1,11 +1,24 @@
-import { Container, Graphics, Point, Text } from "pixi.js";
+import { createTabletArt, loadTabletArt } from "./tablet-art.js";
+import type { TabletArt } from "./tablet-art.js";
+import { Container, Graphics, Point, Rectangle, Sprite } from "pixi.js";
+import { loadDrawerAssets } from "./drawer-assets.js";
+import type { DrawerAssets } from "./drawer-assets.js";
 import { TabletMap } from "@infinite-build/core";
 import type { PlayerState, TabletSpec } from "@infinite-build/core";
 import { Battlefield } from "@infinite-build/renderer";
 
-function text(value: string, size: number, color = 0xe6edf7): Text {
-  return new Text({ text: value, style: { fontFamily: "system-ui, sans-serif", fontSize: size, fill: color } });
-}
+const SLOT_SIZE = 80;
+const SLOT_GAP = 8;
+const SLOT_STEP = SLOT_SIZE + SLOT_GAP;
+const GRID_PADDING = 40;
+const BOARD_SIZE = GRID_PADDING * 2 + SLOT_STEP * 5 - SLOT_GAP;
+const INVENTORY_COLUMNS = 4;
+const INVENTORY_ROWS = 5;
+const INVENTORY_WIDTH = GRID_PADDING * 2 + SLOT_STEP * INVENTORY_COLUMNS - SLOT_GAP;
+const SECTION_GAP = 12;
+const INVENTORY_X = BOARD_SIZE + SECTION_GAP;
+const CONTENT_WIDTH = INVENTORY_X + INVENTORY_WIDTH;
+const DRAWER_PADDING = 16;
 
 export type SlotLocation = { area: "tablets" | "inventory"; index: number };
 export type GameUIOptions = {
@@ -17,8 +30,16 @@ export type GameUIOptions = {
 export class GameUI {
   private readonly root = new Container();
   private readonly panel = new Container();
+  private readonly drawer = new Container();
+  private readonly drawerBackground = new Graphics();
+  private readonly backdrop = new Graphics();
+  private readonly clip = new Graphics();
+  private opened = false;
+  private openness = 0;
+  private drawerWidth = 0;
+  private animation?: number;
+  private destroyed = false;
   private readonly button = new Container();
-  private readonly buttonLabel = text("石板 / 背包", 14);
   private readonly observer: ResizeObserver;
   private state?: PlayerState;
   private readonly slots: { location: SlotLocation; view: Container }[] = [];
@@ -32,26 +53,34 @@ export class GameUI {
     moved: boolean;
   };
   private hovered?: Container;
-  private readonly highlight = new Graphics().roundRect(0, 0, 50, 50, 6).stroke({ color: 0x82e6ce, width: 2 });
+  private readonly highlight = new Graphics().roundRect(0, 0, SLOT_SIZE, SLOT_SIZE, 8).stroke({ color: 0x82e6ce, width: 2 });
   private capacity = 0;
   private contentKey = "";
-  private panelWidth = 690;
-  private panelHeight = 360;
 
-  private constructor(private readonly canvas: HTMLCanvasElement, readonly battlefield: Battlefield, private readonly options: GameUIOptions) {
-    this.button.addChild(new Graphics().roundRect(0, 0, 120, 36, 8).fill(0x202d42).stroke({ color: 0x78b8ff, width: 1 }));
-    this.buttonLabel.position.set(12, 9);
-    this.button.addChild(this.buttonLabel);
+  private constructor(
+    private readonly canvas: HTMLCanvasElement,
+    readonly battlefield: Battlefield,
+    private readonly options: GameUIOptions,
+    private readonly art: TabletArt,
+    private readonly backgrounds: DrawerAssets,
+  ) {
+    this.button.addChild(new Graphics().roundRect(0, 0, 40, 40, 8).fill(0x172738).stroke({ color: 0x78b8ff, width: 1 }));
+    const symbol = new Graphics();
+    for (let row = 0; row < 2; row++) {
+      for (let column = 0; column < 2; column++) {
+        symbol.roundRect(10 + column * 12, 10 + row * 12, 8, 8, 2).fill(0xb4dce7);
+      }
+    }
+    this.button.addChild(symbol);
     this.button.eventMode = "static";
     this.button.cursor = "pointer";
-    this.button.on("pointertap", () => {
-      this.cancelDrag();
-      this.panel.visible = !this.panel.visible;
-      this.buttonLabel.text = this.panel.visible ? "收起面板" : "石板 / 背包";
-    });
-    this.panel.visible = false;
-    this.panel.eventMode = "static";
-    this.root.addChild(this.button, this.panel);
+    this.button.on("pointertap", () => this.setOpen(!this.opened));
+    this.backdrop.eventMode = "static";
+    this.backdrop.on("pointertap", () => this.setOpen(false));
+    this.drawer.eventMode = "static";
+    this.drawer.addChild(this.drawerBackground, this.panel);
+    this.root.addChild(this.backdrop, this.drawer, this.button, this.clip);
+    this.root.mask = this.clip;
     battlefield.mountOverlay(this.root);
     this.observer = new ResizeObserver(() => this.layout());
     this.observer.observe(canvas);
@@ -65,7 +94,14 @@ export class GameUI {
   }
 
   static async create(canvas: HTMLCanvasElement, options: GameUIOptions = {}): Promise<GameUI> {
-    return new GameUI(canvas, await Battlefield.create(canvas), options);
+    const art = await loadTabletArt();
+    try {
+      const backgrounds = await loadDrawerAssets();
+      return new GameUI(canvas, await Battlefield.create(canvas), options, art, backgrounds);
+    } catch (error) {
+      art.destroy();
+      throw error;
+    }
   }
 
   update(state: PlayerState, inventoryCapacity: number): void {
@@ -77,21 +113,17 @@ export class GameUI {
     this.renderPanel();
   }
 
-  private slot(tablet: TabletSpec.Slot | undefined, index: number, x: number, y: number): Container {
+  private slot(tablet: TabletSpec.Slot | undefined, x: number, y: number): Container {
     const slot = new Container();
     slot.position.set(x, y);
-    const color = !tablet ? 0x121c2b : tablet.kind === "tablet-skill" ? 0x49304a : 0x204139;
-    slot.addChild(new Graphics().roundRect(0, 0, 50, 50, 6).fill(color).stroke({ color: index === 0 ? 0xbfa278 : 0x43516c, width: 1 }));
-    const number = text(String(index).padStart(2, "0"), 9, 0x92a3b9);
-    number.position.set(5, 4);
-    const name = !tablet ? "空槽" : tablet.kind === "tablet-skill" ? (tablet.skill === "nova" ? "新星" : tablet.skill === "fireball" ? "火球" : "技能") : tablet.kind === "tablet-passive" ? "被动" : "辅助";
-    const label = text(name, 12);
-    label.position.set(11, 19);
-    slot.addChild(number, label);
+    slot.hitArea = new Rectangle(0, 0, SLOT_SIZE, SLOT_SIZE);
+    const color = !tablet ? 0x101923 : tablet.kind === "tablet-skill" ? 0x362941 : 0x193d36;
+    slot.addChild(new Graphics().roundRect(0, 0, SLOT_SIZE, SLOT_SIZE, 8)
+      .fill({ color, alpha: tablet ? 0.7 : 0.4 }).stroke({ color: tablet ? 0x60717f : 0x3b4b54, width: 1, alpha: 0.7 }));
     if (tablet) {
-      const rarity = text(tablet.rarity === "rare" ? "稀有" : "魔法", 9, tablet.rarity === "rare" ? 0xffc45e : 0x79b8ff);
-      rarity.position.set(15, 36);
-      slot.addChild(rarity);
+      const artwork = createTabletArt(tablet, this.art, 72);
+      artwork.position.set(SLOT_SIZE / 2);
+      slot.addChild(artwork);
     }
     return slot;
   }
@@ -101,30 +133,27 @@ export class GameUI {
     this.cancelDrag();
     this.slots.length = 0;
     for (const child of this.panel.removeChildren()) child.destroy({ children: true });
-    const columns = 6;
-    const rows = Math.ceil(this.capacity / columns);
-    this.panelHeight = Math.max(360, 90 + rows * 56);
-    this.panel.addChild(new Graphics().roundRect(0, 0, this.panelWidth, this.panelHeight, 12).fill({ color: 0x141e2e, alpha: 0.97 }).stroke({ color: 0x43516c, width: 1 }));
-    const boardTitle = text("石板盘", 18);
-    boardTitle.position.set(20, 18);
-    const used = this.state.inventory.slice(0, this.capacity).filter(Boolean).length;
-    const inventoryTitle = text(`背包  ${used} / ${this.capacity}`, 18);
-    inventoryTitle.position.set(330, 18);
-    const hint = text(this.options.onMoveTablet ? "拖到空槽移动 · 拖到石板交换 · Esc 取消" : "石板盘与背包预览", 12, 0x92a3b9);
-    hint.position.set(20, this.panelHeight - 26);
-    this.panel.addChild(boardTitle, inventoryTitle, hint);
+    const board = new Sprite(this.backgrounds.board);
+    board.width = board.height = BOARD_SIZE;
+    const inventory = new Sprite(this.backgrounds.inventory);
+    inventory.position.set(INVENTORY_X, 0);
+    inventory.width = INVENTORY_WIDTH;
+    inventory.height = BOARD_SIZE;
+    this.panel.addChild(board, inventory);
     TabletMap.pos2Id.forEach((row, y) => row.forEach((index, x) => {
-      const view = this.slot(this.state!.tablets[index], index, 20 + x * 56, 55 + y * 56);
+      const view = this.slot(this.state!.tablets[index], GRID_PADDING + x * SLOT_STEP, GRID_PADDING + y * SLOT_STEP);
       view.cursor = this.options.onMoveTablet && this.state!.tablets[index] ? "grab" : "default";
       view.eventMode = "static";
       this.slots.push({ location: { area: "tablets", index }, view });
       this.panel.addChild(view);
     }));
-    for (let index = 0; index < this.capacity; index++) {
-      const view = this.slot(this.state.inventory[index], index, 330 + (index % columns) * 56, 55 + Math.floor(index / columns) * 56);
-      view.cursor = this.options.onMoveTablet && this.state.inventory[index] ? "grab" : "default";
+    for (let index = 0; index < INVENTORY_COLUMNS * INVENTORY_ROWS; index++) {
+      const view = this.slot(this.state.inventory[index], INVENTORY_X + GRID_PADDING + (index % INVENTORY_COLUMNS) * SLOT_STEP, GRID_PADDING + Math.floor(index / INVENTORY_COLUMNS) * SLOT_STEP);
+      const enabled = index < this.capacity;
+      view.alpha = enabled ? 1 : 0.35;
+      view.cursor = enabled && this.options.onMoveTablet && this.state.inventory[index] ? "grab" : "default";
       view.eventMode = "static";
-      this.slots.push({ location: { area: "inventory", index }, view });
+      if (enabled) this.slots.push({ location: { area: "inventory", index }, view });
       this.panel.addChild(view);
     }
     this.layout();
@@ -139,18 +168,18 @@ export class GameUI {
   }
 
   private slotAt(point: Point) {
-    return this.slots.find(({ view }) => point.x >= view.x && point.x < view.x + 50 && point.y >= view.y && point.y < view.y + 50);
+    return this.slots.find(({ view }) => point.x >= view.x && point.x < view.x + SLOT_SIZE && point.y >= view.y && point.y < view.y + SLOT_SIZE);
   }
 
   private readonly onPointerDown = (event: PointerEvent): void => {
-    if (event.button !== 0 || this.drag || !this.panel.visible || !this.options.onMoveTablet) return;
+    if (event.button !== 0 || this.drag || !this.opened || this.animation !== undefined || !this.options.onMoveTablet) return;
     const point = this.pointerPosition(event);
     const source = this.slotAt(point);
     if (!source) return;
     const tablet = this.state?.[source.location.area][source.location.index];
     if (!tablet) return;
     event.preventDefault();
-    const ghost = this.slot(tablet, source.location.index, point.x - 25, point.y - 25);
+    const ghost = this.slot(tablet, point.x - SLOT_SIZE / 2, point.y - SLOT_SIZE / 2);
     ghost.eventMode = "none";
     ghost.visible = false;
     this.panel.addChild(ghost);
@@ -165,7 +194,7 @@ export class GameUI {
     drag.source.alpha = 0.35;
     drag.ghost.visible = true;
     const point = this.pointerPosition(event);
-    drag.ghost.position.set(point.x - 25, point.y - 25);
+    drag.ghost.position.set(point.x - SLOT_SIZE / 2, point.y - SLOT_SIZE / 2);
     const target = this.slotAt(point)?.view;
     if (target !== this.hovered) {
       this.highlight.removeFromParent();
@@ -188,7 +217,9 @@ export class GameUI {
   };
 
   private readonly onKeyDown = (event: KeyboardEvent): void => {
-    if (event.key === "Escape") this.cancelDrag();
+    if (event.key !== "Escape") return;
+    if (this.drag) this.cancelDrag();
+    else this.setOpen(false);
   };
 
   private readonly cancelDrag = (): void => {
@@ -201,16 +232,56 @@ export class GameUI {
     }
   };
 
+  private setOpen(open: boolean): void {
+    if (this.destroyed || this.opened === open) return;
+    this.cancelDrag();
+    this.opened = open;
+    if (this.animation !== undefined) window.cancelAnimationFrame(this.animation);
+    const from = this.openness;
+    const target = open ? 1 : 0;
+    const startedAt = performance.now();
+    const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 240;
+    const animate = (now: number) => {
+      const progress = duration === 0 ? 1 : Math.min(1, (now - startedAt) / duration);
+      const eased = 1 - (1 - progress) ** 3;
+      this.openness = from + (target - from) * eased;
+      this.positionDrawer();
+      this.animation = progress < 1 ? window.requestAnimationFrame(animate) : undefined;
+    };
+    animate(startedAt);
+  }
+
+  private positionDrawer(): void {
+    this.drawer.position.set(this.canvas.clientWidth - this.drawerWidth * this.openness, 0);
+    this.drawer.visible = this.backdrop.visible = this.openness > 0;
+    this.backdrop.alpha = this.openness;
+    this.button.visible = !this.opened && this.openness === 0;
+  }
+
   private layout(): void {
+    this.cancelDrag();
     const width = Math.max(1, this.canvas.clientWidth);
     const height = Math.max(1, this.canvas.clientHeight);
     this.button.position.set(12, 12);
-    const scale = Math.max(0.001, Math.min(1, (width - 24) / this.panelWidth, (height - 72) / this.panelHeight));
+    const scale = Math.max(0.001, Math.min(1,
+      (width - DRAWER_PADDING * 2) / CONTENT_WIDTH,
+      (height - DRAWER_PADDING * 2) / BOARD_SIZE,
+    ));
     this.panel.scale.set(scale);
-    this.panel.position.set((width - this.panelWidth * scale) / 2, 60);
+    this.panel.position.set(DRAWER_PADDING, Math.max(0, (height - BOARD_SIZE * scale) / 2));
+    this.drawerWidth = CONTENT_WIDTH * scale + DRAWER_PADDING * 2;
+    this.drawerBackground.clear().rect(0, 0, this.drawerWidth, height).fill({ color: 0x0c141d, alpha: 0.98 })
+      .moveTo(0, 0).lineTo(0, height).stroke({ color: 0x54717c, width: 2 });
+    this.drawer.hitArea = new Rectangle(0, 0, this.drawerWidth, height);
+    this.backdrop.clear().rect(0, 0, width, height).fill({ color: 0x040910, alpha: 0.48 });
+    this.clip.clear().rect(0, 0, width, height).fill(0xffffff);
+    this.positionDrawer();
   }
 
   destroy(): void {
+    if (this.destroyed) return;
+    this.destroyed = true;
+    if (this.animation !== undefined) window.cancelAnimationFrame(this.animation);
     this.cancelDrag();
     this.highlight.destroy();
     this.canvas.removeEventListener("pointerdown", this.onPointerDown);
@@ -221,5 +292,6 @@ export class GameUI {
     window.removeEventListener("keydown", this.onKeyDown);
     this.observer.disconnect();
     this.battlefield.destroy();
+    this.art.destroy();
   }
 }
