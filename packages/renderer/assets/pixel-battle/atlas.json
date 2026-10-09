@@ -1729,6 +1729,20 @@
         675
       ],
       "alignment": "center"
+    },
+    "tablet-support-rare": {
+      "image": "tablet-roles-gold.png",
+      "frame": [
+        134,
+        142,
+        685,
+        632
+      ],
+      "size": [
+        685,
+        685
+      ],
+      "alignment": "center"
     }
   },
   "characters": {
@@ -1961,7 +1975,8 @@
     "xp": "fantasy-xp",
     "passive-quarter-empty": "passive-quarter-empty",
     "passive-magic": "tablet-passive-magic",
-    "passive-rare": "tablet-passive-rare"
+    "passive-rare": "tablet-passive-rare",
+    "support-rare": "tablet-support-rare"
   },
   "skillTablets": {
     "fireball": "fantasy-fireball",

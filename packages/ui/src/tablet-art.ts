@@ -43,6 +43,24 @@ export async function loadTabletArt(): Promise<TabletArt> {
   };
 }
 
+/** Shared rarity-colored support arrow for inventory and pending loot. */
+export function createSupportTabletArt(
+  kind: "tablet-support-skill" | "tablet-support-passive",
+  rarity: "magic" | "rare",
+  icons: TabletArt["icons"],
+  size: number,
+  rotation = 0,
+): Container {
+  const art = new Container();
+  const stone = new Sprite(icons[rarity === "rare" ? "support-rare" : kind === "tablet-support-skill" ? "support-skill" : "support-passive"]);
+  stone.anchor.set(0.5);
+  stone.position.set(size / 2);
+  stone.width = stone.height = size;
+  stone.angle = rotation;
+  art.addChild(stone);
+  return art;
+}
+
 /** Same composition as mockapp: four rotated quarters underneath a 70% center. */
 export function createTabletArt(tablet: TabletSpec.Tablet, assets: TabletArt, size: number): Container {
   const art = new Container();
@@ -61,13 +79,18 @@ export function createTabletArt(tablet: TabletSpec.Tablet, assets: TabletArt, si
     quarter.addChild(sprite);
     art.addChild(quarter);
   }
+  if (tablet.kind === "tablet-support-skill" || tablet.kind === "tablet-support-passive") {
+    const center = createSupportTabletArt(tablet.kind, tablet.rarity, assets.icons, size * 0.7,
+      "rotate" in tablet ? tablet.rotate : 0);
+    center.position.set(size * 0.15);
+    art.addChild(center);
+    return art;
+  }
   const icon: IconName = tablet.kind === "tablet-skill"
     ? tablet.skill === "nova" ? "nova" : "fireball"
-    : tablet.kind === "tablet-passive" ? tablet.rarity === "rare" ? "passive-rare" : "passive-magic"
-    : tablet.kind === "tablet-support-skill" ? "support-skill" : "support-passive";
+    : tablet.rarity === "rare" ? "passive-rare" : "passive-magic";
   const center = new Sprite(assets.icons[icon]);
   center.anchor.set(0.5);
-  center.angle = "rotate" in tablet ? tablet.rotate : 0;
   center.position.set(size / 2);
   center.width = center.height = size * 0.7;
   art.addChild(center);

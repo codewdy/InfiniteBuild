@@ -1,0 +1,1 @@
+Edit tablet-roles.png: preserve the two-icon atlas layout, transparent background, gray-blue stone, moss, texture, silhouettes and right passive tablet. Change only the left support tablet cyan arrow emblem to golden yellow with warm shadows and pale highlights. No badges or text. Preserve pixel art.

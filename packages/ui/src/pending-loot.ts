@@ -1,7 +1,7 @@
 import { Container, Graphics, Rectangle, Sprite, Text } from "pixi.js";
 import type { Texture } from "pixi.js";
 import type { PlayerState } from "@infinite-build/core";
-import type { TabletArt } from "./tablet-art.js";
+import { createSupportTabletArt, type TabletArt } from "./tablet-art.js";
 
 export type PendingLootItem = PlayerState["pendingLoot"][number]["loot"];
 
@@ -169,7 +169,14 @@ export class PendingLootView extends Container {
       // Atlas-cropped passive/support icons need explicit padding inside the slot.
       const artworkSize = loot.kind === "tablet-skill" ? LOOT_ICON_SIZE - 4 : LOOT_ICON_SIZE * 0.75;
       tablet.width = tablet.height = artworkSize;
-      tile.addChild(tablet);
+      if (loot.kind === "tablet-support-skill" || loot.kind === "tablet-support-passive") {
+        tablet.destroy();
+        const support = createSupportTabletArt(loot.kind, loot.rarity, this.icons, artworkSize);
+        support.position.set((LOOT_ICON_SIZE - artworkSize) / 2);
+        tile.addChild(support);
+      } else {
+        tile.addChild(tablet);
+      }
       const typeLabel = typeLabels[loot.kind];
       const typeHeight = typeLabel.includes("\n") ? 30 : 18;
       tile.addChild(new Graphics().roundRect(0, LOOT_ICON_SIZE - typeHeight, TYPE_BADGE_WIDTH, typeHeight, 4)

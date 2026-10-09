@@ -521,7 +521,7 @@ function createSlot(
     const iconName: IconName = tablet.kind === "tablet-skill"
       ? (tablet.skill === "nova" ? "nova" : "fireball")
       : tablet.kind === "tablet-passive" ? (tablet.rarity === "rare" ? "passive-rare" : "passive-magic")
-      : tablet.kind === "tablet-support-skill" ? "support-skill" : "support-passive";
+      : tablet.rarity === "rare" ? "support-rare" : tablet.kind === "tablet-support-skill" ? "support-skill" : "support-passive";
     const stone = assetIcon(iconName);
     icon.append(stone);
     icon.classList.add("affixed-tablet-icon");
