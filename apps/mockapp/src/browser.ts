@@ -555,6 +555,7 @@ function createSlot(
       const [, , referenceWidth, referenceHeight] = iconAssets["support-skill"].frame;
       const scale = supportTabletScale(
         { width, height }, { width: referenceWidth, height: referenceHeight },
+        appearance.icon.startsWith("support-diagonal-"),
       );
       const [dx, dy] = TabletMap.rotateVec(...appearance.offset, tablet.rotate);
       stone.style.transform = `translate(${dx * 100}%, ${dy * 100}%) rotate(${tablet.rotate + appearance.angle}deg) scale(${scale.x}, ${scale.y})`;

@@ -10,9 +10,9 @@ export function resolveSupportTabletIcon(
   const base: IconName = rarity === "rare" ? "support-rare"
     : kind === "tablet-support-skill" ? "support-skill" : "support-passive";
   const key = targets?.map(([x, y]) => `${x},${y}`).sort().join(";");
-  if (key === "1,-1") return { icon: base, angle: -45, offset: [0.05, -0.05] };
-  const directions: Record<string, "distant" | "line" | "opposite" | "diagonalPair"> = {
+  const directions: Record<string, "distant" | "line" | "opposite" | "diagonal" | "diagonalPair"> = {
     "2,0": "distant",
+    "1,-1": "diagonal",
     "1,0;2,0": "line",
     "-1,0;1,0": "opposite",
     "1,-1;1,1": "diagonalPair",
@@ -28,7 +28,10 @@ export function resolveSupportTabletIcon(
 export function supportTabletScale(
   frame: { width: number; height: number },
   reference: { width: number; height: number },
+  preserveAspect = false,
 ): { x: number; y: number } {
+  // Diagonal arrow symmetry requires equal scaling on both axes.
+  if (preserveAspect) return { x: 1, y: 1 };
   const square = Math.max(frame.width, frame.height);
   return {
     x: square / frame.width,

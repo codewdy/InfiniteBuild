@@ -1911,6 +1911,34 @@
         784
       ],
       "alignment": "center"
+    },
+    "support-diagonal-magic": {
+      "image": "support-diagonal-v2.png",
+      "frame": [
+        202,
+        256,
+        499,
+        515
+      ],
+      "size": [
+        515,
+        515
+      ],
+      "alignment": "center"
+    },
+    "support-diagonal-rare": {
+      "image": "support-diagonal-v2.png",
+      "frame": [
+        881,
+        256,
+        499,
+        515
+      ],
+      "size": [
+        515,
+        515
+      ],
+      "alignment": "center"
     }
   },
   "characters": {
@@ -2156,7 +2184,9 @@
     "support-opposite-magic": "support-opposite-magic",
     "support-opposite-rare": "support-opposite-rare",
     "support-diagonalPair-magic": "support-diagonalPair-magic",
-    "support-diagonalPair-rare": "support-diagonalPair-rare"
+    "support-diagonalPair-rare": "support-diagonalPair-rare",
+    "support-diagonal-magic": "support-diagonal-magic",
+    "support-diagonal-rare": "support-diagonal-rare"
   },
   "skillTablets": {
     "fireball": "fantasy-fireball",

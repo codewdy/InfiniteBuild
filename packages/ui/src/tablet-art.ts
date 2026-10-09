@@ -58,7 +58,10 @@ export function createSupportTabletArt(
   stone.anchor.set(0.5);
   const [dx, dy] = TabletMap.rotateVec(...appearance.offset, rotation);
   stone.position.set(size * (0.5 + dx), size * (0.5 + dy));
-  const scale = supportTabletScale(stone.texture.frame, icons["support-skill"].frame);
+  const scale = supportTabletScale(
+    stone.texture.frame, icons["support-skill"].frame,
+    appearance.icon.startsWith("support-diagonal-"),
+  );
   stone.width = size * scale.x;
   stone.height = size * scale.y;
   stone.angle = rotation + appearance.angle;
