@@ -5,6 +5,7 @@ import { createSupportTabletArt, type TabletArt } from "./tablet-art.js";
 
 export type PendingLootItem = PlayerState["pendingLoot"][number]["loot"];
 
+const rarityNames = { normal: "普通", magic: "魔法", rare: "稀有" } as const;
 const LOOT_ICON_SIZE = 72;
 const TYPE_BADGE_WIDTH = 30;
 const names: Record<PendingLootItem["kind"], string> = {
@@ -142,7 +143,7 @@ export class PendingLootView extends Container {
       const card = new Container();
       card.position.set(gridX + (index % grid.columns) * step, gridY + Math.floor(index / grid.columns) * step);
       card.scale.set(grid.size / LOOT_ICON_SIZE);
-      card.label = `${names[loot.kind]} · ${loot.rarity === "rare" ? "稀有" : "魔法"} · 等级 ${loot.level} · ${count} 件`;
+      card.label = `${names[loot.kind]} · ${rarityNames[loot.rarity]} · 等级 ${loot.level} · ${count} 件`;
       const rare = loot.rarity === "rare";
       const tile = new Container();
       tile.eventMode = "static";
@@ -157,7 +158,7 @@ export class PendingLootView extends Container {
         this.render();
       });
       tile.addChild(new Graphics().roundRect(0, 0, LOOT_ICON_SIZE, LOOT_ICON_SIZE, 8)
-        .fill(rare ? 0x332c20 : 0x1b2c38).stroke({ color: this.isSelected(loot) ? 0x91f0c8 : rare ? 0xc6a052 : 0x6297bf, width: 2 }));
+        .fill(rare ? 0x332c20 : loot.rarity === "normal" ? 0x272b30 : 0x1b2c38).stroke({ color: this.isSelected(loot) ? 0x91f0c8 : rare ? 0xc6a052 : loot.rarity === "normal" ? 0xaeb5bd : 0x6297bf, width: 2 }));
       // A pending skill is not rolled yet: use a generic tablet, not a specific spell.
       const texture = loot.kind === "tablet-skill" ? this.skillIcons[loot.rarity]
         : loot.kind === "tablet-passive" ? this.icons[rare ? "passive-rare" : "passive-magic"]
@@ -237,8 +238,8 @@ export class PendingLootView extends Container {
       menu.on("pointertap", event => event.stopPropagation());
       menu.addChild(new Graphics().roundRect(0, 0, menuWidth, menuHeight, 8)
         .fill(0x14252d).stroke({ color: 0x91b7a5, width: 1 }));
-      menu.addChild(this.text(names[loot.kind], 12, 10, 15, loot.rarity === "rare" ? 0xedce85 : 0xb9d9ef));
-      menu.addChild(this.text(`${loot.rarity === "rare" ? "稀有" : "魔法"} · Lv.${loot.level} · ×${count}`, 12, 34, 13, 0xa4b1b6));
+      menu.addChild(this.text(names[loot.kind], 12, 10, 15, loot.rarity === "rare" ? 0xedce85 : loot.rarity === "normal" ? 0xe5e9ee : 0xb9d9ef));
+      menu.addChild(this.text(`${rarityNames[loot.rarity]} · Lv.${loot.level} · ×${count}`, 12, 34, 13, 0xa4b1b6));
       menu.addChild(this.button("领一件", 12, 60, 160, 32, canClaim, () => {
         this.closeMenu();
         this.onClaim?.({ ...loot }, 1);

@@ -506,7 +506,7 @@ function createSlot(
   if (tablet?.kind === "tablet-support-skill" || tablet?.kind === "tablet-support-passive") {
     slot.title += `\n辅助对象：${tablet.kind === "tablet-support-skill" ? "技能石板" : "被动石板"}`;
   }
-  if (tablet) slot.title += `\n稀有度：${tablet.rarity === "rare" ? "稀有" : "魔法"}`;
+  if (tablet) slot.title += `\n稀有度：${tablet.rarity === "normal" ? "普通" : tablet.rarity === "rare" ? "稀有" : "魔法"}`;
   if (sources.length) slot.title += `\n被辅助：来自槽位 ${sources.join("、")}`;
   const index = document.createElement("span");
   index.className = "slot-index";
@@ -518,8 +518,9 @@ function createSlot(
   icon.className = "tablet-icon";
   icon.setAttribute("aria-hidden", "true");
   if (tablet) {
+    const skill = tablet.kind === "tablet-skill" && tablet.skill === "nova" ? "nova" : "fireball";
     const iconName: IconName = tablet.kind === "tablet-skill"
-      ? (tablet.skill === "nova" ? "nova" : "fireball")
+      ? (tablet.rarity === "normal" ? skill : `${skill}-${tablet.rarity}`)
       : tablet.kind === "tablet-passive" ? (tablet.rarity === "rare" ? "passive-rare" : "passive-magic")
       : tablet.rarity === "rare" ? "support-rare" : tablet.kind === "tablet-support-skill" ? "support-skill" : "support-passive";
     const stone = assetIcon(iconName);
@@ -678,7 +679,7 @@ function renderTablets(): void {
     const name = document.createElement("strong");
     name.textContent = lootNames[loot.kind];
     const description = document.createElement("span");
-    description.textContent = `${loot.rarity === "magic" ? "魔法" : "稀有"} · 等级 ${loot.level}${loot.kind === "tablet-support-skill" ? " · 辅助技能" : loot.kind === "tablet-support-passive" ? " · 辅助被动" : ""}`;
+    description.textContent = `${loot.rarity === "normal" ? "普通" : loot.rarity === "magic" ? "魔法" : "稀有"} · 等级 ${loot.level}${loot.kind === "tablet-support-skill" ? " · 辅助技能" : loot.kind === "tablet-support-passive" ? " · 辅助被动" : ""}`;
     details.append(name, description);
     const amount = document.createElement("strong");
     amount.textContent = `× ${count}`;

@@ -1743,6 +1743,62 @@
         685
       ],
       "alignment": "center"
+    },
+    "fireball-magic": {
+      "image": "fantasy-icons-magic.png",
+      "frame": [
+        38,
+        460,
+        369,
+        342
+      ],
+      "size": [
+        369,
+        369
+      ],
+      "alignment": "center"
+    },
+    "fireball-rare": {
+      "image": "fantasy-icons-rare.png",
+      "frame": [
+        38,
+        460,
+        369,
+        342
+      ],
+      "size": [
+        369,
+        369
+      ],
+      "alignment": "center"
+    },
+    "nova-magic": {
+      "image": "fantasy-icons-magic.png",
+      "frame": [
+        450,
+        457,
+        370,
+        348
+      ],
+      "size": [
+        370,
+        370
+      ],
+      "alignment": "center"
+    },
+    "nova-rare": {
+      "image": "fantasy-icons-rare.png",
+      "frame": [
+        450,
+        457,
+        370,
+        348
+      ],
+      "size": [
+        370,
+        370
+      ],
+      "alignment": "center"
     }
   },
   "characters": {
@@ -1976,7 +2032,11 @@
     "passive-quarter-empty": "passive-quarter-empty",
     "passive-magic": "tablet-passive-magic",
     "passive-rare": "tablet-passive-rare",
-    "support-rare": "tablet-support-rare"
+    "support-rare": "tablet-support-rare",
+    "fireball-magic": "fireball-magic",
+    "fireball-rare": "fireball-rare",
+    "nova-magic": "nova-magic",
+    "nova-rare": "nova-rare"
   },
   "skillTablets": {
     "fireball": "fantasy-fireball",

@@ -25,6 +25,7 @@ export namespace Loot {
     Item.Rarity,
     readonly [number, number]
   > = {
+    normal: [0, 0],
     magic: [1, 2],
     rare: [3, 4],
   };

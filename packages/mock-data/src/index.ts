@@ -43,27 +43,11 @@ const tierPreviewTablets = Array.from({ length: 5 }, (_, tier) => ({
 }));
 
 export const playerState: PlayerState = {
-  // 108 distinct stacks exercise pagination on both phone and desktop layouts.
+  // Three skill rarities for comparing artwork and claiming loot.
   pendingLoot: [
+    { loot: { kind: "tablet-skill", rarity: "normal", level: 1 }, count: 3 },
     { loot: { kind: "tablet-skill", rarity: "magic", level: 1 }, count: 3 },
-    { loot: { kind: "tablet-passive", rarity: "rare", level: 1 }, count: 4 },
-    { loot: { kind: "tablet-support-skill", rarity: "magic", level: 1 }, count: 10 },
-    { loot: { kind: "tablet-skill", rarity: "rare", level: 10 }, count: 2 },
-    { loot: { kind: "tablet-skill", rarity: "magic", level: 20 }, count: 5 },
-    { loot: { kind: "tablet-passive", rarity: "magic", level: 1 }, count: 6 },
-    { loot: { kind: "tablet-passive", rarity: "magic", level: 20 }, count: 3 },
-    { loot: { kind: "tablet-passive", rarity: "rare", level: 40 }, count: 2 },
-    { loot: { kind: "tablet-support-skill", rarity: "rare", level: 10 }, count: 2 },
-    { loot: { kind: "tablet-support-passive", rarity: "magic", level: 1 }, count: 4 },
-    { loot: { kind: "tablet-support-passive", rarity: "rare", level: 20 }, count: 2 },
-    { loot: { kind: "tablet-support-passive", rarity: "magic", level: 40 }, count: 3 },
-    ...[2, 3, 4, 5, 8, 12, 15, 25, 30, 35, 45, 50].flatMap((level, levelIndex) =>
-      (["tablet-skill", "tablet-passive", "tablet-support-skill", "tablet-support-passive"] as const)
-        .flatMap((kind, kindIndex) => (["magic", "rare"] as const).map((rarity, rarityIndex) => ({
-          loot: { kind, rarity, level },
-          count: 1 + (levelIndex + kindIndex + rarityIndex) % 5,
-        }))),
-    ),
+    { loot: { kind: "tablet-skill", rarity: "rare", level: 1 }, count: 3 },
   ],
   inventory: [
     ...(["fireball", "nova", "fireball", "nova"] as const).map(

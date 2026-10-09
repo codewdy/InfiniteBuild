@@ -2,7 +2,7 @@ import type { Affix } from "../affix.js";
 import type { TabletSpec } from "../tablet/spec.js";
 
 export namespace Item {
-  export type Rarity = "magic" | "rare";
+  export type Rarity = "normal" | "magic" | "rare";
   export type ItemBase = {
     uuid: string;
     rarity: Rarity;

@@ -46,7 +46,7 @@ export async function loadTabletArt(): Promise<TabletArt> {
 /** Shared rarity-colored support arrow for inventory and pending loot. */
 export function createSupportTabletArt(
   kind: "tablet-support-skill" | "tablet-support-passive",
-  rarity: "magic" | "rare",
+  rarity: TabletSpec.Tablet["rarity"],
   icons: TabletArt["icons"],
   size: number,
   rotation = 0,
@@ -86,8 +86,9 @@ export function createTabletArt(tablet: TabletSpec.Tablet, assets: TabletArt, si
     art.addChild(center);
     return art;
   }
+  const skill = tablet.kind === "tablet-skill" && tablet.skill === "nova" ? "nova" : "fireball";
   const icon: IconName = tablet.kind === "tablet-skill"
-    ? tablet.skill === "nova" ? "nova" : "fireball"
+    ? tablet.rarity === "normal" ? skill : `${skill}-${tablet.rarity}`
     : tablet.rarity === "rare" ? "passive-rare" : "passive-magic";
   const center = new Sprite(assets.icons[icon]);
   center.anchor.set(0.5);
