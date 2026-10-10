@@ -7,6 +7,7 @@ import {
   Sprite,
   Text,
 } from "pixi.js";
+import { MonsterInfo } from "./monster-info.js";
 import { BattleResultOverlay } from "./battle-result.js";
 import type { BattlefieldResult } from "./battle-result.js";
 import { loadBattlefieldAssets } from "./battlefield-assets.js";
@@ -17,7 +18,7 @@ import type {
 } from "./battlefield-assets.js";
 import { createSkillEffect } from "./effects/index.js";
 import type { SkillEffect } from "./effects/index.js";
-import type { BattleEvent, BattleLog } from "@infinite-build/core";
+import type { BattleEvent, BattleLog, UnitDefinition, SkillDefinition } from "@infinite-build/core";
 
 // Preserve the original character proportions at the reference battlefield height.
 const REFERENCE_HEIGHT = 290;
@@ -58,6 +59,8 @@ export type BattlefieldOptions = {
   mapName?: string;
   onTogglePlaying?: () => void;
   skillNames?: Readonly<Record<string, string>>;
+  unitDefinitions?: Readonly<Record<string, UnitDefinition>>;
+  skillDefinitions?: Readonly<Record<string, SkillDefinition>>;
 };
 
 /** Presentation only: battle logs remain the authority for time and positions. */
@@ -84,6 +87,10 @@ export class Battlefield {
   private readonly playbackButtonIcon = new Sprite({ roundPixels: true });
   private readonly playbackButtonText = this.text("继续", 10, 0xe7f8f4);
   private readonly resultOverlay: BattleResultOverlay;
+  private readonly monsterInfo = new MonsterInfo();
+  private readonly onInfoKeyDown = (event: KeyboardEvent): void => {
+    if (event.key === "Escape") this.monsterInfo.hide();
+  };
   private readonly skillBars: {
     progress: number;
     castRate: number;
@@ -200,6 +207,7 @@ export class Battlefield {
       view.scene,
       view.transitionLayer,
       view.resultOverlay,
+      view.monsterInfo,
     );
     view.viewport.mask = view.viewportClip;
     view.app.stage.addChild(view.viewport, view.viewportClip);
@@ -208,6 +216,7 @@ export class Battlefield {
       .fill(0xffffff);
     view.observer.observe(canvas);
     view.app.ticker.add(() => view.draw());
+    window.addEventListener("keydown", view.onInfoKeyDown);
     canvas.dataset.renderer = "pixi";
     return view;
   }
@@ -366,6 +375,7 @@ export class Battlefield {
       this.scene.alpha = 0;
     }
     this.resultOverlay.hide();
+    this.monsterInfo.hide(true);
     this.clearSkillBars();
     for (const view of this.views.values())
       view.root.destroy({ children: true });
@@ -388,6 +398,7 @@ export class Battlefield {
     if (this.destroyed) return;
     this.destroyed = true;
     this.observer.disconnect();
+    window.removeEventListener("keydown", this.onInfoKeyDown);
     this.clearTransition();
     this.app.destroy(false, { children: true });
   }
@@ -660,6 +671,19 @@ export class Battlefield {
     label.anchor.set(0.5);
     label.y = -49;
     root.addChild(shadow, body, health, label);
+    if (unit.kind !== "Player") {
+      root.eventMode = "static";
+      root.cursor = "pointer";
+      root.hitArea = new Rectangle(-28, -58, 56, 84);
+      root.on("pointertap", event => {
+        if (event.button !== 0) return;
+        const definition = this.options.unitDefinitions?.[unit.kind];
+        if (!definition) return;
+        event.stopPropagation();
+        this.monsterInfo.show(definition, this.assets.characters[unit.kind], this.options.skillDefinitions ?? {});
+        this.monsterInfo.layout(this.width, this.height);
+      });
+    }
     (unit.kind === "Player" ? this.playerLayer : this.actors).addChild(root);
     return {
       root,
@@ -750,6 +774,7 @@ export class Battlefield {
     this.advanceAnimations(now);
     this.drawTransition(now);
     this.resultOverlay.update(now, this.width, this.height);
+    this.monsterInfo.layout(this.width, this.height);
     if (!this.log) return;
     const progress = this.progress(now);
     const origin = this.fromOrigin + (this.origin - this.fromOrigin) * progress;

@@ -843,6 +843,8 @@ function render(): void {
     level: currentLevel,
     mapName: gameData.mapDefinitions[task.spec.map]!.name,
     onTogglePlaying: togglePlaying,
+    unitDefinitions: gameData.unitDefinitions,
+    skillDefinitions: gameData.skillDefinitions,
     vision,
     skillNames,
     frameDuration: 1000 / Number(speed.value),
