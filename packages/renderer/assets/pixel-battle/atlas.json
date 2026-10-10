@@ -1,6 +1,24 @@
 {
   "image": "atlas.png",
   "frames": {
+    "battle-pause": {
+      "image": "battle-playback-icons.png",
+      "frame": [248, 142, 392, 592],
+      "size": [592, 592],
+      "alignment": "center"
+    },
+    "battle-resume": {
+      "image": "battle-playback-icons.png",
+      "frame": [1070, 142, 494, 592],
+      "size": [592, 592],
+      "alignment": "center"
+    },
+    "battle-progress-frame": {
+      "image": "battle-progress-frame.png",
+      "frame": [28, 450, 1480, 124],
+      "size": [1480, 124],
+      "alignment": "center"
+    },
     "mage-idle": {
       "frame": [
         35,
@@ -2146,7 +2164,12 @@
       "fantasy-attack-3"
     ]
   },
-  "background": "fantasy-forest.png",
+  "playbackIcons": { "pause": "battle-pause", "resume": "battle-resume" },
+  "progressFrame": "battle-progress-frame",
+  "backgrounds": {
+    "forest": "fantasy-forest.png",
+    "grassland": "fantasy-grassland.png"
+  },
   "settlement": {
     "emblems": {
       "Victory": "fantasy-victory",

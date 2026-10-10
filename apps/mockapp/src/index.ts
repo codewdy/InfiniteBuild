@@ -1,15 +1,12 @@
 import { Battle, Game } from "@infinite-build/core";
-import { battleSpec, gameData } from "@infinite-build/mock-data";
+import { gameData } from "@infinite-build/mock-data";
 
 const game = new Game(gameData);
 const battleCount = 3;
 const maxFrames = 10000;
 
 for (let round = 0; round < battleCount; round++) {
-  const task = game.startBattle({
-    ...battleSpec,
-    seed: battleSpec.seed + round,
-  });
+  const task = game.startLevel([1, 1]);
   const battle = new Battle(gameData, task.spec, task.player);
   let log = battle.renderLog();
   console.log(

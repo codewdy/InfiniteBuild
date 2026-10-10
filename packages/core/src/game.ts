@@ -29,7 +29,10 @@ export class Game {
   readonly rng: RandomGenerator;
   private readonly playerManager: PlayerManager;
 
-  constructor(data: GameData, seed: number = Date.now()) {
+  constructor(
+    private readonly data: GameData,
+    seed: number = Date.now(),
+  ) {
     this.rng = new RandomGenerator(seed);
     this.playerManager = new PlayerManager(data, this.rng);
     this.state = this.playerManager.initPlayer();
@@ -41,6 +44,24 @@ export class Game {
 
   get player(): PlayerState {
     return this.getState();
+  }
+
+  startLevel(level: [number, number]): Game.Battle {
+    if (this.activeBattle) {
+      throw new Error("A battle is already active.");
+    }
+    const definition = this.data.mapLevelDefinitions.find(
+      (entry) => entry.level[0] === level[0] && entry.level[1] === level[1],
+    );
+    if (!definition) throw new Error(`Unknown level: ${level.join("-")}`);
+    if (!definition.maps.length)
+      throw new Error(`Level has no maps: ${level.join("-")}`);
+    for (const map of definition.maps) {
+      if (!this.data.mapDefinitions[map])
+        throw new Error(`Unknown map: ${map}`);
+    }
+    const map = this.rng.choice(definition.maps)!;
+    return this.startBattle({ map, seed: this.rng.randInt(0, 0xffffffff) });
   }
 
   startBattle(spec: BattleSpec): Game.Battle {

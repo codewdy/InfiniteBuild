@@ -14,6 +14,7 @@ Each logged skill progress is the endpoint of its displayed frame. During that f
 
 The rest of the active asset set now follows the same direction:
 
+- `fantasy-grassland.png`: the daytime pixel-art grassland background for the slime-only `grassland` map in level 1-1. Selected by `backgrounds.grassland`; generated with the built-in image_gen tool using `fantasy-grassland-prompt.txt`.
 - `fantasy-forest.png`: the moonlit forest battle background, with simplified foliage and a low-contrast clearing. Vertical centering keeps the tree line and clearing visible in wide battle viewports; horizontal scrolling still follows the player.
 - `fantasy-effects.png`: four active frames each for fireball and attack. Attack uses its own gold slash frames. Its original nova row is retained but superseded by the dedicated shockwave below.
 - `nova-shockwave.png`: a thin lavender/cyan pixel energy ring with an empty center, generated using the built-in image_gen tool with the current prompt in `nova-shockwave-prompt.txt`. The renderer projects it into a ground ellipse at the caster's feet, expands horizontally in sync with the damage wave, and smoothly fades it in and out. A single stable texture avoids the silhouette jumps of the previous four ornate rune frames.
@@ -37,7 +38,7 @@ Inventory tablet icons are outside this asset set; settlement tablet icons use t
 
 `nova-ring.png` is a transparent circular shockwave generated separately with the built-in image_gen tool. Its prompt is recorded in `nova-ring-prompt.txt`. A frame may select an additional image using its `image` field. The ring texture itself expands to the skill radius and fades over the effect duration; no procedural circle is drawn behind it. The player remains above effects.
 
-`background-forest.png` is a moonlit pixel-art forest clearing generated with the built-in image_gen tool. Its prompt is in `background-prompt.txt`; the manifest selects it using `background`. The renderer draws it below all characters and effects and uses nearest-neighbor sampling. Two viewport-covering tiles alternate horizontal mirroring so repeated edges match. Their horizontal offset follows the interpolated player camera at the same world-to-screen scale as the actors; stationary players do not scroll the background, and battle resets return it to the start.
+`background-forest.png` is a moonlit pixel-art forest clearing generated with the built-in image_gen tool. Its prompt is in `background-prompt.txt`; the active forest image is selected through the manifest’s `backgrounds.forest` mapping and the map definition’s `background` key. The renderer draws it below all characters and effects and uses nearest-neighbor sampling. Two viewport-covering tiles alternate horizontal mirroring so repeated edges match. Their horizontal offset follows the interpolated player camera at the same world-to-screen scale as the actors; stationary players do not scroll the background, and battle resets return it to the start.
 
 `settlement-icons.png` is a transparent eight-icon sprite atlas generated with the built-in image_gen tool. The current prompt is in `settlement-prompt.txt`. It contains victory/defeat emblems, skill/passive/support tablets, a pending-loot chest, and an XP crystal. Their individual regions and role mappings are stored in `atlas.json` under `frames` and `settlement` so replacement art does not require rewriting pixel patterns in TypeScript.
 
@@ -48,3 +49,7 @@ Passive tablet centers select `passive-magic` or `passive-rare` from item rarity
 Support tablets retain the gray-blue stone from `tablet-roles.png`. Magic uses its blue arrow; rare uses the gold arrow in `tablet-roles-gold.png`, with no whole-stone tint or target badge. Both inventory and pending loot use the shared rarity artwork. See `tablet-roles-gold-prompt.txt`.
 
 Skill tablets use the original fireball/nova art for normal rarity. Magic and rare use matching crops from `fantasy-icons-magic.png` and `fantasy-icons-rare.png`, with blue or gold halos around the skill emblem on the stone face. The stone base color is preserved; no whole-tablet filter is applied. These variants are shared by the canvas board/backpack and HTML preview. Prompts are saved beside each atlas.
+
+`battle-progress-frame.png` is a transparent stone-and-bronze HUD frame generated with the built-in image_gen tool. The prompt is saved in `battle-progress-frame-prompt.txt`. Atlas crop: (28, 450, 1480, 124). The renderer uses nine-slice rails, a live teal fill, and defeat counts along the bottom edge. Skill rows start above the meter and wrap upward.
+
+`battle-playback-icons.png` contains transparent cyan-and-bronze pause and resume symbols generated with the built-in image_gen tool; prompt: `battle-playback-icons-prompt.txt`. Atlas entries normalize both to 592-square logical cells. The bottom HUD button switches the symbol with playback state and shows a text hint on hover.

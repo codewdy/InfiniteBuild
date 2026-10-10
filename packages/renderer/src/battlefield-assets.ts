@@ -19,7 +19,9 @@ export type SettlementAssets = {
   rewards: Record<"skill" | "passive" | "support-skill" | "support-passive" | "pending" | "xp", Texture>;
 };
 export type BattlefieldAssets = {
-  background: Texture;
+  progressFrame: Texture;
+  playbackIcons: Record<"pause" | "resume", Texture>;
+  backgrounds: Record<string, Texture>;
   characters: Record<string, CharacterTextures>;
   fireball: Texture[];
   nova: Texture[];
@@ -30,7 +32,9 @@ export type BattlefieldAssets = {
   settlement: SettlementAssets;
 };
 type AtlasManifest = {
-  background: string;
+  progressFrame: string;
+  playbackIcons: Record<"pause" | "resume", string>;
+  backgrounds: Record<string, string>;
   image: string;
   frames: Record<string, {
     image?: string;
@@ -77,11 +81,14 @@ async function loadAtlas(): Promise<BattlefieldAssets> {
   const response = await fetch(new URL("atlas.json", base));
   if (!response.ok) throw new Error(`Failed to load battle atlas: ${response.status}`);
   const manifest = await response.json() as AtlasManifest;
-  const [atlas, background] = await Promise.all([
+  const [atlas, backgroundEntries] = await Promise.all([
     Assets.load<Texture>(new URL(manifest.image, base).href),
-    Assets.load<Texture>(new URL(manifest.background, base).href),
+    Promise.all(Object.entries(manifest.backgrounds).map(async ([name, path]) => {
+      const texture = await Assets.load<Texture>(new URL(path, base).href);
+      texture.source.scaleMode = "nearest";
+      return [name, texture] as const;
+    })),
   ]);
-  background.source.scaleMode = "nearest";
   atlas.source.scaleMode = "nearest";
   const images = new Map<string, Texture>([[manifest.image, atlas]]);
   const textures: Record<string, Texture> = {};
@@ -123,7 +130,12 @@ async function loadAtlas(): Promise<BattlefieldAssets> {
     };
   };
   return {
-    background,
+    progressFrame: texture(manifest.progressFrame),
+    playbackIcons: {
+      pause: texture(manifest.playbackIcons.pause),
+      resume: texture(manifest.playbackIcons.resume),
+    },
+    backgrounds: Object.fromEntries(backgroundEntries),
     characters: Object.fromEntries(Object.entries(manifest.characters).map(([kind, poses]) => [
       kind, {
         scale: poses.scale,

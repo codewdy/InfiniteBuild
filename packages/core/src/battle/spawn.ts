@@ -3,7 +3,15 @@ import type { RandomGenerator } from "../random-generator.js";
 import { RegularUnit } from "./combat/regular-unit.js";
 import type { GameData } from "../game-data.js";
 
+export type MapLevelDefinition = {
+  level: [number, number];
+  name: string;
+  maps: string[];
+};
+
 export type MapDefinition = {
+  name: string;
+  background: string;
   totalValue: number;
   spawner: {
     mapSize: number;

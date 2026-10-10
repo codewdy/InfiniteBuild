@@ -1,5 +1,5 @@
 import type { Config } from "./config.js";
-import type { MapDefinition } from "./battle/spawn.js";
+import type { MapDefinition, MapLevelDefinition } from "./battle/spawn.js";
 import type { BuffDefinition } from "./battle/combat/buff.js";
 import type { UnitDefinition } from "./battle/combat/regular-unit.js";
 import type { SkillDefinition } from "./battle/combat/skill.js";
@@ -29,6 +29,7 @@ export type {
 export type GameData = {
   unitDefinitions: Record<string, UnitDefinition>;
   mapDefinitions: Record<string, MapDefinition>;
+  mapLevelDefinitions: MapLevelDefinition[];
   skillDefinitions: Record<string, SkillDefinition>;
   buffDefinitions: Record<string, BuffDefinition>;
   playerDefinition: PlayerDefinition;

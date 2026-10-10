@@ -16,7 +16,6 @@ import type {
   PlayerState,
 } from "@infinite-build/core";
 import {
-  battleSpec,
   createPassiveTablet,
   createSupportTablet,
   supportTabletOptions,
@@ -732,7 +731,8 @@ document.addEventListener("keydown", (event) => {
   renderTablets();
 });
 
-let task = game.startBattle(battleSpec);
+const currentLevel: [number, number] = [1, 1];
+let task = game.startLevel(currentLevel);
 let battle = new Battle(gameData, task.spec, task.player);
 let log = battle.renderLog();
 let history: BattleLog[] = [log];
@@ -839,6 +839,10 @@ function render(): void {
   speed.disabled = finished;
   element("reset").textContent = finished ? "重新开始" : "重置";
   battlefield.update(log, {
+    background: gameData.mapDefinitions[task.spec.map]!.background,
+    level: currentLevel,
+    mapName: gameData.mapDefinitions[task.spec.map]!.name,
+    onTogglePlaying: togglePlaying,
     vision,
     skillNames,
     frameDuration: 1000 / Number(speed.value),
@@ -916,10 +920,7 @@ function resetBattle(): void {
   battlefield.reset(!game.battle);
   if (!game.battle) {
     round += 1;
-    task = game.startBattle({
-      ...battleSpec,
-      seed: battleSpec.seed + round - 1,
-    });
+    task = game.startLevel(currentLevel);
   }
   battle = new Battle(gameData, task.spec, game.getState());
   log = battle.renderLog();
@@ -929,7 +930,12 @@ function resetBattle(): void {
   playerPosition = 0;
 }
 
-play.addEventListener("click", () => (timer === undefined ? start() : pause()));
+function togglePlaying(): void {
+  if (timer === undefined) start();
+  else pause();
+}
+
+play.addEventListener("click", togglePlaying);
 step.addEventListener("click", advance);
 element("reset").addEventListener("click", () => {
   pause();

@@ -26,6 +26,7 @@ export type BattleContext = {
   player: PlayerUnit;
   units: UnitManager;
   pendingSpawns: Unit[];
+  allSpawns: Set<Unit>;
   taskScheduler: TaskScheduler;
   events: EventManager;
 };
@@ -64,6 +65,7 @@ export class Battle {
       player: player,
       units: new UnitManager(rng, [player]),
       pendingSpawns: spawns,
+      allSpawns: new Set(spawns),
       taskScheduler: new TaskScheduler(),
       events: new EventManager(gameData),
     };
@@ -114,6 +116,15 @@ export class Battle {
         },
       })),
       events: this.ctx.events.getEvents(),
+      progress: {
+        defeated:
+          this.ctx.allSpawns.size -
+          this.ctx.pendingSpawns.length -
+          Array.from(this.ctx.units).filter((unit) =>
+            this.ctx.allSpawns.has(unit),
+          ).length,
+        total: this.ctx.allSpawns.size,
+      },
     };
   }
   checkBattleStatus(): void {

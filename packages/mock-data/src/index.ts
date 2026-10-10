@@ -54,26 +54,25 @@ export const playerState: PlayerState = {
     { loot: { kind: "tablet-skill", rarity: "rare", level: 1 }, count: 3 },
   ],
   inventory: [
-    ...(["fireball", "nova", "fireball", "nova"] as const).map(
-      (kind, index) => createTablet(kind, TabletMap.idSize + index),
+    ...(["fireball", "nova", "fireball", "nova"] as const).map((kind, index) =>
+      createTablet(kind, TabletMap.idSize + index),
     ),
     supportTablet,
     passiveTablet,
     previewPassiveTablet,
     ...tierPreviewTablets,
-    ...supportTabletOptions.slice(1).map(({ id }, index) =>
-      createSupportTablet(TabletMap.idSize + 12 + index, id),
-    ),
+    ...supportTabletOptions
+      .slice(1)
+      .map(({ id }, index) =>
+        createSupportTablet(TabletMap.idSize + 12 + index, id),
+      ),
   ],
   level: 1,
   xp: 0,
   move: { speed: 1, safeRange: 1, range: 5, count: 2 },
+  // Fill the board to exercise the skill progress layout with all 25 skills.
   tablets: Array.from({ length: TabletMap.idSize }, (_, id) =>
-    id === 0
-      ? createTablet("fireball", id)
-      : id === 1
-        ? createTablet("nova", id)
-        : null,
+    createTablet(id % 2 === 0 ? "fireball" : "nova", id),
   ),
 };
 
@@ -157,7 +156,23 @@ export const gameData: GameData = {
     },
   },
   mapDefinitions: {
-    demo: {
+    grassland: {
+      name: "草原",
+      background: "grassland",
+      xp: 100,
+      totalValue: 60,
+      spawner: [
+        {
+          mapSize: 5,
+          value: 1,
+          weight: 1,
+          enemies: [{ kind: "Slime", count: { min: 1, max: 3 } }],
+        },
+      ],
+    },
+    forest: {
+      name: "林地",
+      background: "forest",
       xp: 100,
       totalValue: 60,
       spawner: [
@@ -176,6 +191,13 @@ export const gameData: GameData = {
       ],
     },
   },
+  mapLevelDefinitions: [
+    {
+      level: [1, 1],
+      name: "启程",
+      maps: ["forest", "grassland"],
+    },
+  ],
 };
 
-export const battleSpec: BattleSpec = { seed: 42, map: "demo" };
+export const battleSpec: BattleSpec = { seed: 42, map: "forest" };

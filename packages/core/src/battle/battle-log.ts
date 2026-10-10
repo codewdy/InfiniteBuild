@@ -44,4 +44,8 @@ export type BattleLog = {
     };
   }[];
   events: BattleEvent.Event[];
+  progress: {
+    defeated: number;
+    total: number;
+  };
 };
