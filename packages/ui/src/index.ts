@@ -6,8 +6,8 @@ import type { TabletArt } from "./tablet-art.js";
 import { Container, Graphics, Point, Rectangle, Sprite, Text } from "pixi.js";
 import { loadDrawerAssets } from "./drawer-assets.js";
 import type { DrawerAssets } from "./drawer-assets.js";
-import { TabletMap } from "@infinite-build/core";
-import type { GameData, PlayerState, TabletSpec } from "@infinite-build/core";
+import { TabletMap, TabletSpec } from "@infinite-build/core";
+import type { GameData, PlayerState } from "@infinite-build/core";
 import { Battlefield } from "@infinite-build/renderer";
 
 const SLOT_SIZE = 80;
@@ -57,6 +57,7 @@ export class GameUI {
   private readonly tooltip = new TabletTooltipView();
   private tooltipSelection?: { uuid: string; location: SlotLocation };
   private tooltipHover?: Container;
+  private readonly tabletHighlights: Graphics[] = [];
   private suppressTooltipTap = false;
   private pointerButton = 0;
   private destroyed = false;
@@ -128,11 +129,19 @@ export class GameUI {
     this.capacity = inventoryCapacity;
     this.pendingLoot.update(state, inventoryCapacity);
     const selection = this.tooltipSelection;
+    const hover = this.slots.find(({ view }) => view === this.tooltipHover);
+    const hoveredUuid = hover && state[hover.location.area][hover.location.index]?.uuid;
     this.renderPanel();
     if (selection) {
       const slot = this.slots.find(({ location }) => this.state?.[location.area][location.index]?.uuid === selection.uuid);
       if (slot) {
         this.tooltipSelection = { uuid: selection.uuid, location: slot.location };
+        this.showTooltip(slot.view, slot.location);
+      }
+    } else if (hoveredUuid) {
+      const slot = this.slots.find(({ location }) => state[location.area][location.index]?.uuid === hoveredUuid);
+      if (slot) {
+        this.tooltipHover = slot.view;
         this.showTooltip(slot.view, slot.location);
       }
     }
@@ -156,6 +165,7 @@ export class GameUI {
   private renderPanel(): void {
     if (!this.state) return;
     this.cancelDrag();
+    this.clearTabletHighlights();
     this.slots.length = 0;
     this.inventorySlots.length = 0;
     for (const group of [this.boardPanel, this.inventoryPanel]) {
@@ -222,7 +232,41 @@ export class GameUI {
     });
   }
 
+  private clearTabletHighlights(): void {
+    for (const frame of this.tabletHighlights) frame.destroy();
+    this.tabletHighlights.length = 0;
+  }
+
+  private showTabletHighlights(location: SlotLocation): void {
+    this.clearTabletHighlights();
+    if (!this.state?.[location.area][location.index]) return;
+    const related = new Set<number>();
+    if (location.area === "tablets") {
+      this.state.tablets.forEach((tablet, source) => {
+        if (!tablet || !("rotate" in tablet)) return;
+        const targetKind = tablet.kind === "tablet-support-skill" ? "tablet-skill" : "tablet-passive";
+        for (const [x, y] of TabletSpec.getSupportDelta(this.options.gameData, tablet)) {
+          const target = TabletMap.move(source, x, y, tablet.rotate);
+          // Match the runtime support rules: a direction alone is not a connection.
+          if (target === undefined || this.state!.tablets[target]?.kind !== targetKind) continue;
+          if (source === location.index) related.add(target);
+          if (target === location.index) related.add(source);
+        }
+      });
+    }
+    for (const slot of this.slots) {
+      const focused = slot.location.area === location.area && slot.location.index === location.index;
+      if (!focused && !(slot.location.area === "tablets" && related.has(slot.location.index))) continue;
+      const frame = new Graphics().roundRect(0, 0, SLOT_SIZE, SLOT_SIZE, 8)
+        .stroke({ color: focused ? 0xffd477 : 0x82e6ce, width: focused ? 3 : 2 });
+      frame.eventMode = "none";
+      slot.view.addChild(frame);
+      this.tabletHighlights.push(frame);
+    }
+  }
+
   private showTooltip(view: Container, location: SlotLocation): void {
+    this.showTabletHighlights(location);
     const tablet = this.state?.[location.area][location.index];
     if (!tablet) {
       this.tooltip.hide();
@@ -241,6 +285,7 @@ export class GameUI {
   }
 
   private hideTooltip(): void {
+    this.clearTabletHighlights();
     this.tooltip.hide();
     this.tooltipHover = undefined;
     this.tooltipSelection = undefined;
