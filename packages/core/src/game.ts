@@ -3,6 +3,7 @@ import { RandomGenerator } from "./random-generator.js";
 import { PlayerManager } from "./player/manager.js";
 import type { BattleSettlement } from "./player/manager.js";
 import type { BattleSpec } from "./battle/battle.js";
+import type { MapLevel } from "./battle/spawn.js";
 import type { PlayerState } from "./player/state.js";
 import { stateValidate } from "./player/state-validate.js";
 import type { ValidateError } from "./player/state-validate.js";
@@ -46,7 +47,7 @@ export class Game {
     return this.getState();
   }
 
-  startLevel(level: [number, number]): Game.Battle {
+  startLevel(level: MapLevel): Game.Battle {
     if (this.activeBattle) {
       throw new Error("A battle is already active.");
     }

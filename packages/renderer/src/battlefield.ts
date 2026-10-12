@@ -18,7 +18,7 @@ import type {
 } from "./battlefield-assets.js";
 import { createSkillEffect } from "./effects/index.js";
 import type { SkillEffect } from "./effects/index.js";
-import type { BattleEvent, BattleLog, UnitDefinition, SkillDefinition } from "@infinite-build/core";
+import type { BattleEvent, BattleLog, MapLevel, UnitDefinition, SkillDefinition } from "@infinite-build/core";
 
 // Preserve the original character proportions at the reference battlefield height.
 const REFERENCE_HEIGHT = 290;
@@ -55,7 +55,7 @@ export type BattlefieldOptions = {
   vision: number;
   frameDuration: number;
   playing: boolean;
-  level?: readonly [number, number];
+  level?: Readonly<MapLevel>;
   mapName?: string;
   onTogglePlaying?: () => void;
   skillNames?: Readonly<Record<string, string>>;

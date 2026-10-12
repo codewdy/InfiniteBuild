@@ -23,7 +23,7 @@ export { TabletMap } from "./player/tablet/map.js";
 export { tabletRun } from "./player/tablet/runner.js";
 export type { Config } from "./config.js";
 export { GameData } from "./game-data.js";
-export type { MapDefinition } from "./battle/spawn.js";
+export type { MapDefinition, MapLevel, MapLevelDefinition } from "./battle/spawn.js";
 export type { BuffDefinition } from "./battle/combat/buff.js";
 export { Attribute } from "./battle/combat/attribute.js";
 export { Affix } from "./player/affix.js";

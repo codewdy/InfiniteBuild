@@ -13,6 +13,7 @@ import {
 import type {
   BattleLog,
   BattleSettlement,
+  MapLevel,
   PlayerState,
 } from "@infinite-build/core";
 import {
@@ -731,7 +732,7 @@ document.addEventListener("keydown", (event) => {
   renderTablets();
 });
 
-const currentLevel: [number, number] = [1, 1];
+const currentLevel: MapLevel = [1, 1];
 let task = game.startLevel(currentLevel);
 let battle = new Battle(gameData, task.spec, task.player);
 let log = battle.renderLog();

@@ -3,8 +3,10 @@ import type { RandomGenerator } from "../random-generator.js";
 import { RegularUnit } from "./combat/regular-unit.js";
 import type { GameData } from "../game-data.js";
 
+export type MapLevel = [number, number];
+
 export type MapLevelDefinition = {
-  level: [number, number];
+  level: MapLevel;
   name: string;
   maps: string[];
 };
