@@ -10,6 +10,10 @@ import type { ValidateError } from "./player/state-validate.js";
 import type { Loot } from "./player/loot.js";
 import type { Item } from "./player/item/item.js";
 
+function compareMapLevels(left: MapLevel, right: MapLevel): number {
+  return left[0] - right[0] || left[1] - right[1];
+}
+
 export namespace Game {
   export type Battle = {
     uuid: string;
@@ -47,7 +51,7 @@ export class Game {
     return this.getState();
   }
 
-  startLevel(level: MapLevel): Game.Battle {
+  startLevel(level: MapLevel = this.state.currentMapLevel): Game.Battle {
     if (this.activeBattle) {
       throw new Error("A battle is already active.");
     }
@@ -55,6 +59,9 @@ export class Game {
       (entry) => entry.level[0] === level[0] && entry.level[1] === level[1],
     );
     if (!definition) throw new Error(`Unknown level: ${level.join("-")}`);
+    if (compareMapLevels(level, this.state.highestUnlockedMapLevel) > 0) {
+      throw new Error(`Level is locked: ${level.join("-")}`);
+    }
     if (!definition.maps.length)
       throw new Error(`Level has no maps: ${level.join("-")}`);
     for (const map of definition.maps) {
@@ -62,13 +69,18 @@ export class Game {
         throw new Error(`Unknown map: ${map}`);
     }
     const map = this.rng.choice(definition.maps)!;
-    return this.startBattle({ map, seed: this.rng.randInt(0, 0xffffffff) });
+    return this.startBattle({
+      level,
+      map,
+      seed: this.rng.randInt(0, 0xffffffff),
+    });
   }
 
   startBattle(spec: BattleSpec): Game.Battle {
     if (this.activeBattle) {
       throw new Error("A battle is already active.");
     }
+    this.state.currentMapLevel = [...spec.level];
     this.activeBattle = {
       uuid: crypto.randomUUID(),
       spec: structuredClone(spec),
@@ -86,6 +98,20 @@ export class Game {
       result,
       this.state,
     );
+    if (result.result === "Victory") {
+      const completedLevel = this.activeBattle.spec.level;
+      const nextLevel = this.data.mapLevelDefinitions
+        .map((definition) => definition.level)
+        .filter((level) => compareMapLevels(level, completedLevel) > 0)
+        .sort(compareMapLevels)[0];
+      if (
+        nextLevel &&
+        compareMapLevels(nextLevel, settlement.player.highestUnlockedMapLevel) >
+          0
+      ) {
+        settlement.player.highestUnlockedMapLevel = [...nextLevel];
+      }
+    }
     this.state = settlement.player;
     this.activeBattle = undefined;
     return structuredClone(settlement);

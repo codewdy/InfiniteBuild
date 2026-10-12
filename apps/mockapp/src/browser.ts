@@ -1,5 +1,10 @@
 import { GameUI } from "@infinite-build/ui";
-import { loadBattlefieldIcons, loadPassiveAffixIcons, resolveSupportTabletIcon, supportTabletScale } from "@infinite-build/renderer";
+import {
+  loadBattlefieldIcons,
+  loadPassiveAffixIcons,
+  resolveSupportTabletIcon,
+  supportTabletScale,
+} from "@infinite-build/renderer";
 import type { IconName, IconAsset } from "@infinite-build/renderer";
 import type { BattlefieldResult } from "@infinite-build/renderer";
 import {
@@ -13,7 +18,6 @@ import {
 import type {
   BattleLog,
   BattleSettlement,
-  MapLevel,
   PlayerState,
 } from "@infinite-build/core";
 import {
@@ -43,13 +47,32 @@ const customZoom = element<HTMLInputElement>("custom-zoom");
 const customZoomValue = element<HTMLOutputElement>("custom-zoom-value");
 const resizeHandle = element<HTMLButtonElement>("resolution-resize");
 let customSize = { width: 1024, height: 768 };
-let resizeDrag: { pointerId: number; x: number; y: number; width: number; height: number; scale: number } | undefined;
+let resizeDrag:
+  | {
+      pointerId: number;
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      scale: number;
+    }
+  | undefined;
 
 function setCustomSize(width: number, height: number): void {
-  width = Math.round(Math.min(2560, Math.max(256, Number.isFinite(width) ? width : customSize.width)));
+  width = Math.round(
+    Math.min(
+      2560,
+      Math.max(256, Number.isFinite(width) ? width : customSize.width),
+    ),
+  );
   // Keep room for UI even at the battlefield's widest allowed aspect ratio.
-  const minHeight = Math.max(320, Math.ceil(width * 9 / 21) + 160);
-  height = Math.round(Math.min(2560, Math.max(minHeight, Number.isFinite(height) ? height : customSize.height)));
+  const minHeight = Math.max(320, Math.ceil((width * 9) / 21) + 160);
+  height = Math.round(
+    Math.min(
+      2560,
+      Math.max(minHeight, Number.isFinite(height) ? height : customSize.height),
+    ),
+  );
   customSize = { width, height };
   customWidth.value = String(width);
   customHeight.value = String(height);
@@ -65,9 +88,23 @@ function applyResolution(): void {
   const custom = resolution.value === "custom";
   customResolution.hidden = resizeHandle.hidden = !custom;
   battlefieldViewport.dataset.custom = String(custom);
-  const width = custom ? customSize.width : dimensions ? Number(dimensions[1]) : mobile ? 390 : 1024;
-  const height = custom ? customSize.height : dimensions ? Number(dimensions[2]) : mobile ? 844 : 768;
-  const scale = custom ? Number(customZoom.value) / 100 : Math.min(1, availableWidth / width, availableHeight / height);
+  const width = custom
+    ? customSize.width
+    : dimensions
+      ? Number(dimensions[1])
+      : mobile
+        ? 390
+        : 1024;
+  const height = custom
+    ? customSize.height
+    : dimensions
+      ? Number(dimensions[2])
+      : mobile
+        ? 844
+        : 768;
+  const scale = custom
+    ? Number(customZoom.value) / 100
+    : Math.min(1, availableWidth / width, availableHeight / height);
   customZoomValue.value = `${customZoom.value}%`;
   // Transform only the preview; Pixi keeps rendering at the selected dimensions.
   canvas.style.width = `${width}px`;
@@ -84,10 +121,18 @@ applyResolution();
 resolution.addEventListener("change", () => {
   if (resolution.value === "custom") {
     setCustomSize(canvas.clientWidth, canvas.clientHeight);
-    customZoom.value = String(Math.max(10, Math.floor(Math.min(1,
-      battlefieldViewport.clientWidth / customSize.width,
-      window.innerHeight * 0.8 / customSize.height,
-    ) * 100)));
+    customZoom.value = String(
+      Math.max(
+        10,
+        Math.floor(
+          Math.min(
+            1,
+            battlefieldViewport.clientWidth / customSize.width,
+            (window.innerHeight * 0.8) / customSize.height,
+          ) * 100,
+        ),
+      ),
+    );
   }
   applyResolution();
 });
@@ -98,52 +143,82 @@ for (const input of [customWidth, customHeight]) {
   });
 }
 customZoom.addEventListener("input", applyResolution);
-resizeHandle.addEventListener("pointerdown", event => {
+resizeHandle.addEventListener("pointerdown", (event) => {
   if (event.button !== 0 || resizeDrag) return;
   event.preventDefault();
   resizeHandle.focus();
-  resizeDrag = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, ...customSize, scale: Number(customZoom.value) / 100 };
+  resizeDrag = {
+    pointerId: event.pointerId,
+    x: event.clientX,
+    y: event.clientY,
+    ...customSize,
+    scale: Number(customZoom.value) / 100,
+  };
   resizeHandle.setPointerCapture(event.pointerId);
 });
-resizeHandle.addEventListener("pointermove", event => {
+resizeHandle.addEventListener("pointermove", (event) => {
   if (!resizeDrag || resizeDrag.pointerId !== event.pointerId) return;
-  setCustomSize(resizeDrag.width + (event.clientX - resizeDrag.x) / resizeDrag.scale,
-    resizeDrag.height + (event.clientY - resizeDrag.y) / resizeDrag.scale);
+  setCustomSize(
+    resizeDrag.width + (event.clientX - resizeDrag.x) / resizeDrag.scale,
+    resizeDrag.height + (event.clientY - resizeDrag.y) / resizeDrag.scale,
+  );
   applyResolution();
 });
 function endResize(): void {
   const pointerId = resizeDrag?.pointerId;
   resizeDrag = undefined;
-  if (pointerId !== undefined && resizeHandle.hasPointerCapture(pointerId)) resizeHandle.releasePointerCapture(pointerId);
+  if (pointerId !== undefined && resizeHandle.hasPointerCapture(pointerId))
+    resizeHandle.releasePointerCapture(pointerId);
 }
 resizeHandle.addEventListener("pointerup", endResize);
 resizeHandle.addEventListener("pointercancel", endResize);
 resizeHandle.addEventListener("lostpointercapture", endResize);
 window.addEventListener("blur", endResize);
-resizeHandle.addEventListener("keydown", event => {
+resizeHandle.addEventListener("keydown", (event) => {
   const delta = event.shiftKey ? 50 : 10;
-  if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
+  if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key))
+    return;
   event.preventDefault();
-  setCustomSize(customSize.width + (event.key === "ArrowRight" ? delta : event.key === "ArrowLeft" ? -delta : 0),
-    customSize.height + (event.key === "ArrowDown" ? delta : event.key === "ArrowUp" ? -delta : 0));
+  setCustomSize(
+    customSize.width +
+      (event.key === "ArrowRight"
+        ? delta
+        : event.key === "ArrowLeft"
+          ? -delta
+          : 0),
+    customSize.height +
+      (event.key === "ArrowDown"
+        ? delta
+        : event.key === "ArrowUp"
+          ? -delta
+          : 0),
+  );
   applyResolution();
 });
 window.addEventListener("resize", applyResolution);
 const viewportObserver = new ResizeObserver(applyResolution);
 viewportObserver.observe(battlefieldViewport);
-window.addEventListener("pagehide", () => {
-  endResize();
-  window.removeEventListener("blur", endResize);
-  viewportObserver.disconnect();
-  window.removeEventListener("resize", applyResolution);
-}, { once: true });
+window.addEventListener(
+  "pagehide",
+  () => {
+    endResize();
+    window.removeEventListener("blur", endResize);
+    viewportObserver.disconnect();
+    window.removeEventListener("resize", applyResolution);
+  },
+  { once: true },
+);
 const gameUI = await GameUI.create(canvas, {
   gameData,
   onMoveTablet: moveTablet,
   onRotateTablet: rotateTablet,
   onClaimLoot: (loot, count) => {
     const opened = game.openLoots(loot, count);
-    submitState(opened.player, "validate", `已领取 ${opened.items.length} 件战利品`);
+    submitState(
+      opened.player,
+      "validate",
+      `已领取 ${opened.items.length} 件战利品`,
+    );
   },
 });
 const battlefield = gameUI.battlefield;
@@ -183,11 +258,17 @@ const tabletMessage = element<HTMLParagraphElement>("tablet-message");
 const logs = element<HTMLPreElement>("logs");
 const vision = gameData.config.map.visionRange;
 const skillNames = Object.fromEntries(
-  Object.entries(gameData.skillDefinitions).map(([id, definition]) => [id, definition.name]),
+  Object.entries(gameData.skillDefinitions).map(([id, definition]) => [
+    id,
+    definition.name,
+  ]),
 );
 const game = new Game(gameData);
 const inventoryCapacity = gameData.playerDefinition.inventoryCapacity;
-const lootNames: Record<PlayerState["pendingLoot"][number]["loot"]["kind"], string> = {
+const lootNames: Record<
+  PlayerState["pendingLoot"][number]["loot"]["kind"],
+  string
+> = {
   "tablet-skill": "技能石板",
   "tablet-passive": "被动石板",
   "tablet-support-skill": "辅助石板",
@@ -283,11 +364,18 @@ function moveTablet(uuid: string, target: SlotLocation): void {
 
 function rotateTablet(uuid: string): void {
   const state = game.getState();
-  const tablet = [...state.tablets, ...state.inventory].find(item => item?.uuid === uuid);
+  const tablet = [...state.tablets, ...state.inventory].find(
+    (item) => item?.uuid === uuid,
+  );
   if (!tablet || !("rotate" in tablet)) return;
   const rotations = [0, 90, 180, 270] as const;
-  tablet.rotate = rotations[(rotations.indexOf(tablet.rotate) + 1) % rotations.length]!;
-  submitState(state, "validate", `${tabletName(tablet)}已旋转至 ${tablet.rotate}°`);
+  tablet.rotate =
+    rotations[(rotations.indexOf(tablet.rotate) + 1) % rotations.length]!;
+  submitState(
+    state,
+    "validate",
+    `${tabletName(tablet)}已旋转至 ${tablet.rotate}°`,
+  );
 }
 
 function discardTablet(uuid: string): void {
@@ -371,7 +459,8 @@ for (const option of supportTabletOptions) {
   button.className = "add-tablet";
   button.dataset.skill = "tablet-support-skill";
   button.textContent = `＋ ${option.name}辅助`;
-  button.title = "辅助标记方向的技能石板，持续施放速率提升(add) 50%。右键旋转方向。";
+  button.title =
+    "辅助标记方向的技能石板，持续施放速率提升(add) 50%。右键旋转方向。";
   button.addEventListener("click", () => {
     const state = game.getState();
     const tablet = createSupportTablet(state.inventory.length, option.id);
@@ -500,15 +589,21 @@ function createSlot(
       slot.title = [
         tabletName(tablet),
         ...tablet.affixes.map((affix) => affixText(tablet, affix)),
-        ...("rotate" in tablet ? [`旋转 ${tablet.rotate}° · 右键或按 R 顺时针旋转`] : []),
+        ...("rotate" in tablet
+          ? [`旋转 ${tablet.rotate}° · 右键或按 R 顺时针旋转`]
+          : []),
         tablet.uuid,
       ].join("\n");
     }
   }
-  if (tablet?.kind === "tablet-support-skill" || tablet?.kind === "tablet-support-passive") {
+  if (
+    tablet?.kind === "tablet-support-skill" ||
+    tablet?.kind === "tablet-support-passive"
+  ) {
     slot.title += `\n辅助对象：${tablet.kind === "tablet-support-skill" ? "技能石板" : "被动石板"}`;
   }
-  if (tablet) slot.title += `\n稀有度：${tablet.rarity === "normal" ? "普通" : tablet.rarity === "rare" ? "稀有" : "魔法"}`;
+  if (tablet)
+    slot.title += `\n稀有度：${tablet.rarity === "normal" ? "普通" : tablet.rarity === "rare" ? "稀有" : "魔法"}`;
   if (sources.length) slot.title += `\n被辅助：来自槽位 ${sources.join("、")}`;
   const index = document.createElement("span");
   index.className = "slot-index";
@@ -520,14 +615,32 @@ function createSlot(
   icon.className = "tablet-icon";
   icon.setAttribute("aria-hidden", "true");
   if (tablet) {
-    const skill = tablet.kind === "tablet-skill" && tablet.skill === "nova" ? "nova" : "fireball";
-    const iconName: IconName = tablet.kind === "tablet-skill"
-      ? (tablet.rarity === "normal" ? skill : `${skill}-${tablet.rarity}`)
-      : tablet.kind === "tablet-passive" ? (tablet.rarity === "rare" ? "passive-rare" : "passive-magic")
-      : tablet.rarity === "rare" ? "support-rare" : tablet.kind === "tablet-support-skill" ? "support-skill" : "support-passive";
-    const appearance = "rotate" in tablet
-      ? resolveSupportTabletIcon(TabletSpec.getSupportDelta(gameData, tablet), tablet.kind, tablet.rarity)
-      : undefined;
+    const skill =
+      tablet.kind === "tablet-skill" && tablet.skill === "nova"
+        ? "nova"
+        : "fireball";
+    const iconName: IconName =
+      tablet.kind === "tablet-skill"
+        ? tablet.rarity === "normal"
+          ? skill
+          : `${skill}-${tablet.rarity}`
+        : tablet.kind === "tablet-passive"
+          ? tablet.rarity === "rare"
+            ? "passive-rare"
+            : "passive-magic"
+          : tablet.rarity === "rare"
+            ? "support-rare"
+            : tablet.kind === "tablet-support-skill"
+              ? "support-skill"
+              : "support-passive";
+    const appearance =
+      "rotate" in tablet
+        ? resolveSupportTabletIcon(
+            TabletSpec.getSupportDelta(gameData, tablet),
+            tablet.kind,
+            tablet.rarity,
+          )
+        : undefined;
     const stone = assetIcon(appearance?.icon ?? iconName);
     icon.append(stone);
     icon.classList.add("affixed-tablet-icon");
@@ -542,9 +655,11 @@ function createSlot(
         segment.dataset.affix = affix.id;
         segment.dataset.tier = String(affix.tier);
       }
-      const border = assetIcon(affix
-        ? passiveAffixIcons[affix.id] ?? iconAssets["passive-quarter-empty"]
-        : iconAssets["passive-quarter-empty"]);
+      const border = assetIcon(
+        affix
+          ? (passiveAffixIcons[affix.id] ?? iconAssets["passive-quarter-empty"])
+          : iconAssets["passive-quarter-empty"],
+      );
       border.classList.add("tablet-affix-icon");
       border.style.transform = `rotate(${quadrant * 90}deg)`;
       segment.append(border);
@@ -552,9 +667,11 @@ function createSlot(
     }
     if ("rotate" in tablet && appearance) {
       const [, , width, height] = iconAssets[appearance.icon].frame;
-      const [, , referenceWidth, referenceHeight] = iconAssets["support-skill"].frame;
+      const [, , referenceWidth, referenceHeight] =
+        iconAssets["support-skill"].frame;
       const scale = supportTabletScale(
-        { width, height }, { width: referenceWidth, height: referenceHeight },
+        { width, height },
+        { width: referenceWidth, height: referenceHeight },
         appearance.icon.startsWith("support-diagonal-"),
       );
       const [dx, dy] = TabletMap.rotateVec(...appearance.offset, tablet.rotate);
@@ -585,7 +702,8 @@ function createSlot(
     rotate();
   });
   slot.addEventListener("keydown", (event) => {
-    if (event.key.toLowerCase() !== "r" || !tablet || !("rotate" in tablet)) return;
+    if (event.key.toLowerCase() !== "r" || !tablet || !("rotate" in tablet))
+      return;
     event.preventDefault();
     rotate();
     const container =
@@ -646,17 +764,26 @@ function createSlot(
 function renderTablets(): void {
   if (draggingUuid) return;
   const state = game.getState();
-  const key = JSON.stringify([state.tablets, state.inventory, state.pendingLoot, selectedUuid]);
+  const key = JSON.stringify([
+    state.tablets,
+    state.inventory,
+    state.pendingLoot,
+    selectedUuid,
+  ]);
   if (key === renderedLoadout) return;
   renderedLoadout = key;
   const supportedBy = new Map<number, number[]>();
   state.tablets.forEach((tablet, source) => {
     if (
       !tablet ||
-      (tablet.kind !== "tablet-support-skill" && tablet.kind !== "tablet-support-passive")
+      (tablet.kind !== "tablet-support-skill" &&
+        tablet.kind !== "tablet-support-passive")
     )
       return;
-    const targetKind = tablet.kind === "tablet-support-skill" ? "tablet-skill" : "tablet-passive";
+    const targetKind =
+      tablet.kind === "tablet-support-skill"
+        ? "tablet-skill"
+        : "tablet-passive";
     for (const [x, y] of TabletSpec.getSupportDelta(gameData, tablet)) {
       const target = TabletMap.move(source, x, y, tablet.rotate);
       if (target === undefined || state.tablets[target]?.kind !== targetKind)
@@ -678,11 +805,15 @@ function renderTablets(): void {
       createSlot(state, { area: "inventory", index }),
     ),
   );
-  const used = state.inventory.slice(0, inventoryCapacity).filter((item) => item !== null).length;
+  const used = state.inventory
+    .slice(0, inventoryCapacity)
+    .filter((item) => item !== null).length;
   element("inventory-count").textContent = `${used} / ${inventoryCapacity} 格`;
-  element("tablet-add-actions").querySelectorAll<HTMLButtonElement>("button").forEach((button) => {
-    button.disabled = used >= inventoryCapacity;
-  });
+  element("tablet-add-actions")
+    .querySelectorAll<HTMLButtonElement>("button")
+    .forEach((button) => {
+      button.disabled = used >= inventoryCapacity;
+    });
   element("pending-loot-count").textContent =
     `${state.pendingLoot.reduce((total, entry) => total + entry.count, 0)} 件`;
   const rows = state.pendingLoot.map(({ loot, count }) => {
@@ -699,7 +830,10 @@ function renderTablets(): void {
     amount.textContent = `× ${count}`;
     const actions = document.createElement("div");
     actions.className = "pending-loot-actions";
-    for (const [label, requestedCount] of [["打开 1 件", 1], ["尽可能打开", undefined]] as const) {
+    for (const [label, requestedCount] of [
+      ["打开 1 件", 1],
+      ["尽可能打开", undefined],
+    ] as const) {
       const button = document.createElement("button");
       button.type = "button";
       button.textContent = label;
@@ -707,7 +841,11 @@ function renderTablets(): void {
       button.title = button.disabled ? "背包已满，请先腾出空位" : label;
       button.addEventListener("click", () => {
         const opened = game.openLoots(loot, requestedCount);
-        submitState(opened.player, "validate", `已打开 ${opened.items.length} 件战利品`);
+        submitState(
+          opened.player,
+          "validate",
+          `已打开 ${opened.items.length} 件战利品`,
+        );
       });
       actions.append(button);
     }
@@ -732,8 +870,7 @@ document.addEventListener("keydown", (event) => {
   renderTablets();
 });
 
-const currentLevel: MapLevel = [1, 1];
-let task = game.startLevel(currentLevel);
+let task = game.startLevel();
 let battle = new Battle(gameData, task.spec, task.player);
 let log = battle.renderLog();
 let history: BattleLog[] = [log];
@@ -841,7 +978,7 @@ function render(): void {
   element("reset").textContent = finished ? "重新开始" : "重置";
   battlefield.update(log, {
     background: gameData.mapDefinitions[task.spec.map]!.background,
-    level: currentLevel,
+    level: task.spec.level,
     mapName: gameData.mapDefinitions[task.spec.map]!.name,
     onTogglePlaying: togglePlaying,
     unitDefinitions: gameData.unitDefinitions,
@@ -923,7 +1060,7 @@ function resetBattle(): void {
   battlefield.reset(!game.battle);
   if (!game.battle) {
     round += 1;
-    task = game.startLevel(currentLevel);
+    task = game.startLevel();
   }
   battle = new Battle(gameData, task.spec, game.getState());
   log = battle.renderLog();

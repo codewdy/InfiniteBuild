@@ -5,6 +5,7 @@ import { Status } from "../battle/combat/status.js";
 import { tabletRun } from "./tablet/runner.js";
 import type { Inventory } from "./item/inventory.js";
 import type { Loot } from "./loot.js";
+import type { MapLevel } from "../battle/spawn.js";
 
 export type PlayerCombatProfile = {
   move: PlayerState["move"];
@@ -28,6 +29,8 @@ export type PlayerState = {
     loot: Loot.LootItem;
     count: number;
   }[];
+  currentMapLevel: MapLevel;
+  highestUnlockedMapLevel: MapLevel;
 };
 
 export function derivePlayerCombatProfile(

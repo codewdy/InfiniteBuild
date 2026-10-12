@@ -114,7 +114,14 @@ namespace validator {
     }
     return undefined;
   }
-  export const validators = { inventory, tablet, pendingLoot };
+  export function mapProgress(src: PlayerState, dst: PlayerState): string | undefined {
+    if (!deepEqual(src.currentMapLevel, dst.currentMapLevel) ||
+        !deepEqual(src.highestUnlockedMapLevel, dst.highestUnlockedMapLevel)) {
+      return "Map progress must not change through changeState.";
+    }
+    return undefined;
+  }
+  export const validators = { inventory, tablet, pendingLoot, mapProgress };
 }
 
 export function stateValidate(

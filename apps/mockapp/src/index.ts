@@ -6,7 +6,7 @@ const battleCount = 3;
 const maxFrames = 10000;
 
 for (let round = 0; round < battleCount; round++) {
-  const task = game.startLevel([1, 1]);
+  const task = game.startLevel();
   const battle = new Battle(gameData, task.spec, task.player);
   let log = battle.renderLog();
   console.log(

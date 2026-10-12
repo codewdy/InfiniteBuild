@@ -47,6 +47,8 @@ const tierPreviewTablets = Array.from({ length: 5 }, (_, tier) => ({
 }));
 
 export const playerState: PlayerState = {
+  currentMapLevel: [1, 1],
+  highestUnlockedMapLevel: [1, 1],
   // Three skill rarities for comparing artwork and claiming loot.
   pendingLoot: [
     { loot: { kind: "tablet-skill", rarity: "normal", level: 1 }, count: 3 },
@@ -200,4 +202,8 @@ export const gameData: GameData = {
   ],
 };
 
-export const battleSpec: BattleSpec = { seed: 42, map: "forest" };
+export const battleSpec: BattleSpec = {
+  level: [1, 1],
+  seed: 42,
+  map: "forest",
+};

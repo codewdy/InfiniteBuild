@@ -1,6 +1,6 @@
 import { BuffManager } from "./combat/buff.js";
 import { RandomGenerator } from "../random-generator.js";
-import { spawn } from "./spawn.js";
+import { spawn, type MapLevel } from "./spawn.js";
 import { UnitManager } from "./unit-list.js";
 import type { Unit } from "./combat/unit.js";
 import { TaskScheduler } from "./task-scheduler.js";
@@ -13,6 +13,7 @@ import type { PlayerState } from "../player/state.js";
 import type { GameData } from "../game-data.js";
 
 export type BattleSpec = {
+  level: MapLevel;
   seed: number;
   map: string;
 };
