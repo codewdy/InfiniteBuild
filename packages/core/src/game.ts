@@ -52,9 +52,6 @@ export class Game {
   }
 
   startLevel(level: MapLevel = this.state.currentMapLevel): Game.Battle {
-    if (this.activeBattle) {
-      throw new Error("A battle is already active.");
-    }
     const definition = this.data.mapLevelDefinitions.find(
       (entry) => entry.level[0] === level[0] && entry.level[1] === level[1],
     );
@@ -77,9 +74,6 @@ export class Game {
   }
 
   startBattle(spec: BattleSpec): Game.Battle {
-    if (this.activeBattle) {
-      throw new Error("A battle is already active.");
-    }
     this.state.currentMapLevel = [...spec.level];
     this.activeBattle = {
       uuid: crypto.randomUUID(),

@@ -14,7 +14,7 @@ Each logged skill progress is the endpoint of its displayed frame. During that f
 
 The rest of the active asset set now follows the same direction:
 
-- `fantasy-grassland.png`: the daytime pixel-art grassland background for the slime-only `grassland` map in level 1-1. Selected by `backgrounds.grassland`; generated with the built-in image_gen tool using `fantasy-grassland-prompt.txt`.
+- `fantasy-grassland.png`: the daytime pixel-art grassland background for the slime-only `grassland` map in level 1-2. Selected by `backgrounds.grassland`; generated with the built-in image_gen tool using `fantasy-grassland-prompt.txt`.
 - `fantasy-forest.png`: the moonlit forest battle background, with simplified foliage and a low-contrast clearing. Vertical centering keeps the tree line and clearing visible in wide battle viewports; horizontal scrolling still follows the player.
 - `fantasy-effects.png`: four active frames each for fireball and attack. Attack uses its own gold slash frames. Its original nova row is retained but superseded by the dedicated shockwave below.
 - `nova-shockwave.png`: a thin lavender/cyan pixel energy ring with an empty center, generated using the built-in image_gen tool with the current prompt in `nova-shockwave-prompt.txt`. The renderer projects it into a ground ellipse at the caster's feet, expands horizontally in sync with the damage wave, and smoothly fades it in and out. A single stable texture avoids the silhouette jumps of the previous four ornate rune frames.

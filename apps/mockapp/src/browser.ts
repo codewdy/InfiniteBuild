@@ -18,6 +18,7 @@ import {
 import type {
   BattleLog,
   BattleSettlement,
+  MapLevel,
   PlayerState,
 } from "@infinite-build/core";
 import {
@@ -210,6 +211,7 @@ window.addEventListener(
 );
 const gameUI = await GameUI.create(canvas, {
   gameData,
+  onSelectLevel: selectChallenge,
   onMoveTablet: moveTablet,
   onRotateTablet: rotateTablet,
   onClaimLoot: (loot, count) => {
@@ -1055,19 +1057,33 @@ function start(): void {
   render();
 }
 
-function resetBattle(): void {
-  tabletMessage.textContent = "当前石板已生效，可继续修改。";
-  battlefield.reset(!game.battle);
-  if (!game.battle) {
+function resetBattle(level?: MapLevel): void {
+  const createBattle = level !== undefined || !game.battle;
+  if (createBattle) {
+    task = game.startLevel(level);
     round += 1;
-    task = game.startLevel();
   }
+  tabletMessage.textContent = "当前石板已生效，可继续修改。";
+  battlefield.reset(createBattle);
   battle = new Battle(gameData, task.spec, game.getState());
   log = battle.renderLog();
   history = [log];
   deaths = 0;
   totalDamage = 0;
   playerPosition = 0;
+}
+
+function isLevelUnlocked(level: MapLevel): boolean {
+  const highest = game.player.highestUnlockedMapLevel;
+  return level[0] < highest[0] || (level[0] === highest[0] && level[1] <= highest[1]);
+}
+
+function selectChallenge(level: MapLevel): void {
+  if (!isLevelUnlocked(level)) return;
+  if (!gameData.mapLevelDefinitions.some(definition =>
+    definition.level[0] === level[0] && definition.level[1] === level[1])) return;
+  resetBattle(level);
+  render();
 }
 
 function togglePlaying(): void {

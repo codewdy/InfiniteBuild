@@ -1,3 +1,4 @@
+import { ChallengesView } from "./challenges.js";
 import { PendingLootView } from "./pending-loot.js";
 import type { PendingLootItem } from "./pending-loot.js";
 import { describeTablet, TabletTooltipView } from "./tablet-tooltip.js";
@@ -7,7 +8,7 @@ import { Container, Graphics, Point, Rectangle, Sprite, Text } from "pixi.js";
 import { loadDrawerAssets } from "./drawer-assets.js";
 import type { DrawerAssets } from "./drawer-assets.js";
 import { TabletMap, TabletSpec } from "@infinite-build/core";
-import type { GameData, PlayerState } from "@infinite-build/core";
+import type { GameData, MapLevel, PlayerState } from "@infinite-build/core";
 import { Battlefield } from "@infinite-build/renderer";
 
 const SLOT_SIZE = 80;
@@ -33,6 +34,7 @@ export type SlotLocation = { area: "tablets" | "inventory"; index: number };
 export type GameUIOptions = {
   /** UI uses game definitions to render skill and affix descriptions. */
   gameData: GameData;
+  onSelectLevel?: (level: MapLevel) => void;
   /** The host validates and applies the move, then supplies the latest state. */
   onMoveTablet?: (uuid: string, target: SlotLocation) => void;
   /** The host rotates the support tablet clockwise and validates the new state. */
@@ -45,8 +47,9 @@ export type GameUIOptions = {
 export class GameUI {
   private readonly root = new Container();
   private readonly pendingLoot: PendingLootView;
+  private readonly challenges: ChallengesView;
   private readonly tabs = new Container();
-  private activeTab: "tablets" | "loot" = "tablets";
+  private activeTab: "tablets" | "loot" | "challenges" = "tablets";
   private readonly background: Sprite;
   private readonly panel = new Container();
   private readonly boardPanel = new Container();
@@ -86,6 +89,7 @@ export class GameUI {
     private readonly art: TabletArt,
     private readonly backgrounds: DrawerAssets,
   ) {
+    this.challenges = new ChallengesView(options.gameData, options.onSelectLevel);
     this.pendingLoot = new PendingLootView(art.icons, backgrounds.randomSkill, options.onClaimLoot);
     this.panel.addChild(this.boardPanel, this.inventoryPanel);
     this.panel.eventMode = "static";
@@ -95,7 +99,7 @@ export class GameUI {
     this.background = new Sprite(backgrounds.background);
     this.background.anchor.set(0.5);
     this.background.eventMode = "none";
-    this.root.addChild(this.background, this.panel, this.pendingLoot, this.tabs, this.tooltip, this.clip);
+    this.root.addChild(this.background, this.panel, this.pendingLoot, this.challenges, this.tabs, this.tooltip, this.clip);
     this.root.mask = this.clip;
     battlefield.mountOverlay(this.root);
     this.observer = new ResizeObserver(() => this.layout());
@@ -122,6 +126,8 @@ export class GameUI {
   }
 
   update(state: PlayerState, inventoryCapacity: number): void {
+    this.challenges.update(state);
+    this.state = state;
     const key = JSON.stringify([state.tablets, state.inventory, state.pendingLoot, inventoryCapacity]);
     if (key === this.contentKey) return;
     this.contentKey = key;
@@ -292,7 +298,7 @@ export class GameUI {
   }
 
   private rotateTablet(uuid: string, lockTooltip = true): void {
-    if (this.activeTab === "loot" || this.drag || !this.options.onRotateTablet) return;
+    if (this.activeTab !== "tablets" || this.drag || !this.options.onRotateTablet) return;
     const slot = this.slots.find(({ location }) => {
       const tablet = this.state?.[location.area][location.index];
       return tablet?.uuid === uuid && "rotate" in tablet;
@@ -321,7 +327,7 @@ export class GameUI {
   }
 
   private readonly onContextMenu = (event: MouseEvent): void => {
-    if (this.activeTab === "loot" || this.drag || !this.options.onRotateTablet) return;
+    if (this.activeTab !== "tablets" || this.drag || !this.options.onRotateTablet) return;
     if (this.pointerInTooltip(event, false)) {
       event.preventDefault();
       return;
@@ -351,7 +357,7 @@ export class GameUI {
   private readonly onPointerDown = (event: PointerEvent): void => {
     this.suppressTooltipTap = false;
     this.pointerButton = event.button;
-    if (this.activeTab === "loot" || this.pointerInTooltip(event)) return;
+    if (this.activeTab !== "tablets" || this.pointerInTooltip(event)) return;
     if (event.button !== 0 || this.drag || !this.options.onMoveTablet) return;
     const point = this.pointerPosition(event);
     const source = this.slotAt(point);
@@ -426,14 +432,15 @@ export class GameUI {
     for (const child of this.tabs.removeChildren()) child.destroy({ children: true });
     this.panel.visible = this.activeTab === "tablets";
     this.pendingLoot.visible = this.activeTab === "loot";
+    this.challenges.visible = this.activeTab === "challenges";
     const total = this.state?.pendingLoot.reduce((sum, entry) => sum + entry.count, 0) ?? 0;
     const landscape = width >= this.canvas.clientHeight;
-    const barWidth = TAB_ICON_SIZE * 2 + TAB_GAP;
+    const barWidth = TAB_ICON_SIZE * 3 + TAB_GAP * 2;
     this.tabs.scale.set(landscape ? Math.max(0.001, Math.min(1, (this.uiHeight - 32) / barWidth)) : 1);
     this.canvas.title = "";
     this.tabs.position.set(landscape ? 8 : (width - barWidth) / 2,
       landscape ? 16 : this.uiHeight - TAB_BAR_HEIGHT + 8);
-    const entries = [["tablets", "石板"], ["loot", "领取战利品"]] as const;
+    const entries = [["tablets", "石板"], ["loot", "领取战利品"], ["challenges", "关卡"]] as const;
     entries.forEach(([tab, label], index) => {
       const selected = this.activeTab === tab;
       const button = new Container();
@@ -446,12 +453,21 @@ export class GameUI {
         .fill(selected ? 0x36545b : 0x16282e)
         .stroke({ color: selected ? 0xb5d9c1 : 0x516768, width: 1 }));
       button.label = label;
-      const icon = new Sprite(this.backgrounds.tabs[tab]);
-      icon.anchor.set(0.5);
-      icon.position.set(TAB_ICON_SIZE / 2);
-      icon.width = icon.height = TAB_ICON_SIZE;
-      icon.alpha = selected ? 1 : 0.75;
-      button.addChild(icon);
+      if (tab === "challenges") {
+        const caption = new Text({ text: "关卡", resolution: 2, style: {
+          fontFamily: "system-ui, sans-serif", fontSize: 20, fontWeight: "bold", fill: 0xb5d9c1,
+        } });
+        caption.anchor.set(0.5);
+        caption.position.set(TAB_ICON_SIZE / 2);
+        button.addChild(caption);
+      } else {
+        const icon = new Sprite(this.backgrounds.tabs[tab]);
+        icon.anchor.set(0.5);
+        icon.position.set(TAB_ICON_SIZE / 2);
+        icon.width = icon.height = TAB_ICON_SIZE;
+        icon.alpha = selected ? 1 : 0.75;
+        button.addChild(icon);
+      }
       if (tab === "loot" && total > 0) {
         const badgeWidth = total > 99 ? 30 : 24;
         button.addChild(new Graphics().roundRect(TAB_ICON_SIZE - badgeWidth, 0, badgeWidth, 22, 10)
@@ -511,6 +527,8 @@ export class GameUI {
     const panelHeight = Math.max(1, height - (landscape ? 0 : TAB_BAR_HEIGHT));
     this.pendingLoot.position.set(panelX, 0);
     this.pendingLoot.layout(panelWidth, panelHeight);
+    this.challenges.position.set(panelX, 0);
+    this.challenges.layout(panelWidth, panelHeight);
     this.renderTabs(width);
     const scale = Math.max(0.001, Math.min(1,
       (panelWidth - PANEL_PADDING * 2) / contentWidth,

@@ -89,7 +89,9 @@ export class Battlefield {
   private readonly resultOverlay: BattleResultOverlay;
   private readonly monsterInfo = new MonsterInfo();
   private readonly onInfoKeyDown = (event: KeyboardEvent): void => {
-    if (event.key === "Escape") this.monsterInfo.hide();
+    if (event.key === "Escape") {
+      this.monsterInfo.hide();
+    }
   };
   private readonly skillBars: {
     progress: number;

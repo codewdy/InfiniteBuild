@@ -196,8 +196,13 @@ export const gameData: GameData = {
   mapLevelDefinitions: [
     {
       level: [1, 1],
-      name: "启程",
-      maps: ["forest", "grassland"],
+      name: "林地",
+      maps: ["forest"],
+    },
+    {
+      level: [1, 2],
+      name: "草原",
+      maps: ["grassland"],
     },
   ],
 };
