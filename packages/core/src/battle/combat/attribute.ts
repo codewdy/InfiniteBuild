@@ -1,33 +1,19 @@
 export type Attribute = {
-  base: number;
-  inc: number;
-  more: number;
+  base?: number;
+  inc?: number;
+  more?: number;
 };
 
 export namespace Attribute {
-  export type Modifier = Partial<Attribute>;
-  export type Dict<Field extends string = string> = Record<Field, Attribute>;
-  export type DictModifier<Field extends string = string> = Partial<
-    Record<Field, Modifier>
-  >;
+  export type Dict = Record<string, Attribute>;
 
-  export function createByRaw(base: number): Attribute {
-    return { base, inc: 0, more: 0 };
-  }
-
-  export function createDictByRaw<Field extends string>(
-    fields: readonly Field[],
-    source: Partial<Record<NoInfer<Field>, number>> = {},
-  ): Dict<Field> {
+  export function createDictByRaw(source: Record<string, number> = {}): Dict {
     return Object.fromEntries(
-      fields.map((field) => [
-        field,
-        createByRaw(source[field] ?? 0),
-      ]),
-    ) as Dict<Field>;
+      Object.entries(source).map(([key, base]) => [key, { base }]),
+    );
   }
 
-  export function merge(...sources: (Modifier | undefined)[]): Attribute {
+  export function merge(...sources: (Attribute | undefined)[]): Attribute {
     let base = 0;
     let inc = 0;
     let multiplier = 1;
@@ -40,19 +26,10 @@ export namespace Attribute {
     return { base, inc, more: multiplier - 1 };
   }
 
-  export function mergeDict<Field extends string>(
-    source: Dict<Field>,
-    ...sources: (DictModifier<NoInfer<Field>> | undefined)[]
-  ): Dict<Field>;
-  export function mergeDict<Field extends string = string>(
-    ...sources: (DictModifier<Field> | undefined)[]
-  ): Partial<Dict<Field>>;
-  export function mergeDict<Field extends string = string>(
-    ...sources: (DictModifier<Field> | undefined)[]
-  ): Partial<Dict<Field>> {
-    const fields = new Set<Field>();
+  export function mergeDict(...sources: (Dict | undefined)[]): Dict {
+    const fields = new Set<string>();
     for (const source of sources) {
-      for (const field of Object.keys(source ?? {}) as Field[]) {
+      for (const field of Object.keys(source ?? {})) {
         fields.add(field);
       }
     }
@@ -61,27 +38,18 @@ export namespace Attribute {
         field,
         merge(...sources.map((source) => source?.[field])),
       ]),
-    ) as Partial<Dict<Field>>;
+    );
   }
 
-  export function resolve(value: Modifier): number {
-    return (value.base ?? 0) * (1 + (value.inc ?? 0)) * (1 + (value.more ?? 0));
+  export function resolve(value: Attribute | undefined): number {
+    return (
+      (value?.base ?? 0) * (1 + (value?.inc ?? 0)) * (1 + (value?.more ?? 0))
+    );
   }
 
-  export function resolveDict<Field extends string>(
-    source: Record<Field, Modifier>,
-  ): Record<Field, number>;
-  export function resolveDict<Field extends string = string>(
-    source: DictModifier<Field>,
-  ): Partial<Record<Field, number>>;
-  export function resolveDict<Field extends string = string>(
-    source: DictModifier<Field>,
-  ): Partial<Record<Field, number>> {
+  export function resolveDict(source: Dict): Record<string, number> {
     return Object.fromEntries(
-      (Object.keys(source) as Field[]).map((field) => [
-        field,
-        resolve(source[field] ?? {}),
-      ]),
-    ) as Partial<Record<Field, number>>;
+      Object.entries(source).map(([key, value]) => [key, resolve(value)]),
+    );
   }
 }

@@ -12,7 +12,8 @@ export const attack = GameData.defineSkill({
     let target: typeof self | undefined;
     let nearestDistance = Infinity;
     for (const unit of ctx.units) {
-      if (unit.faction === self.faction || unit.isDead || unit.hp <= 0) continue;
+      if (unit.faction === self.faction || unit.isDead || unit.hp <= 0)
+        continue;
       const distance = Math.abs(unit.position - self.position);
       if (distance <= skill.params.range && distance < nearestDistance) {
         target = unit;
@@ -26,7 +27,7 @@ export const attack = GameData.defineSkill({
       skill: "attack",
       payload: { from: self.position, to: target.id, durationFrames: 3 },
     });
-    hit(ctx, self, target, self.rawStatus.attributes.attack * 0.1);
+    hit(ctx, self, target, (self.rawStatus.attributes.attack ?? 0) * 0.1);
   },
 });
 
@@ -142,4 +143,9 @@ export const nova = GameData.defineSkill({
   },
 });
 
-export const skillDefinitions = GameData.skills([attack, selfDestruct, fireball, nova]);
+export const skillDefinitions = GameData.skills([
+  attack,
+  selfDestruct,
+  fireball,
+  nova,
+]);

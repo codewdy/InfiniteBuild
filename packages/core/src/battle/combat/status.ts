@@ -3,47 +3,27 @@ import { Trigger } from "./trigger.js";
 
 export type Status = {
   attributes: Status.Attributes;
-  tags: Set<string>;
   triggers: Trigger;
 };
 
 export namespace Status {
-  export const FieldName = ["maxHp", "attack", "defense"] as const;
-  export type Field = (typeof FieldName)[number];
-
-  export function mergeTags(
-    ...sources: (ReadonlySet<string> | readonly string[] | undefined)[]
-  ): Set<string> {
-    const tags = new Set<string>();
-    for (const source of sources) {
-      for (const tag of source ?? []) {
-        tags.add(tag);
-      }
-    }
-    return tags;
-  }
-
   export type Modifier = {
-    attributes?: Attribute.DictModifier<Field>;
-    tags?: Set<string> | string[];
+    attributes?: Attribute.Dict;
     triggers?: Trigger;
   };
-  export type Attributes = Attribute.Dict<Field>;
+  export type Attributes = Attribute.Dict;
   export type RawStatus = {
-    attributes: Record<Field, number>;
-    tags: Set<string>;
+    attributes: Record<string, number>;
     triggers: Trigger;
   };
   export type StatusConfig = {
-    attributes?: Partial<Record<Field, number>>;
-    tags?: string[];
+    attributes?: Record<string, number>;
     triggers?: Trigger;
   };
 
   export function createByConfig(config: StatusConfig): Status {
     return {
-      attributes: Attribute.createDictByRaw(FieldName, config.attributes),
-      tags: new Set(config.tags),
+      attributes: Attribute.createDictByRaw(config.attributes),
       triggers: Trigger.merge(config.triggers ?? {}),
     };
   }
@@ -53,10 +33,6 @@ export namespace Status {
       attributes: Attribute.mergeDict(
         status.attributes,
         ...modifiers.map((modifier) => modifier.attributes),
-      ),
-      tags: mergeTags(
-        status.tags,
-        ...modifiers.map((modifier) => modifier.tags),
       ),
       triggers: Trigger.merge(
         status.triggers,
@@ -68,7 +44,6 @@ export namespace Status {
   export function resolve(status: Status): RawStatus {
     return {
       attributes: Attribute.resolveDict(status.attributes),
-      tags: mergeTags(status.tags),
       triggers: Trigger.merge(status.triggers),
     };
   }

@@ -1,4 +1,3 @@
-import { SkillTrigger } from "../../battle/combat/skill-trigger.js";
 import type { Attribute } from "../../battle/combat/attribute.js";
 import type { PlayerCombatProfile } from "../state.js";
 import type { Status } from "../../battle/combat/status.js";
@@ -7,13 +6,9 @@ import type { TabletSpec } from "./spec.js";
 import type { GameData } from "../../game-data.js";
 
 export namespace Tablet {
-  export const AttributeFieldName = [
-    ...SkillTrigger.eventTypes.map((type) => `skill.${type}` as const),
-  ] as const;
-  export type AttributeField = (typeof AttributeFieldName)[number];
   export type Modifier = {
     skillStatus: Status.Modifier[];
-    attribute: Attribute.Dict<AttributeField>;
+    attribute: Attribute.Dict;
   };
   export type Context = {
     gameData: GameData;

@@ -25,11 +25,10 @@ export abstract class Unit {
   lastHitUnit: Unit | null = null;
   isDead: boolean = false;
   rawStatus: Status.RawStatus = Status.resolve(
-    Status.createByConfig({ attributes: { maxHp: 1 }, tags: [] }),
+    Status.createByConfig({ attributes: { maxHp: 1 } }),
   );
   status: Status = Status.createByConfig({
     attributes: { maxHp: 1 },
-    tags: [],
   });
 
   applyBuff(

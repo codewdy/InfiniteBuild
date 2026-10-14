@@ -113,7 +113,6 @@ export class Battle {
         hp: unit.hp,
         status: {
           attributes: { ...unit.rawStatus.attributes },
-          tags: [...unit.rawStatus.tags],
         },
       })),
       events: this.ctx.events.getEvents(),

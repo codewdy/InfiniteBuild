@@ -8,7 +8,6 @@ export const ignite = GameData.defineBuff({
   threshold: 1,
   modifier(level) {
     return {
-      tags: ["ignite"],
       triggers: {
         onUpdate: [
           (self, ctx) => {

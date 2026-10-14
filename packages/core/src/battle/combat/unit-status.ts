@@ -9,10 +9,11 @@ export function updateStatus(ctx: BattleContext, unit: Unit): void {
   const status = Status.apply(unit.calcBaseStatus(ctx), modifiers);
   unit.status = status;
   unit.rawStatus = Status.resolve(unit.status);
+  const maxHp = Math.max(1, unit.rawStatus.attributes.maxHp ?? 0);
   unit.skillTrigger.updateStatus(ctx, unit);
-  if (unit.rawStatus.attributes.maxHp != unit.maxHp) {
-    unit.hp = (unit.hp * unit.rawStatus.attributes.maxHp) / unit.maxHp;
-    unit.maxHp = unit.rawStatus.attributes.maxHp;
+  if (maxHp != unit.maxHp) {
+    unit.hp = (unit.hp * maxHp) / unit.maxHp;
+    unit.maxHp = maxHp;
   }
 }
 

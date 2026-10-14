@@ -40,7 +40,6 @@ export type BattleLog = {
     hp: number;
     status: {
       attributes: Status.RawStatus["attributes"];
-      tags: string[];
     };
   }[];
   events: BattleEvent.Event[];
