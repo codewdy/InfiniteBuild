@@ -111,6 +111,12 @@ export class Game {
     return structuredClone(settlement);
   }
 
+  completeTutorial(tutorial: string): void {
+    if (!this.state.tutorial.completed.includes(tutorial)) {
+      this.state.tutorial.completed.push(tutorial);
+    }
+  }
+
   getState(): PlayerState {
     return structuredClone(this.state);
   }

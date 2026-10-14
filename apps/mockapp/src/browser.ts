@@ -1,4 +1,4 @@
-import { GameUI } from "@infinite-build/ui";
+import { completedTutorials, EQUIP_SKILL_TUTORIAL, GameUI } from "@infinite-build/ui";
 import {
   loadBattlefieldIcons,
   loadPassiveAffixIcons,
@@ -306,12 +306,19 @@ function submitState(
   mode: "validate" | "force" = "validate",
   message = "石板已修改",
 ): void {
+  const previous = game.getState();
+  const tutorialWasPending = !previous.tutorial.completed.includes(EQUIP_SKILL_TUTORIAL);
   if (mode === "force") game.forceChangeState(state);
   const error = mode === "validate" ? game.changeState(state) : null;
   if (error) {
     tabletMessage.textContent = `修改失败：${error.message}`;
     tabletMessage.dataset.error = "true";
   } else {
+    if (mode === "validate") {
+      for (const tutorial of completedTutorials(previous, game.getState())) {
+        game.completeTutorial(tutorial);
+      }
+    }
     tabletMessage.dataset.error = "false";
     if (log.status === "Running") {
       battle.changeState(game.getState());
@@ -321,6 +328,7 @@ function submitState(
     }
   }
   render();
+  if (!error && tutorialWasPending && game.player.tutorial.completed.includes(EQUIP_SKILL_TUTORIAL)) start();
 }
 
 type SlotLocation = { area: "tablets" | "inventory"; index: number };
@@ -1026,7 +1034,7 @@ function createBattleResult(settlement: BattleSettlement): BattlefieldResult {
 }
 
 function advance(): void {
-  if (!hasStarted) return;
+  if (!hasStarted || !game.player.tutorial.completed.includes(EQUIP_SKILL_TUTORIAL)) return;
   if (log.status !== "Running") return;
   const previous = log;
   log = battle.executeFrame();
@@ -1054,7 +1062,7 @@ function advance(): void {
 }
 
 function start(): void {
-  if (!hasStarted) return;
+  if (!hasStarted || !game.player.tutorial.completed.includes(EQUIP_SKILL_TUTORIAL)) return;
   if (log.status !== "Running" || timer !== undefined) return;
   timer = window.setInterval(advance, 1000 / Number(speed.value));
   play.textContent = "暂停";

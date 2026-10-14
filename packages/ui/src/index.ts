@@ -1,3 +1,6 @@
+import { EQUIP_SKILL_TUTORIAL } from "./tutorial.js";
+export { EQUIP_SKILL_TUTORIAL, completedTutorials } from "./tutorial.js";
+import { EquipTutorialView } from "./equip-tutorial.js";
 import { StartScreenView } from "./start-screen.js";
 import { ChallengesView } from "./challenges.js";
 import { PendingLootView } from "./pending-loot.js";
@@ -60,6 +63,7 @@ export class GameUI {
   private readonly inventorySlots: Container[] = [];
   private readonly clip = new Graphics();
   private readonly tooltip = new TabletTooltipView();
+  private readonly tutorial = new EquipTutorialView();
   private tooltipSelection?: { uuid: string; location: SlotLocation };
   private tooltipHover?: Container;
   private readonly tabletHighlights: Graphics[] = [];
@@ -101,7 +105,7 @@ export class GameUI {
     this.background = new Sprite(backgrounds.background);
     this.background.anchor.set(0.5);
     this.background.eventMode = "none";
-    this.root.addChild(this.background, this.panel, this.pendingLoot, this.challenges, this.tabs, this.tooltip, this.clip);
+    this.root.addChild(this.background, this.panel, this.pendingLoot, this.challenges, this.tabs, this.tutorial, this.tooltip, this.clip);
     this.root.mask = this.clip;
     battlefield.mountOverlay(this.root);
     this.startScreen = new StartScreenView(backgrounds.background);
@@ -144,7 +148,7 @@ export class GameUI {
   update(state: PlayerState, inventoryCapacity: number): void {
     this.challenges.update(state);
     this.state = state;
-    const key = JSON.stringify([state.tablets, state.inventory, state.pendingLoot, inventoryCapacity]);
+    const key = JSON.stringify([state.tablets, state.inventory, state.pendingLoot, state.tutorial, inventoryCapacity]);
     if (key === this.contentKey) return;
     this.contentKey = key;
     this.state = state;
@@ -222,7 +226,14 @@ export class GameUI {
       }
       this.inventoryPanel.addChild(view);
     }
+    const source = this.state.inventory[this.tutorialSource()];
+    this.tutorial.setStone(source ? createTabletArt(source, this.art, 72, this.options.gameData) : undefined);
     this.layout();
+  }
+
+  private tutorialSource(): number {
+    if (!this.state || this.state.tutorial.completed.includes(EQUIP_SKILL_TUTORIAL)) return -1;
+    return this.state.inventory.findIndex((item) => item?.kind === "tablet-skill");
   }
 
   private bindTooltip(view: Container, location: SlotLocation): void {
@@ -392,6 +403,7 @@ export class GameUI {
     ghost.visible = false;
     this.panel.addChild(ghost);
     this.drag = { pointerId: event.pointerId, uuid: tablet.uuid, source: source.view, ghost, startX: event.clientX, startY: event.clientY, moved: false };
+    this.tutorial.visible = false;
   };
 
   private readonly onPointerMove = (event: PointerEvent): void => {
@@ -453,6 +465,7 @@ export class GameUI {
       this.drag.source.alpha = 1;
       this.drag.ghost.destroy({ children: true });
       this.drag = undefined;
+      if (!this.destroyed) this.layoutTutorial();
     }
   };
 
@@ -515,7 +528,7 @@ export class GameUI {
         this.hideTooltip();
         this.pendingLoot.closeMenu();
         this.activeTab = tab;
-        this.renderTabs(this.canvas.clientWidth);
+        this.layout();
       });
       this.tabs.addChild(button);
     });
@@ -573,6 +586,24 @@ export class GameUI {
     this.panel.hitArea = new Rectangle(0, 0, contentWidth, contentHeight);
     this.inventoryPanel.position.set(stacked ? (contentWidth - inventoryWidth) / 2 : INVENTORY_X, stacked ? BOARD_SIZE + SECTION_GAP : 0);
     this.clip.clear().rect(0, 0, width, height).fill(0xffffff);
+    this.layoutTutorial();
+  }
+
+  private layoutTutorial(): void {
+    const index = this.tutorialSource();
+    const source = this.slots.find(({ location }) => location.area === "inventory" && location.index === index);
+    const targetIndex = this.state?.tablets.findIndex(tablet => tablet === null);
+    const target = this.slots.find(({ location }) => location.area === "tablets" && location.index === targetIndex);
+    this.tutorial.visible = false;
+    if (this.activeTab !== "tablets" || this.drag || !source || !target) return;
+    const tablet = this.state!.inventory[index]!;
+    const name = tablet.kind === "tablet-skill" ? this.options.gameData.skillDefinitions[tablet.skill]?.name ?? "技能" : "技能";
+    this.tutorial.show(
+      this.root.toLocal(source.view.toGlobal(new Point(SLOT_SIZE / 2, SLOT_SIZE / 2))),
+      this.root.toLocal(target.view.toGlobal(new Point(SLOT_SIZE / 2, SLOT_SIZE / 2))),
+      SLOT_SIZE * this.panel.scale.x, this.canvas.clientWidth,
+      this.uiHeight - (this.canvas.clientWidth >= this.canvas.clientHeight ? 0 : TAB_BAR_HEIGHT), name,
+    );
   }
 
   destroy(): void {

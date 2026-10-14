@@ -31,6 +31,9 @@ export type PlayerState = {
   }[];
   currentMapLevel: MapLevel;
   highestUnlockedMapLevel: MapLevel;
+  tutorial: {
+    completed: string[];
+  };
 };
 
 export function derivePlayerCombatProfile(

@@ -1,9 +1,6 @@
 import { Attribute, TabletMap } from "@infinite-build/core";
 import {
-  createPassiveTablet,
-  createSupportTablet,
   createTablet,
-  supportTabletOptions,
   tabletDefinition,
 } from "./tablets.js";
 export {
@@ -23,29 +20,6 @@ import { buffDefinitions } from "./buffs.js";
 import { passiveAffixes, supportSkillAffixes } from "./affixes.js";
 export { passiveAffixes, supportSkillAffixes } from "./affixes.js";
 
-const supportTablet = createSupportTablet(TabletMap.idSize + 4);
-const passiveTablet = createPassiveTablet(TabletMap.idSize + 5);
-const previewPassiveTablet = {
-  ...createPassiveTablet(TabletMap.idSize + 6),
-  rarity: "rare" as const,
-  affixes: [
-    { id: "attack", tier: 0, param: 3 },
-    { id: "attackPercent", tier: 0, param: 0.1 },
-    { id: "maxHp", tier: 0, param: 10 },
-    { id: "maxHpPercent", tier: 0, param: 0.1 },
-  ],
-};
-
-// One four-affix stone per tier provides samples of different affix tiers.
-const tierPreviewTablets = Array.from({ length: 5 }, (_, tier) => ({
-  ...createPassiveTablet(TabletMap.idSize + 7 + tier),
-  rarity: "rare" as const,
-  affixes: ["attack", "attackPercent", "maxHp", "maxHpPercent"].map((id) => {
-    const range = passiveAffixes.pool[id]!.tier[tier]!;
-    return { id, tier, param: (range.min + range.max) / 2 };
-  }),
-}));
-
 export const playerState: PlayerState = {
   currentMapLevel: [1, 1],
   highestUnlockedMapLevel: [1, 1],
@@ -55,27 +29,12 @@ export const playerState: PlayerState = {
     { loot: { kind: "tablet-skill", rarity: "magic", level: 1 }, count: 3 },
     { loot: { kind: "tablet-skill", rarity: "rare", level: 1 }, count: 3 },
   ],
-  inventory: [
-    ...(["fireball", "nova", "fireball", "nova"] as const).map((kind, index) =>
-      createTablet(kind, TabletMap.idSize + index),
-    ),
-    supportTablet,
-    passiveTablet,
-    previewPassiveTablet,
-    ...tierPreviewTablets,
-    ...supportTabletOptions
-      .slice(1)
-      .map(({ id }, index) =>
-        createSupportTablet(TabletMap.idSize + 12 + index, id),
-      ),
-  ],
+  inventory: [createTablet("fireball", TabletMap.idSize)],
+  tutorial: { completed: [] },
   level: 1,
   xp: 0,
   move: { speed: 1, safeRange: 1, range: 5, count: 2 },
-  // Fill the board to exercise the skill progress layout with all 25 skills.
-  tablets: Array.from({ length: TabletMap.idSize }, (_, id) =>
-    createTablet(id % 2 === 0 ? "fireball" : "nova", id),
-  ),
+  tablets: Array.from({ length: TabletMap.idSize }, () => null),
 };
 
 export const gameData: GameData = {

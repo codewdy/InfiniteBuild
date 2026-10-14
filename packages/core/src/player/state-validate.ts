@@ -121,7 +121,13 @@ namespace validator {
     }
     return undefined;
   }
-  export const validators = { inventory, tablet, pendingLoot, mapProgress };
+  export function tutorial(src: PlayerState, dst: PlayerState): string | undefined {
+    if (!deepEqual(src.tutorial, dst.tutorial)) {
+      return "Tutorial progress must not change through changeState.";
+    }
+    return undefined;
+  }
+  export const validators = { inventory, tablet, pendingLoot, mapProgress, tutorial };
 }
 
 export function stateValidate(
