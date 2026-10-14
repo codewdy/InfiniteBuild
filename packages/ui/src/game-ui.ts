@@ -1,3 +1,4 @@
+import { PlayerDrawerView } from "./player-drawer.js";
 import { LevelTutorialView } from "./level-tutorial.js";
 import type { SlotLocation, GameUIOptions, GameUIState, BattlefieldResetOptions, BattlefieldResult } from "./types.js";
 import { EQUIP_SKILL_TUTORIAL, challengesUnlocked, levelTutorialPending } from "./tutorial.js";
@@ -39,6 +40,7 @@ export class GameUI {
   private readonly root = new Container();
   private readonly startScreen: StartScreenView;
   private readonly pendingLoot: PendingLootView;
+  private readonly playerDrawer: PlayerDrawerView;
   private readonly challenges: ChallengesView;
   private readonly tabs = new Container();
   private activeTab: "tablets" | "loot" | "challenges" = "tablets";
@@ -83,6 +85,10 @@ export class GameUI {
     private readonly art: TabletArt,
     private readonly backgrounds: DrawerAssets,
   ) {
+    this.playerDrawer = new PlayerDrawerView(canvas, options.gameData, backgrounds.playerHandle, () => {
+      this.cancelDrag();
+      this.hideTooltip();
+    });
     this.challenges = new ChallengesView(options.gameData, options.onSelectLevel, options.onAutoAdvanceLevelChange);
     this.pendingLoot = new PendingLootView(art.icons, backgrounds.randomSkill, options.onClaimLoot);
     this.panel.addChild(this.boardPanel, this.inventoryPanel);
@@ -96,6 +102,7 @@ export class GameUI {
     this.root.addChild(this.background, this.panel, this.pendingLoot, this.challenges, this.tabs, this.tutorial, this.levelTutorial, this.tooltip, this.clip);
     this.root.mask = this.clip;
     battlefield.mountOverlay(this.root);
+    battlefield.mountOverlay(this.playerDrawer);
     this.startScreen = new StartScreenView(backgrounds.background);
     battlefield.mountOverlay(this.startScreen);
     this.observer = new ResizeObserver(() => this.layout());
@@ -135,9 +142,12 @@ export class GameUI {
   showStartScreen(onStart: () => void): void {
     this.cancelDrag();
     this.hideTooltip();
+    this.playerDrawer.close();
     this.root.visible = false;
+    this.playerDrawer.visible = false;
     this.startScreen.show(() => {
       this.root.visible = true;
+      this.playerDrawer.visible = true;
       onStart();
     });
     this.canvas.setAttribute("aria-label", "无限构筑，开始游戏。聚焦画布后按 Enter 开始。");
@@ -160,6 +170,7 @@ export class GameUI {
       mapName: map.name, playing: battle.playing, frameDuration: battle.frameDuration,
     });
     const inventoryCapacity = this.options.gameData.playerDefinition.inventoryCapacity;
+    this.playerDrawer.update(state, battle.log);
     this.challenges.update(state);
     this.state = state;
     const key = JSON.stringify([state.tablets, state.inventory, state.pendingLoot, state.tutorial, state.currentMapLevel, state.highestUnlockedMapLevel, state.config, inventoryCapacity]);
@@ -372,6 +383,7 @@ export class GameUI {
       event.preventDefault();
       return;
     }
+    if (this.playerDrawer.blocksPointer(event)) { event.preventDefault(); return; }
     if (this.activeTab !== "tablets" || this.drag || !this.options.onRotateTablet) return;
     if (this.pointerInTooltip(event, false)) {
       event.preventDefault();
@@ -400,7 +412,7 @@ export class GameUI {
   }
 
   private readonly onPointerDown = (event: PointerEvent): void => {
-    if (this.startScreen.visible) return;
+    if (this.startScreen.visible || this.playerDrawer.blocksPointer(event)) return;
     this.suppressTooltipTap = false;
     this.pointerButton = event.button;
     if (this.activeTab !== "tablets" || this.pointerInTooltip(event)) return;
@@ -467,6 +479,7 @@ export class GameUI {
       return;
     }
     if (event.key !== "Escape") return;
+    if (this.playerDrawer.expanded) { this.playerDrawer.close(); return; }
     if (this.activeTab === "loot") this.pendingLoot.closeMenu();
     else if (this.drag) this.cancelDrag();
     else if (this.tooltip.visible) this.hideTooltip();
@@ -601,6 +614,7 @@ export class GameUI {
     this.panel.hitArea = new Rectangle(0, 0, contentWidth, contentHeight);
     this.inventoryPanel.position.set(stacked ? (contentWidth - inventoryWidth) / 2 : INVENTORY_X, stacked ? BOARD_SIZE + SECTION_GAP : 0);
     this.clip.clear().rect(0, 0, width, height).fill(0xffffff);
+    this.playerDrawer.layout(width, battlefieldHeight);
     this.layoutTutorial();
   }
 
@@ -646,6 +660,7 @@ export class GameUI {
     window.removeEventListener("blur", this.cancelDrag);
     window.removeEventListener("keydown", this.onKeyDown);
     this.observer.disconnect();
+    this.playerDrawer.destroy();
     this.battlefield.destroy();
     this.art.destroy();
   }

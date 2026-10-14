@@ -26,7 +26,7 @@ const REFERENCE_HEIGHT = 290;
 const UNIT_SIZE_FACTOR = 0.75;
 const SKILL_SIZE_FACTOR = 0.65;
 const BATTLE_PROGRESS_HEIGHT = 16;
-const BATTLE_PROGRESS_BOTTOM = 6;
+const BATTLE_PROGRESS_BOTTOM = 14;
 const BATTLE_PROGRESS_GAP = 8;
 
 type Unit = BattleLog["units"][number];
