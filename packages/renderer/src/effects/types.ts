@@ -1,6 +1,6 @@
 import type { BattleEvent, BattleLog } from "@infinite-build/core";
 import type { Sprite } from "pixi.js";
-import type { BattlefieldAssets } from "../battlefield-assets.js";
+import type { BattlefieldAssets } from "@infinite-build/assets";
 
 export type EffectDrawContext = {
   x: (position: number) => number;

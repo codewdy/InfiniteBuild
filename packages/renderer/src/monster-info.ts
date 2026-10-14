@@ -1,6 +1,6 @@
 import { Container, Graphics, Rectangle, Sprite, Text } from "pixi.js";
 import type { SkillDefinition, UnitDefinition } from "@infinite-build/core";
-import type { CharacterTextures } from "./battlefield-assets.js";
+import type { CharacterTextures } from "@infinite-build/assets";
 
 const triggerNames: Record<string, string> = {
   onUpdate: "自动施放",

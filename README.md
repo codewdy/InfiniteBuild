@@ -28,3 +28,7 @@ window.addEventListener("pagehide", () => app.destroy(), { once: true });
 GameApp 对外仅提供 `create()` 和 `destroy()`，构造函数和游戏操作均为私有。计时器、教程、装备、关卡切换和结算由应用内部管理。注入的 Game 实现应与游戏定义一致；当前通过 `GameInterface` 同步调用。
 
 运行 `pnpm mock` 或 `pnpm mock:web` 启动游戏页面。运行 `pnpm run build` 构建所有包，运行 `pnpm --filter @infinite-build/app test` 验证应用生命周期与游戏流程。
+
+## 美术资源
+
+共享美术由 [`packages/assets`](packages/assets/README.md) 管理。`runtime/` 保存按用途分组的运行时图片和清单，`sources/` 保存提示词与历史参考，不参与发布。UI 和 renderer 共用加载器与纹理缓存。运行 `pnpm assets:check` 检查引用、裁切范围和动画配置。

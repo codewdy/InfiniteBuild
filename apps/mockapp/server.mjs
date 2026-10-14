@@ -11,6 +11,7 @@ const mockDataRequire = createRequire(
   resolve(workspace, "packages/mock-data/package.json"),
 );
 const rendererRoot = resolve(workspace, "packages/renderer");
+const assetsRoot = resolve(workspace, "packages/assets");
 const uiRoot = resolve(workspace, "packages/ui");
 const rendererRequire = createRequire(resolve(rendererRoot, "package.json"));
 const clients = new Set();
@@ -62,6 +63,7 @@ async function snapshot(directory) {
 }
 
 const sourceDirectories = [
+  "packages/assets/src",
   "packages/core/src",
   "packages/mock-data/src",
   "packages/renderer/src",
@@ -78,8 +80,7 @@ const webSnapshot = async () =>
   (
     await Promise.all([
       snapshot(resolve(base, "web")),
-      snapshot(resolve(rendererRoot, "assets")),
-      snapshot(resolve(uiRoot, "assets")),
+      snapshot(resolve(assetsRoot, "runtime")),
     ])
   ).join("\n");
 let web = await webSnapshot();
@@ -106,6 +107,7 @@ const watcher = setInterval(async () => {
   }
 }, 500);
 const roots = {
+  "/assets/": assetsRoot,
   "/ui/": uiRoot,
   "/renderer/": rendererRoot,
   "/app/": resolve(base, "dist"),
@@ -150,9 +152,12 @@ const server = createServer(async (request, response) => {
         const root = roots[prefix];
         const candidate = resolve(root, pathname.slice(prefix.length));
         const extensions =
-          ["/renderer/", "/ui/"].includes(prefix) &&
-          pathname.startsWith(`${prefix}assets/`)
-            ? [".png", ".json"]
+          prefix === "/assets/"
+            ? pathname.startsWith(`${prefix}runtime/`)
+              ? [".png", ".json"]
+              : pathname.startsWith(`${prefix}dist/`)
+                ? [".js", ".mjs"]
+                : []
             : [".js", ".mjs"];
         if (
           candidate.startsWith(`${root}/`) &&

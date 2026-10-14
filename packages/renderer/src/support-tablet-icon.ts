@@ -2,7 +2,7 @@ import type { TabletSpec } from "@infinite-build/core";
 import type {
   IconName,
   SupportDirectionIconName,
-} from "./battlefield-assets.js";
+} from "@infinite-build/assets";
 
 /** Both renderers use the same artwork and base angle. */
 export function resolveSupportTabletIcon(

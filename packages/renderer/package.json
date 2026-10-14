@@ -7,18 +7,17 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    },
-    "./assets/*": "./assets/*"
+    }
   },
   "files": [
-    "dist",
-    "assets"
+    "dist"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
     "@infinite-build/core": "workspace:*",
-    "pixi.js": "^8.22.0"
+    "pixi.js": "^8.22.0",
+    "@infinite-build/assets": "workspace:*"
   }
 }

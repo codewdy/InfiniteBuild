@@ -1,73 +1,12 @@
-import { Assets, Container, Rectangle, Sprite, Texture } from "pixi.js";
+import { Container, Sprite } from "pixi.js";
 import { TabletMap, TabletSpec, type GameData } from "@infinite-build/core";
 import {
-  loadBattlefieldIcons,
-  loadPassiveAffixIcons,
   resolveSupportTabletIcon,
   supportTabletScale,
 } from "@infinite-build/renderer";
-import type { IconAsset, IconName } from "@infinite-build/renderer";
-
-export type TabletArt = {
-  icons: Record<IconName, Texture>;
-  affixes: Record<string, Texture>;
-  destroy(): void;
-};
-
-/** Match the square SVG crops used by mockapp, sharing the atlas image sources. */
-export async function loadTabletArt(): Promise<TabletArt> {
-  const [icons, affixes] = await Promise.all([
-    loadBattlefieldIcons(),
-    loadPassiveAffixIcons(),
-  ]);
-  const sources = new Map(
-    await Promise.all(
-      [
-        ...new Set(
-          [...Object.values(icons), ...Object.values(affixes)].map(
-            (asset) => asset.image,
-          ),
-        ),
-      ].map(
-        async (image) => [image, await Assets.load<Texture>(image)] as const,
-      ),
-    ),
-  );
-  const textures = new Map<string, Texture>();
-  const crop = (asset: IconAsset): Texture => {
-    const key = JSON.stringify([asset.image, asset.frame]);
-    let texture = textures.get(key);
-    if (!texture) {
-      const [x, y, width, height] = asset.frame;
-      const size = Math.max(width, height);
-      texture = new Texture({
-        source: sources.get(asset.image)!.source,
-        frame: new Rectangle(x, y, width, height),
-        orig: new Rectangle(0, 0, size, size),
-        trim: new Rectangle(
-          (size - width) / 2,
-          (size - height) / 2,
-          width,
-          height,
-        ),
-      });
-      textures.set(key, texture);
-    }
-    return texture;
-  };
-  return {
-    icons: Object.fromEntries(
-      Object.entries(icons).map(([name, asset]) => [name, crop(asset)]),
-    ) as Record<IconName, Texture>,
-    affixes: Object.fromEntries(
-      Object.entries(affixes).map(([name, asset]) => [name, crop(asset)]),
-    ),
-    destroy() {
-      for (const texture of textures.values()) texture.destroy(false);
-      textures.clear();
-    },
-  };
-}
+import type { IconName, TabletArt } from "@infinite-build/assets";
+export { loadTabletArt } from "@infinite-build/assets";
+export type { TabletArt } from "@infinite-build/assets";
 
 /** Pixel stone arrows share the original support tablet style and rarity colors. */
 export function createSupportTabletArt(

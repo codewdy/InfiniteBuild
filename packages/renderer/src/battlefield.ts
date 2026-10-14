@@ -15,12 +15,12 @@ import {
 import { MonsterInfo } from "./monster-info.js";
 import { BattleResultOverlay } from "./battle-result.js";
 import type { BattlefieldResult } from "./types.js";
-import { loadBattlefieldAssets } from "./battlefield-assets.js";
+import { loadBattlefieldAssets } from "@infinite-build/assets";
 import type {
   BattlefieldAssets,
   CharacterAnimation,
   CharacterTextures,
-} from "./battlefield-assets.js";
+} from "@infinite-build/assets";
 import { createSkillEffect } from "./effects/index.js";
 import type { SkillEffect } from "./effects/index.js";
 import type { BattleEvent, BattleLog } from "@infinite-build/core";

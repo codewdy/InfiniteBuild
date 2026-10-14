@@ -1,0 +1,223 @@
+{
+  "icons": {
+    "fireball": "fantasy-fireball",
+    "nova": "fantasy-nova",
+    "passive": "tablet-passive",
+    "support-skill": "tablet-support",
+    "support-passive": "tablet-support",
+    "pending": "fantasy-pending",
+    "xp": "fantasy-xp",
+    "passive-quarter-empty": "passive-quarter-empty",
+    "passive-magic": "tablet-passive-magic",
+    "passive-rare": "tablet-passive-rare",
+    "support-rare": "tablet-support-rare",
+    "fireball-magic": "fireball-magic",
+    "fireball-rare": "fireball-rare",
+    "nova-magic": "nova-magic",
+    "nova-rare": "nova-rare",
+    "support-distant-magic": "support-distant-magic",
+    "support-distant-rare": "support-distant-rare",
+    "support-line-magic": "support-line-magic",
+    "support-line-rare": "support-line-rare",
+    "support-opposite-magic": "support-opposite-magic",
+    "support-opposite-rare": "support-opposite-rare",
+    "support-diagonalPair-magic": "support-diagonalPair-magic",
+    "support-diagonalPair-rare": "support-diagonalPair-rare",
+    "support-diagonal-magic": "support-diagonal-magic",
+    "support-diagonal-rare": "support-diagonal-rare"
+  },
+  "affixIcons": {
+    "attack": "passive-quarter-attack",
+    "attackPercent": "passive-quarter-attack",
+    "maxHp": "passive-quarter-maxHp",
+    "maxHpPercent": "passive-quarter-maxHp"
+  },
+  "skillTablets": {
+    "fireball": "fantasy-fireball",
+    "nova": "fantasy-nova"
+  },
+  "settlement": {
+    "emblems": {
+      "Victory": "fantasy-victory",
+      "Defeat": "fantasy-defeat"
+    },
+    "rewards": {
+      "skill": "fantasy-fireball",
+      "passive": "tablet-passive",
+      "support-skill": "tablet-support",
+      "support-passive": "tablet-support",
+      "pending": "fantasy-pending",
+      "xp": "fantasy-xp"
+    }
+  },
+  "frames": {
+    "fantasy-defeat": {
+      "image": "tablets/fantasy-icons.png",
+      "frame": [465, 85, 337, 338],
+      "size": [338, 338],
+      "alignment": "center"
+    },
+    "fantasy-fireball": {
+      "image": "tablets/fantasy-icons.png",
+      "frame": [38, 460, 369, 342],
+      "size": [369, 369],
+      "alignment": "center"
+    },
+    "fantasy-nova": {
+      "image": "tablets/fantasy-icons.png",
+      "frame": [450, 457, 370, 348],
+      "size": [370, 370],
+      "alignment": "center"
+    },
+    "fantasy-pending": {
+      "image": "tablets/fantasy-icons.png",
+      "frame": [863, 879, 352, 309],
+      "size": [352, 352],
+      "alignment": "center"
+    },
+    "fantasy-victory": {
+      "image": "tablets/fantasy-icons.png",
+      "frame": [42, 62, 385, 345],
+      "size": [385, 385],
+      "alignment": "center"
+    },
+    "fantasy-xp": {
+      "image": "tablets/fantasy-icons.png",
+      "frame": [877, 93, 327, 320],
+      "size": [327, 327],
+      "alignment": "center"
+    },
+    "fireball-magic": {
+      "image": "tablets/fantasy-icons-magic.png",
+      "frame": [38, 460, 369, 342],
+      "size": [369, 369],
+      "alignment": "center"
+    },
+    "fireball-rare": {
+      "image": "tablets/fantasy-icons-rare.png",
+      "frame": [38, 460, 369, 342],
+      "size": [369, 369],
+      "alignment": "center"
+    },
+    "nova-magic": {
+      "image": "tablets/fantasy-icons-magic.png",
+      "frame": [450, 457, 370, 348],
+      "size": [370, 370],
+      "alignment": "center"
+    },
+    "nova-rare": {
+      "image": "tablets/fantasy-icons-rare.png",
+      "frame": [450, 457, 370, 348],
+      "size": [370, 370],
+      "alignment": "center"
+    },
+    "passive-quarter-attack": {
+      "image": "tablets/passive-affix-quarters.png",
+      "frame": [16, 15, 706, 694],
+      "size": [706, 706],
+      "alignment": "center"
+    },
+    "passive-quarter-empty": {
+      "image": "tablets/passive-affix-quarters.png",
+      "frame": [1459, 15, 705, 694],
+      "size": [705, 705],
+      "alignment": "center"
+    },
+    "passive-quarter-maxHp": {
+      "image": "tablets/passive-affix-quarters.png",
+      "frame": [738, 15, 705, 694],
+      "size": [705, 705],
+      "alignment": "center"
+    },
+    "support-diagonal-magic": {
+      "image": "tablets/support-diagonal-v2.png",
+      "frame": [202, 256, 499, 515],
+      "size": [515, 515],
+      "alignment": "center"
+    },
+    "support-diagonal-rare": {
+      "image": "tablets/support-diagonal-v2.png",
+      "frame": [881, 256, 499, 515],
+      "size": [515, 515],
+      "alignment": "center"
+    },
+    "support-diagonalPair-magic": {
+      "image": "tablets/support-diagonalPair-v2.png",
+      "frame": [52, 120, 709, 784],
+      "size": [784, 784],
+      "alignment": "center"
+    },
+    "support-diagonalPair-rare": {
+      "image": "tablets/support-diagonalPair-v2.png",
+      "frame": [820, 120, 708, 784],
+      "size": [784, 784],
+      "alignment": "center"
+    },
+    "support-distant-magic": {
+      "image": "tablets/support-distant.png",
+      "frame": [52, 293, 713, 438],
+      "size": [713, 713],
+      "alignment": "center"
+    },
+    "support-distant-rare": {
+      "image": "tablets/support-distant.png",
+      "frame": [811, 293, 721, 438],
+      "size": [721, 721],
+      "alignment": "center"
+    },
+    "support-line-magic": {
+      "image": "tablets/support-line.png",
+      "frame": [88, 203, 662, 652],
+      "size": [662, 662],
+      "alignment": "center"
+    },
+    "support-line-rare": {
+      "image": "tablets/support-line.png",
+      "frame": [824, 203, 651, 652],
+      "size": [652, 652],
+      "alignment": "center"
+    },
+    "support-opposite-magic": {
+      "image": "tablets/support-opposite.png",
+      "frame": [16, 287, 738, 457],
+      "size": [738, 738],
+      "alignment": "center"
+    },
+    "support-opposite-rare": {
+      "image": "tablets/support-opposite.png",
+      "frame": [783, 287, 738, 457],
+      "size": [738, 738],
+      "alignment": "center"
+    },
+    "tablet-passive": {
+      "image": "tablets/tablet-roles.png",
+      "frame": [987, 99, 687, 695],
+      "size": [695, 695],
+      "alignment": "center"
+    },
+    "tablet-passive-magic": {
+      "image": "tablets/passive-rarities.png",
+      "frame": [106, 118, 669, 675],
+      "size": [675, 675],
+      "alignment": "center"
+    },
+    "tablet-passive-rare": {
+      "image": "tablets/passive-rarities.png",
+      "frame": [993, 118, 669, 675],
+      "size": [675, 675],
+      "alignment": "center"
+    },
+    "tablet-support": {
+      "image": "tablets/tablet-roles.png",
+      "frame": [134, 142, 685, 632],
+      "size": [685, 685],
+      "alignment": "center"
+    },
+    "tablet-support-rare": {
+      "image": "tablets/tablet-roles-gold.png",
+      "frame": [134, 142, 685, 632],
+      "size": [685, 685],
+      "alignment": "center"
+    }
+  }
+}

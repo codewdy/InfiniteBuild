@@ -1,0 +1,73 @@
+{
+  "effects": {
+    "fireball": [
+      "fantasy-fireball-0",
+      "fantasy-fireball-1",
+      "fantasy-fireball-2",
+      "fantasy-fireball-3"
+    ],
+    "nova": ["nova-shockwave"],
+    "attack": [
+      "fantasy-attack-0",
+      "fantasy-attack-1",
+      "fantasy-attack-2",
+      "fantasy-attack-3"
+    ]
+  },
+  "frames": {
+    "fantasy-attack-0": {
+      "image": "effects/fantasy-effects.png",
+      "frame": [91, 807, 195, 160],
+      "size": [400, 360],
+      "alignment": "center"
+    },
+    "fantasy-attack-1": {
+      "image": "effects/fantasy-effects.png",
+      "frame": [404, 741, 283, 253],
+      "size": [400, 360],
+      "alignment": "center"
+    },
+    "fantasy-attack-2": {
+      "image": "effects/fantasy-effects.png",
+      "frame": [744, 736, 321, 287],
+      "size": [400, 360],
+      "alignment": "center"
+    },
+    "fantasy-attack-3": {
+      "image": "effects/fantasy-effects.png",
+      "frame": [1157, 773, 231, 210],
+      "size": [400, 360],
+      "alignment": "center"
+    },
+    "fantasy-fireball-0": {
+      "image": "effects/fantasy-effects.png",
+      "frame": [55, 161, 258, 154],
+      "size": [400, 300],
+      "alignment": "center"
+    },
+    "fantasy-fireball-1": {
+      "image": "effects/fantasy-effects.png",
+      "frame": [393, 128, 298, 198],
+      "size": [400, 300],
+      "alignment": "center"
+    },
+    "fantasy-fireball-2": {
+      "image": "effects/fantasy-effects.png",
+      "frame": [736, 103, 326, 242],
+      "size": [400, 300],
+      "alignment": "center"
+    },
+    "fantasy-fireball-3": {
+      "image": "effects/fantasy-effects.png",
+      "frame": [1122, 129, 274, 194],
+      "size": [400, 300],
+      "alignment": "center"
+    },
+    "nova-shockwave": {
+      "image": "effects/nova-shockwave.png",
+      "frame": [81, 95, 1103, 1069],
+      "size": [1103, 1103],
+      "alignment": "center"
+    }
+  }
+}

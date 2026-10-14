@@ -20,8 +20,8 @@ import { describeTablet, TabletTooltipView } from "./tablet-tooltip.js";
 import { createTabletArt, loadTabletArt } from "./tablet-art.js";
 import type { TabletArt } from "./tablet-art.js";
 import { Container, Graphics, Point, Rectangle, Sprite, Text } from "pixi.js";
-import { loadDrawerAssets } from "./drawer-assets.js";
-import type { DrawerAssets } from "./drawer-assets.js";
+import { loadDrawerAssets } from "@infinite-build/assets";
+import type { DrawerAssets } from "@infinite-build/assets";
 import { TabletMap, TabletSpec } from "@infinite-build/core";
 import type { PlayerState } from "@infinite-build/core";
 import { Battlefield } from "@infinite-build/renderer";
@@ -162,23 +162,20 @@ export class GameUI {
     canvas: HTMLCanvasElement,
     options: GameUIOptions,
   ): Promise<GameUI> {
-    const art = await loadTabletArt();
+    const [art, backgrounds] = await Promise.all([
+      loadTabletArt(),
+      loadDrawerAssets(),
+    ]);
+    const battlefield = await Battlefield.create(canvas, {
+      vision: options.gameData.config.map.visionRange,
+      unitDefinitions: options.gameData.unitDefinitions,
+      skillDefinitions: options.gameData.skillDefinitions,
+      onTogglePlaying: options.onTogglePlaying,
+    });
     try {
-      const backgrounds = await loadDrawerAssets();
-      const battlefield = await Battlefield.create(canvas, {
-        vision: options.gameData.config.map.visionRange,
-        unitDefinitions: options.gameData.unitDefinitions,
-        skillDefinitions: options.gameData.skillDefinitions,
-        onTogglePlaying: options.onTogglePlaying,
-      });
-      try {
-        return new GameUI(canvas, battlefield, options, art, backgrounds);
-      } catch (error) {
-        battlefield.destroy();
-        throw error;
-      }
+      return new GameUI(canvas, battlefield, options, art, backgrounds);
     } catch (error) {
-      art.destroy();
+      battlefield.destroy();
       throw error;
     }
   }
@@ -977,6 +974,5 @@ export class GameUI {
     this.observer.disconnect();
     this.playerDrawer.destroy();
     this.battlefield.destroy();
-    this.art.destroy();
   }
 }

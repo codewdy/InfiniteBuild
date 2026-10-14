@@ -1,0 +1,20 @@
+{
+  "backgrounds": {
+    "forest": "background.forest",
+    "grassland": "background.grassland"
+  },
+  "frames": {
+    "background.forest": {
+      "image": "backgrounds/fantasy-forest.png",
+      "frame": [0, 0, 1536, 1024],
+      "size": [1536, 1024],
+      "alignment": "center"
+    },
+    "background.grassland": {
+      "image": "backgrounds/fantasy-grassland.png",
+      "frame": [0, 0, 1536, 1024],
+      "size": [1536, 1024],
+      "alignment": "center"
+    }
+  }
+}

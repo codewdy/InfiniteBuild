@@ -1,0 +1,27 @@
+{
+  "progressFrame": "battle-progress-frame",
+  "playbackIcons": {
+    "pause": "battle-pause",
+    "resume": "battle-resume"
+  },
+  "frames": {
+    "battle-pause": {
+      "image": "battle-ui/battle-playback-icons.png",
+      "frame": [248, 142, 392, 592],
+      "size": [592, 592],
+      "alignment": "center"
+    },
+    "battle-progress-frame": {
+      "image": "battle-ui/battle-progress-frame.png",
+      "frame": [28, 450, 1480, 124],
+      "size": [1480, 124],
+      "alignment": "center"
+    },
+    "battle-resume": {
+      "image": "battle-ui/battle-playback-icons.png",
+      "frame": [1070, 142, 494, 592],
+      "size": [592, 592],
+      "alignment": "center"
+    }
+  }
+}

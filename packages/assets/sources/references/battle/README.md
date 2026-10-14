@@ -1,3 +1,8 @@
+> Historical production notes preserved during asset migration. Paths and active
+> mappings below describe the former renderer-owned layout. See
+> [the assets package documentation](../../../README.md) and `runtime/` manifests
+> for the current asset layout and active mappings.
+
 # Pixel battle assets
 
 Prompt files are concise descriptions of the intended final assets. They retain layout, style and animation requirements and are maintained independently of the original generation call history.

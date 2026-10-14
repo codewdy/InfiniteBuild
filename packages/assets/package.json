@@ -1,0 +1,25 @@
+{
+  "name": "@infinite-build/assets",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./runtime/*": "./runtime/*"
+  },
+  "files": [
+    "dist",
+    "runtime"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "node scripts/check.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "pixi.js": "^8.22.0"
+  }
+}

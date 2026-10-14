@@ -1,0 +1,76 @@
+{
+  "ui": {
+    "board": "ui.board",
+    "inventory": "ui.inventory",
+    "inventoryWide": "ui.inventoryWide",
+    "background": "ui.background",
+    "tabs.tablets": "ui.tabs.tablets",
+    "tabs.loot": "ui.tabs.loot",
+    "randomSkill.rare": "ui.randomSkill.rare",
+    "randomSkill.magic": "ui.randomSkill.magic",
+    "randomSkill.normal": "ui.randomSkill.normal",
+    "playerHandle": "ui.playerHandle"
+  },
+  "frames": {
+    "ui.board": {
+      "image": "ui/tablet-board-background.png",
+      "frame": [0, 0, 1254, 1254],
+      "size": [1254, 1254],
+      "alignment": "center"
+    },
+    "ui.inventory": {
+      "image": "ui/inventory-background.png",
+      "frame": [0, 0, 1122, 1402],
+      "size": [1122, 1402],
+      "alignment": "center"
+    },
+    "ui.inventoryWide": {
+      "image": "ui/inventory-background-wide.png",
+      "frame": [0, 0, 1402, 1122],
+      "size": [1402, 1122],
+      "alignment": "center"
+    },
+    "ui.background": {
+      "image": "ui/loadout-background.png",
+      "frame": [0, 0, 1536, 1024],
+      "size": [1536, 1024],
+      "alignment": "center"
+    },
+    "ui.tabs.tablets": {
+      "image": "ui/tab-tablets.png",
+      "frame": [0, 0, 1254, 1254],
+      "size": [1254, 1254],
+      "alignment": "center"
+    },
+    "ui.tabs.loot": {
+      "image": "ui/tab-loot.png",
+      "frame": [0, 0, 1254, 1254],
+      "size": [1254, 1254],
+      "alignment": "center"
+    },
+    "ui.randomSkill.rare": {
+      "image": "ui/random-skill-tablet.png",
+      "frame": [0, 0, 1254, 1254],
+      "size": [1254, 1254],
+      "alignment": "center"
+    },
+    "ui.randomSkill.magic": {
+      "image": "ui/random-skill-tablet-magic.png",
+      "frame": [0, 0, 1254, 1254],
+      "size": [1254, 1254],
+      "alignment": "center"
+    },
+    "ui.randomSkill.normal": {
+      "image": "ui/random-skill-tablet-normal.png",
+      "frame": [0, 0, 1254, 1254],
+      "size": [1254, 1254],
+      "alignment": "center"
+    },
+    "ui.playerHandle": {
+      "image": "ui/player-drawer-tab.png",
+      "frame": [100, 197, 1780, 400],
+      "size": [1780, 400],
+      "alignment": "center"
+    }
+  }
+}

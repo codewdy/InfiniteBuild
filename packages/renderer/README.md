@@ -1,6 +1,6 @@
 # @infinite-build/renderer
 
-PixiJS battle presentation for InfiniteBuild. The package consumes core `BattleLog` snapshots and owns the battlefield canvas, character poses, effects, damage text, camera interpolation and pixel atlas. It does not execute battles or manage player state.
+PixiJS battle presentation for InfiniteBuild. The package consumes core `BattleLog` snapshots and owns the battlefield canvas, character poses, effects, damage text, camera interpolation. It does not execute battles or manage player state.
 
 ```ts
 import { Battlefield } from "@infinite-build/renderer";
@@ -17,6 +17,11 @@ battlefield.reset();
 battlefield.destroy();
 ```
 
-Build with `pnpm --filter @infinite-build/renderer build`, or use the workspace build. The package exports TypeScript declarations and ships `assets/` alongside `dist/`. Serve both directories while preserving their relative paths: the atlas loader resolves `../assets/pixel-battle/` relative to its module URL. The mock-app serves the package under `/renderer/` and watches its sources and assets for changes.
+Build with `pnpm --filter @infinite-build/renderer build`, or use the workspace build.
+The package exports TypeScript declarations and compiled code in `dist/`.
 
-The generated atlas, frame definitions and generation prompt live in `assets/pixel-battle/`. PixiJS is a renderer dependency; browser consumers must bundle it or provide an import-map entry. The mock-app uses its locally installed standalone browser module.
+Shared artwork, manifests, cropped textures and loading are managed by
+[`@infinite-build/assets`](../assets/README.md). The renderer owns display objects
+and retains shared textures across scene resets. Serve the assets package's
+`dist/` and `runtime/` directories together. Browser consumers must bundle dependencies
+or provide import-map entries for `@infinite-build/assets` and `pixi.js`.

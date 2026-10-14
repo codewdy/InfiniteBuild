@@ -1,7 +1,7 @@
 import type { BattlefieldResult } from "./types.js";
 import { Container, Sprite, Text } from "pixi.js";
 import type { Texture } from "pixi.js";
-import type { SettlementAssets } from "./battlefield-assets.js";
+import type { SettlementAssets } from "@infinite-build/assets";
 
 function rewardText(value: string, fill: number): Text {
   return new Text({
