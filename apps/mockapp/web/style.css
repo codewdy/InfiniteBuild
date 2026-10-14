@@ -655,3 +655,7 @@ pre {
 
 .pending-loot-item[data-rarity="normal"] { border-color: #aeb5bd; background: #272b30; }
 .pending-loot-item[data-rarity="normal"] strong { color: #e5e9ee; }
+
+[hidden] {
+  display: none !important;
+}

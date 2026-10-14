@@ -880,6 +880,7 @@ let deaths = 0;
 let totalDamage = 0;
 let playerPosition = 0;
 let timer: number | undefined;
+let hasStarted = false;
 function render(): void {
   gameUI.update(game.getState(), inventoryCapacity);
   renderTablets();
@@ -969,8 +970,9 @@ function render(): void {
     eventRows.length === 0 ? "当前帧无事件" : `当前帧 ${eventRows.length} 条`;
   logs.textContent = history.map((entry) => JSON.stringify(entry)).join("\n");
   logs.scrollTop = logs.scrollHeight;
-  step.disabled = log.status !== "Running" || timer !== undefined;
-  play.disabled = log.status !== "Running";
+  step.disabled = !hasStarted || log.status !== "Running" || timer !== undefined;
+  play.disabled = !hasStarted || log.status !== "Running";
+  element<HTMLButtonElement>("reset").disabled = !hasStarted;
   play.textContent = finished
     ? "已结束"
     : timer === undefined
@@ -1024,6 +1026,7 @@ function createBattleResult(settlement: BattleSettlement): BattlefieldResult {
 }
 
 function advance(): void {
+  if (!hasStarted) return;
   if (log.status !== "Running") return;
   const previous = log;
   log = battle.executeFrame();
@@ -1051,6 +1054,7 @@ function advance(): void {
 }
 
 function start(): void {
+  if (!hasStarted) return;
   if (log.status !== "Running" || timer !== undefined) return;
   timer = window.setInterval(advance, 1000 / Number(speed.value));
   play.textContent = "暂停";
@@ -1079,6 +1083,7 @@ function isLevelUnlocked(level: MapLevel): boolean {
 }
 
 function selectChallenge(level: MapLevel): void {
+  if (!hasStarted) return;
   if (!isLevelUnlocked(level)) return;
   if (!gameData.mapLevelDefinitions.some(definition =>
     definition.level[0] === level[0] && definition.level[1] === level[1])) return;
@@ -1143,3 +1148,9 @@ for (const [index, name] of tabs.entries()) {
   });
 }
 render();
+
+gameUI.showStartScreen(() => {
+  hasStarted = true;
+  applyResolution();
+  start();
+});

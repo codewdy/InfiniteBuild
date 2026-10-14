@@ -1,3 +1,4 @@
+import { StartScreenView } from "./start-screen.js";
 import { ChallengesView } from "./challenges.js";
 import { PendingLootView } from "./pending-loot.js";
 import type { PendingLootItem } from "./pending-loot.js";
@@ -46,6 +47,7 @@ export type GameUIOptions = {
 /** Game screen composition with host-controlled inventory changes. */
 export class GameUI {
   private readonly root = new Container();
+  private readonly startScreen: StartScreenView;
   private readonly pendingLoot: PendingLootView;
   private readonly challenges: ChallengesView;
   private readonly tabs = new Container();
@@ -102,6 +104,8 @@ export class GameUI {
     this.root.addChild(this.background, this.panel, this.pendingLoot, this.challenges, this.tabs, this.tooltip, this.clip);
     this.root.mask = this.clip;
     battlefield.mountOverlay(this.root);
+    this.startScreen = new StartScreenView(backgrounds.background);
+    battlefield.mountOverlay(this.startScreen);
     this.observer = new ResizeObserver(() => this.layout());
     this.observer.observe(canvas);
     this.layout();
@@ -123,6 +127,18 @@ export class GameUI {
       art.destroy();
       throw error;
     }
+  }
+
+  showStartScreen(onStart: () => void): void {
+    this.cancelDrag();
+    this.hideTooltip();
+    this.root.visible = false;
+    this.startScreen.show(() => {
+      this.root.visible = true;
+      onStart();
+    });
+    this.canvas.setAttribute("aria-label", "无限构筑，开始游戏。聚焦画布后按 Enter 开始。");
+    this.canvas.focus({ preventScroll: true });
   }
 
   update(state: PlayerState, inventoryCapacity: number): void {
@@ -327,6 +343,10 @@ export class GameUI {
   }
 
   private readonly onContextMenu = (event: MouseEvent): void => {
+    if (this.startScreen.visible) {
+      event.preventDefault();
+      return;
+    }
     if (this.activeTab !== "tablets" || this.drag || !this.options.onRotateTablet) return;
     if (this.pointerInTooltip(event, false)) {
       event.preventDefault();
@@ -355,6 +375,7 @@ export class GameUI {
   }
 
   private readonly onPointerDown = (event: PointerEvent): void => {
+    if (this.startScreen.visible) return;
     this.suppressTooltipTap = false;
     this.pointerButton = event.button;
     if (this.activeTab !== "tablets" || this.pointerInTooltip(event)) return;
@@ -412,6 +433,13 @@ export class GameUI {
   };
 
   private readonly onKeyDown = (event: KeyboardEvent): void => {
+    if (this.startScreen.visible) {
+      if (event.key === "Enter" && document.activeElement === this.canvas) {
+        event.preventDefault();
+        this.startScreen.start();
+      }
+      return;
+    }
     if (event.key !== "Escape") return;
     if (this.activeTab === "loot") this.pendingLoot.closeMenu();
     else if (this.drag) this.cancelDrag();
@@ -498,6 +526,7 @@ export class GameUI {
     this.hideTooltip();
     const width = Math.max(1, this.canvas.clientWidth);
     const canvasHeight = Math.max(1, this.canvas.clientHeight);
+    this.startScreen.layout(width, canvasHeight);
     const landscape = width >= canvasHeight;
     const stacked = !landscape;
     const inventoryColumns = stacked ? STACKED_INVENTORY_COLUMNS : INVENTORY_COLUMNS;
