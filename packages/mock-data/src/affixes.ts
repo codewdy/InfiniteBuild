@@ -29,8 +29,7 @@ export const passiveAffixes: GameData["affixDefinition"]["tablet"]["passive"] =
       attackPercent: {
         tag: ["tablet-passive"],
         name: "攻击力提升",
-        description: (param) =>
-          `攻击力提升(add) ${formatValue(param * 100)}%`,
+        description: (param) => `攻击力提升(add) ${formatValue(param * 100)}%`,
         tier: [
           { min: 0.05, max: 0.1 },
           { min: 0.1, max: 0.15 },

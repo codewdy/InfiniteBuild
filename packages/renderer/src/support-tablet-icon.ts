@@ -1,5 +1,8 @@
 import type { TabletSpec } from "@infinite-build/core";
-import type { IconName, SupportDirectionIconName } from "./battlefield-assets.js";
+import type {
+  IconName,
+  SupportDirectionIconName,
+} from "./battlefield-assets.js";
 
 /** Both renderers use the same artwork and base angle. */
 export function resolveSupportTabletIcon(
@@ -7,10 +10,20 @@ export function resolveSupportTabletIcon(
   kind: "tablet-support-skill" | "tablet-support-passive",
   rarity: TabletSpec.Tablet["rarity"],
 ): { icon: IconName; angle: number; offset: [number, number] } {
-  const base: IconName = rarity === "rare" ? "support-rare"
-    : kind === "tablet-support-skill" ? "support-skill" : "support-passive";
-  const key = targets?.map(([x, y]) => `${x},${y}`).sort().join(";");
-  const directions: Record<string, "distant" | "line" | "opposite" | "diagonal" | "diagonalPair"> = {
+  const base: IconName =
+    rarity === "rare"
+      ? "support-rare"
+      : kind === "tablet-support-skill"
+        ? "support-skill"
+        : "support-passive";
+  const key = targets
+    ?.map(([x, y]) => `${x},${y}`)
+    .sort()
+    .join(";");
+  const directions: Record<
+    string,
+    "distant" | "line" | "opposite" | "diagonal" | "diagonalPair"
+  > = {
     "2,0": "distant",
     "1,-1": "diagonal",
     "1,0;2,0": "line",
@@ -19,7 +32,7 @@ export function resolveSupportTabletIcon(
   };
   const direction = key === undefined ? undefined : directions[key];
   const icon: IconName = direction
-    ? `support-${direction}-${rarity === "rare" ? "rare" : "magic"}` satisfies SupportDirectionIconName
+    ? (`support-${direction}-${rarity === "rare" ? "rare" : "magic"}` satisfies SupportDirectionIconName)
     : base;
   return { icon, angle: 0, offset: [0, 0] };
 }

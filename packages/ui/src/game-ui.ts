@@ -1,7 +1,17 @@
 import { PlayerDrawerView } from "./player-drawer.js";
 import { LevelTutorialView } from "./level-tutorial.js";
-import type { SlotLocation, GameUIOptions, GameUIState, BattlefieldResetOptions, BattlefieldResult } from "./types.js";
-import { EQUIP_SKILL_TUTORIAL, challengesUnlocked, levelTutorialPending } from "./tutorial.js";
+import type {
+  SlotLocation,
+  GameUIOptions,
+  GameUIState,
+  BattlefieldResetOptions,
+  BattlefieldResult,
+} from "./types.js";
+import {
+  EQUIP_SKILL_TUTORIAL,
+  challengesUnlocked,
+  levelTutorialPending,
+} from "./tutorial.js";
 import { EquipTutorialView } from "./equip-tutorial.js";
 import { StartScreenView } from "./start-screen.js";
 import { ChallengesView } from "./challenges.js";
@@ -73,7 +83,9 @@ export class GameUI {
     moved: boolean;
   };
   private hovered?: Container;
-  private readonly highlight = new Graphics().roundRect(0, 0, SLOT_SIZE, SLOT_SIZE, 8).stroke({ color: 0x82e6ce, width: 2 });
+  private readonly highlight = new Graphics()
+    .roundRect(0, 0, SLOT_SIZE, SLOT_SIZE, 8)
+    .stroke({ color: 0x82e6ce, width: 2 });
   private uiHeight = 1;
   private capacity = 0;
   private contentKey = "";
@@ -85,21 +97,50 @@ export class GameUI {
     private readonly art: TabletArt,
     private readonly backgrounds: DrawerAssets,
   ) {
-    this.playerDrawer = new PlayerDrawerView(canvas, options.gameData, backgrounds.playerHandle, () => {
-      this.cancelDrag();
-      this.hideTooltip();
-    });
-    this.challenges = new ChallengesView(options.gameData, options.onSelectLevel, options.onAutoAdvanceLevelChange);
-    this.pendingLoot = new PendingLootView(art.icons, backgrounds.randomSkill, options.onClaimLoot);
+    this.playerDrawer = new PlayerDrawerView(
+      canvas,
+      options.gameData,
+      backgrounds.playerHandle,
+      () => {
+        this.cancelDrag();
+        this.hideTooltip();
+      },
+    );
+    this.challenges = new ChallengesView(
+      options.gameData,
+      options.onSelectLevel,
+      options.onAutoAdvanceLevelChange,
+    );
+    this.pendingLoot = new PendingLootView(
+      art.icons,
+      backgrounds.randomSkill,
+      options.onClaimLoot,
+    );
     this.panel.addChild(this.boardPanel, this.inventoryPanel);
     this.panel.eventMode = "static";
-    this.panel.on("pointertap", event => {
-      if (event.button === 0 && this.pointerButton === 0 && event.target === this.panel && !this.suppressTooltipTap) this.hideTooltip();
+    this.panel.on("pointertap", (event) => {
+      if (
+        event.button === 0 &&
+        this.pointerButton === 0 &&
+        event.target === this.panel &&
+        !this.suppressTooltipTap
+      )
+        this.hideTooltip();
     });
     this.background = new Sprite(backgrounds.background);
     this.background.anchor.set(0.5);
     this.background.eventMode = "none";
-    this.root.addChild(this.background, this.panel, this.pendingLoot, this.challenges, this.tabs, this.tutorial, this.levelTutorial, this.tooltip, this.clip);
+    this.root.addChild(
+      this.background,
+      this.panel,
+      this.pendingLoot,
+      this.challenges,
+      this.tabs,
+      this.tutorial,
+      this.levelTutorial,
+      this.tooltip,
+      this.clip,
+    );
     this.root.mask = this.clip;
     battlefield.mountOverlay(this.root);
     battlefield.mountOverlay(this.playerDrawer);
@@ -117,7 +158,10 @@ export class GameUI {
     window.addEventListener("keydown", this.onKeyDown);
   }
 
-  static async create(canvas: HTMLCanvasElement, options: GameUIOptions): Promise<GameUI> {
+  static async create(
+    canvas: HTMLCanvasElement,
+    options: GameUIOptions,
+  ): Promise<GameUI> {
     const art = await loadTabletArt();
     try {
       const backgrounds = await loadDrawerAssets();
@@ -150,7 +194,10 @@ export class GameUI {
       this.playerDrawer.visible = true;
       onStart();
     });
-    this.canvas.setAttribute("aria-label", "无限构筑，开始游戏。聚焦画布后按 Enter 开始。");
+    this.canvas.setAttribute(
+      "aria-label",
+      "无限构筑，开始游戏。聚焦画布后按 Enter 开始。",
+    );
     this.canvas.focus({ preventScroll: true });
   }
 
@@ -166,14 +213,28 @@ export class GameUI {
     const map = this.options.gameData.mapDefinitions[battle.spec.map];
     if (!map) throw new Error(`Unknown map: ${battle.spec.map}`);
     this.battlefield.update({
-      log: battle.log, level: battle.spec.level, background: map.background,
-      mapName: map.name, playing: battle.playing, frameDuration: battle.frameDuration,
+      log: battle.log,
+      level: battle.spec.level,
+      background: map.background,
+      mapName: map.name,
+      playing: battle.playing,
+      frameDuration: battle.frameDuration,
     });
-    const inventoryCapacity = this.options.gameData.playerDefinition.inventoryCapacity;
+    const inventoryCapacity =
+      this.options.gameData.playerDefinition.inventoryCapacity;
     this.playerDrawer.update(state, battle.log);
     this.challenges.update(state);
     this.state = state;
-    const key = JSON.stringify([state.tablets, state.inventory, state.pendingLoot, state.tutorial, state.currentMapLevel, state.highestUnlockedMapLevel, state.config, inventoryCapacity]);
+    const key = JSON.stringify([
+      state.tablets,
+      state.inventory,
+      state.pendingLoot,
+      state.tutorial,
+      state.currentMapLevel,
+      state.highestUnlockedMapLevel,
+      state.config,
+      inventoryCapacity,
+    ]);
     if (key === this.contentKey) return;
     this.contentKey = key;
     this.state = state;
@@ -181,16 +242,26 @@ export class GameUI {
     this.pendingLoot.update(state, inventoryCapacity);
     const selection = this.tooltipSelection;
     const hover = this.slots.find(({ view }) => view === this.tooltipHover);
-    const hoveredUuid = hover && state[hover.location.area][hover.location.index]?.uuid;
+    const hoveredUuid =
+      hover && state[hover.location.area][hover.location.index]?.uuid;
     this.renderPanel();
     if (selection) {
-      const slot = this.slots.find(({ location }) => this.state?.[location.area][location.index]?.uuid === selection.uuid);
+      const slot = this.slots.find(
+        ({ location }) =>
+          this.state?.[location.area][location.index]?.uuid === selection.uuid,
+      );
       if (slot) {
-        this.tooltipSelection = { uuid: selection.uuid, location: slot.location };
+        this.tooltipSelection = {
+          uuid: selection.uuid,
+          location: slot.location,
+        };
         this.showTooltip(slot.view, slot.location);
       }
     } else if (hoveredUuid) {
-      const slot = this.slots.find(({ location }) => state[location.area][location.index]?.uuid === hoveredUuid);
+      const slot = this.slots.find(
+        ({ location }) =>
+          state[location.area][location.index]?.uuid === hoveredUuid,
+      );
       if (slot) {
         this.tooltipHover = slot.view;
         this.showTooltip(slot.view, slot.location);
@@ -198,15 +269,32 @@ export class GameUI {
     }
   }
 
-  private slot(tablet: TabletSpec.Slot | undefined, x: number, y: number): Container {
+  private slot(
+    tablet: TabletSpec.Slot | undefined,
+    x: number,
+    y: number,
+  ): Container {
     const slot = new Container();
     slot.position.set(x, y);
     slot.hitArea = new Rectangle(0, 0, SLOT_SIZE, SLOT_SIZE);
-    const color = !tablet ? 0x101923 : tablet.kind === "tablet-skill" ? 0x362941 : 0x193d36;
-    slot.addChild(new Graphics().roundRect(0, 0, SLOT_SIZE, SLOT_SIZE, 8)
-      .fill({ color, alpha: tablet ? 0.7 : 0.4 }).stroke({ color: tablet ? 0x60717f : 0x3b4b54, width: 1, alpha: 0.7 }));
+    const color = !tablet
+      ? 0x101923
+      : tablet.kind === "tablet-skill"
+        ? 0x362941
+        : 0x193d36;
+    slot.addChild(
+      new Graphics()
+        .roundRect(0, 0, SLOT_SIZE, SLOT_SIZE, 8)
+        .fill({ color, alpha: tablet ? 0.7 : 0.4 })
+        .stroke({ color: tablet ? 0x60717f : 0x3b4b54, width: 1, alpha: 0.7 }),
+    );
     if (tablet) {
-      const artwork = createTabletArt(tablet, this.art, 72, this.options.gameData);
+      const artwork = createTabletArt(
+        tablet,
+        this.art,
+        72,
+        this.options.gameData,
+      );
       artwork.position.set(SLOT_SIZE / 2);
       slot.addChild(artwork);
     }
@@ -220,7 +308,8 @@ export class GameUI {
     this.slots.length = 0;
     this.inventorySlots.length = 0;
     for (const group of [this.boardPanel, this.inventoryPanel]) {
-      for (const child of group.removeChildren()) child.destroy({ children: true });
+      for (const child of group.removeChildren())
+        child.destroy({ children: true });
     }
     const board = new Sprite(this.backgrounds.board);
     board.width = board.height = BOARD_SIZE;
@@ -228,21 +317,33 @@ export class GameUI {
     this.inventoryBackground = inventory;
     this.boardPanel.addChild(board);
     this.inventoryPanel.addChild(inventory);
-    TabletMap.pos2Id.forEach((row, y) => row.forEach((index, x) => {
-      const view = this.slot(this.state!.tablets[index], GRID_PADDING + x * SLOT_STEP, GRID_PADDING + y * SLOT_STEP);
-      view.cursor = this.options.onMoveTablet && this.state!.tablets[index] ? "grab" : "default";
-      view.eventMode = "static";
-      const location: SlotLocation = { area: "tablets", index };
-      this.slots.push({ location, view });
-      this.bindTooltip(view, location);
-      this.boardPanel.addChild(view);
-    }));
+    TabletMap.pos2Id.forEach((row, y) =>
+      row.forEach((index, x) => {
+        const view = this.slot(
+          this.state!.tablets[index],
+          GRID_PADDING + x * SLOT_STEP,
+          GRID_PADDING + y * SLOT_STEP,
+        );
+        view.cursor =
+          this.options.onMoveTablet && this.state!.tablets[index]
+            ? "grab"
+            : "default";
+        view.eventMode = "static";
+        const location: SlotLocation = { area: "tablets", index };
+        this.slots.push({ location, view });
+        this.bindTooltip(view, location);
+        this.boardPanel.addChild(view);
+      }),
+    );
     for (let index = 0; index < INVENTORY_COLUMNS * INVENTORY_ROWS; index++) {
       const view = this.slot(this.state.inventory[index], 0, 0);
       this.inventorySlots.push(view);
       const enabled = index < this.capacity;
       view.alpha = enabled ? 1 : 0.35;
-      view.cursor = enabled && this.options.onMoveTablet && this.state.inventory[index] ? "grab" : "default";
+      view.cursor =
+        enabled && this.options.onMoveTablet && this.state.inventory[index]
+          ? "grab"
+          : "default";
       view.eventMode = "static";
       if (enabled) {
         const location: SlotLocation = { area: "inventory", index };
@@ -252,18 +353,29 @@ export class GameUI {
       this.inventoryPanel.addChild(view);
     }
     const source = this.state.inventory[this.tutorialSource()];
-    this.tutorial.setStone(source ? createTabletArt(source, this.art, 72, this.options.gameData) : undefined);
+    this.tutorial.setStone(
+      source
+        ? createTabletArt(source, this.art, 72, this.options.gameData)
+        : undefined,
+    );
     this.layout();
   }
 
   private tutorialSource(): number {
-    if (!this.state || this.state.tutorial.completed.includes(EQUIP_SKILL_TUTORIAL)) return -1;
-    return this.state.inventory.findIndex((item) => item?.kind === "tablet-skill");
+    if (
+      !this.state ||
+      this.state.tutorial.completed.includes(EQUIP_SKILL_TUTORIAL)
+    )
+      return -1;
+    return this.state.inventory.findIndex(
+      (item) => item?.kind === "tablet-skill",
+    );
   }
 
   private bindTooltip(view: Container, location: SlotLocation): void {
-    view.on("pointerover", event => {
-      if (event.pointerType === "touch" || this.drag || this.tooltipSelection) return;
+    view.on("pointerover", (event) => {
+      if (event.pointerType === "touch" || this.drag || this.tooltipSelection)
+        return;
       this.tooltipHover = view;
       this.showTooltip(view, location);
     });
@@ -271,8 +383,14 @@ export class GameUI {
       if (this.tooltipSelection || this.tooltipHover !== view) return;
       this.hideTooltip();
     });
-    view.on("pointertap", event => {
-      if (event.button !== 0 || this.pointerButton !== 0 || this.suppressTooltipTap || this.drag?.moved) return;
+    view.on("pointertap", (event) => {
+      if (
+        event.button !== 0 ||
+        this.pointerButton !== 0 ||
+        this.suppressTooltipTap ||
+        this.drag?.moved
+      )
+        return;
       // Pixi may dispatch the tap before the window pointerup clears a pending drag.
       this.cancelDrag();
       const tablet = this.state?.[location.area][location.index];
@@ -302,21 +420,41 @@ export class GameUI {
     if (location.area === "tablets") {
       this.state.tablets.forEach((tablet, source) => {
         if (!tablet || !("rotate" in tablet)) return;
-        const targetKind = tablet.kind === "tablet-support-skill" ? "tablet-skill" : "tablet-passive";
-        for (const [x, y] of TabletSpec.getSupportDelta(this.options.gameData, tablet)) {
+        const targetKind =
+          tablet.kind === "tablet-support-skill"
+            ? "tablet-skill"
+            : "tablet-passive";
+        for (const [x, y] of TabletSpec.getSupportDelta(
+          this.options.gameData,
+          tablet,
+        )) {
           const target = TabletMap.move(source, x, y, tablet.rotate);
           // Match the runtime support rules: a direction alone is not a connection.
-          if (target === undefined || this.state!.tablets[target]?.kind !== targetKind) continue;
+          if (
+            target === undefined ||
+            this.state!.tablets[target]?.kind !== targetKind
+          )
+            continue;
           if (source === location.index) related.add(target);
           if (target === location.index) related.add(source);
         }
       });
     }
     for (const slot of this.slots) {
-      const focused = slot.location.area === location.area && slot.location.index === location.index;
-      if (!focused && !(slot.location.area === "tablets" && related.has(slot.location.index))) continue;
-      const frame = new Graphics().roundRect(0, 0, SLOT_SIZE, SLOT_SIZE, 8)
-        .stroke({ color: focused ? 0xffd477 : 0x82e6ce, width: focused ? 3 : 2 });
+      const focused =
+        slot.location.area === location.area &&
+        slot.location.index === location.index;
+      if (
+        !focused &&
+        !(slot.location.area === "tablets" && related.has(slot.location.index))
+      )
+        continue;
+      const frame = new Graphics()
+        .roundRect(0, 0, SLOT_SIZE, SLOT_SIZE, 8)
+        .stroke({
+          color: focused ? 0xffd477 : 0x82e6ce,
+          width: focused ? 3 : 2,
+        });
       frame.eventMode = "none";
       slot.view.addChild(frame);
       this.tabletHighlights.push(frame);
@@ -331,14 +469,28 @@ export class GameUI {
       return;
     }
     this.tooltip.eventMode = this.tooltipSelection ? "static" : "none";
-    const content = describeTablet(tablet, this.options.gameData, location.area);
+    const content = describeTablet(
+      tablet,
+      this.options.gameData,
+      location.area,
+    );
     const origin = this.root.toLocal(view.toGlobal(new Point()));
-    this.tooltip.show(content,
-      new Rectangle(origin.x, origin.y, SLOT_SIZE * this.panel.scale.x, SLOT_SIZE * this.panel.scale.y),
-      this.canvas.clientWidth, this.uiHeight, tablet.rarity === "rare",
-      "rotate" in tablet && this.options.onRotateTablet ? () => {
-        if (this.pointerButton === 0) this.rotateTablet(tablet.uuid);
-      } : undefined,
+    this.tooltip.show(
+      content,
+      new Rectangle(
+        origin.x,
+        origin.y,
+        SLOT_SIZE * this.panel.scale.x,
+        SLOT_SIZE * this.panel.scale.y,
+      ),
+      this.canvas.clientWidth,
+      this.uiHeight,
+      tablet.rarity === "rare",
+      "rotate" in tablet && this.options.onRotateTablet
+        ? () => {
+            if (this.pointerButton === 0) this.rotateTablet(tablet.uuid);
+          }
+        : undefined,
     );
   }
 
@@ -350,7 +502,12 @@ export class GameUI {
   }
 
   private rotateTablet(uuid: string, lockTooltip = true): void {
-    if (this.activeTab !== "tablets" || this.drag || !this.options.onRotateTablet) return;
+    if (
+      this.activeTab !== "tablets" ||
+      this.drag ||
+      !this.options.onRotateTablet
+    )
+      return;
     const slot = this.slots.find(({ location }) => {
       const tablet = this.state?.[location.area][location.index];
       return tablet?.uuid === uuid && "rotate" in tablet;
@@ -360,21 +517,35 @@ export class GameUI {
     if (lockTooltip) this.tooltipSelection = { uuid, location: slot.location };
     this.options.onRotateTablet(uuid);
     const displayUuid = selectedUuid ?? uuid;
-    const updated = this.slots.find(({ location }) => this.state?.[location.area][location.index]?.uuid === displayUuid);
+    const updated = this.slots.find(
+      ({ location }) =>
+        this.state?.[location.area][location.index]?.uuid === displayUuid,
+    );
     if (updated) {
-      this.tooltipSelection = selectedUuid ? { uuid: selectedUuid, location: updated.location } : undefined;
+      this.tooltipSelection = selectedUuid
+        ? { uuid: selectedUuid, location: updated.location }
+        : undefined;
       this.tooltipHover = selectedUuid ? undefined : updated.view;
       this.showTooltip(updated.view, updated.location);
     } else this.hideTooltip();
   }
 
   private pointerInTooltip(event: MouseEvent, interactiveOnly = true): boolean {
-    if (!this.tooltip.visible || (interactiveOnly && this.tooltip.eventMode === "none") || !(this.tooltip.hitArea instanceof Rectangle)) return false;
+    if (
+      !this.tooltip.visible ||
+      (interactiveOnly && this.tooltip.eventMode === "none") ||
+      !(this.tooltip.hitArea instanceof Rectangle)
+    )
+      return false;
     const bounds = this.canvas.getBoundingClientRect();
-    const point = this.tooltip.toLocal(new Point(
-      (event.clientX - bounds.left) * this.canvas.clientWidth / bounds.width,
-      (event.clientY - bounds.top) * this.canvas.clientHeight / bounds.height,
-    ));
+    const point = this.tooltip.toLocal(
+      new Point(
+        ((event.clientX - bounds.left) * this.canvas.clientWidth) /
+          bounds.width,
+        ((event.clientY - bounds.top) * this.canvas.clientHeight) /
+          bounds.height,
+      ),
+    );
     return this.tooltip.hitArea.contains(point.x, point.y);
   }
 
@@ -383,14 +554,23 @@ export class GameUI {
       event.preventDefault();
       return;
     }
-    if (this.playerDrawer.blocksPointer(event)) { event.preventDefault(); return; }
-    if (this.activeTab !== "tablets" || this.drag || !this.options.onRotateTablet) return;
+    if (this.playerDrawer.blocksPointer(event)) {
+      event.preventDefault();
+      return;
+    }
+    if (
+      this.activeTab !== "tablets" ||
+      this.drag ||
+      !this.options.onRotateTablet
+    )
+      return;
     if (this.pointerInTooltip(event, false)) {
       event.preventDefault();
       return;
     }
     const slot = this.slotAt(this.pointerPosition(event));
-    const tablet = slot && this.state?.[slot.location.area][slot.location.index];
+    const tablet =
+      slot && this.state?.[slot.location.area][slot.location.index];
     if (!tablet || !("rotate" in tablet)) return;
     event.preventDefault();
     this.rotateTablet(tablet.uuid, false);
@@ -398,21 +578,31 @@ export class GameUI {
 
   private pointerPosition(event: MouseEvent): Point {
     const bounds = this.canvas.getBoundingClientRect();
-    return this.panel.toLocal(new Point(
-      (event.clientX - bounds.left) * this.canvas.clientWidth / bounds.width,
-      (event.clientY - bounds.top) * this.canvas.clientHeight / bounds.height,
-    ));
+    return this.panel.toLocal(
+      new Point(
+        ((event.clientX - bounds.left) * this.canvas.clientWidth) /
+          bounds.width,
+        ((event.clientY - bounds.top) * this.canvas.clientHeight) /
+          bounds.height,
+      ),
+    );
   }
 
   private slotAt(point: Point) {
     return this.slots.find(({ view }) => {
       const origin = this.panel.toLocal(view.toGlobal(new Point()));
-      return point.x >= origin.x && point.x < origin.x + SLOT_SIZE && point.y >= origin.y && point.y < origin.y + SLOT_SIZE;
+      return (
+        point.x >= origin.x &&
+        point.x < origin.x + SLOT_SIZE &&
+        point.y >= origin.y &&
+        point.y < origin.y + SLOT_SIZE
+      );
     });
   }
 
   private readonly onPointerDown = (event: PointerEvent): void => {
-    if (this.startScreen.visible || this.playerDrawer.blocksPointer(event)) return;
+    if (this.startScreen.visible || this.playerDrawer.blocksPointer(event))
+      return;
     this.suppressTooltipTap = false;
     this.pointerButton = event.button;
     if (this.activeTab !== "tablets" || this.pointerInTooltip(event)) return;
@@ -424,11 +614,23 @@ export class GameUI {
     if (!tablet) return;
     event.preventDefault();
     this.tooltip.hide();
-    const ghost = this.slot(tablet, point.x - SLOT_SIZE / 2, point.y - SLOT_SIZE / 2);
+    const ghost = this.slot(
+      tablet,
+      point.x - SLOT_SIZE / 2,
+      point.y - SLOT_SIZE / 2,
+    );
     ghost.eventMode = "none";
     ghost.visible = false;
     this.panel.addChild(ghost);
-    this.drag = { pointerId: event.pointerId, uuid: tablet.uuid, source: source.view, ghost, startX: event.clientX, startY: event.clientY, moved: false };
+    this.drag = {
+      pointerId: event.pointerId,
+      uuid: tablet.uuid,
+      source: source.view,
+      ghost,
+      startX: event.clientX,
+      startY: event.clientY,
+      moved: false,
+    };
     this.tutorial.visible = false;
   };
 
@@ -436,12 +638,20 @@ export class GameUI {
     const drag = this.drag;
     if (!drag) {
       // A state refresh replaces the hovered slot, so pointerout may target a destroyed view.
-      if (this.tooltip.visible && !this.tooltipSelection
-        && this.slotAt(this.pointerPosition(event))?.view !== this.tooltipHover) this.hideTooltip();
+      if (
+        this.tooltip.visible &&
+        !this.tooltipSelection &&
+        this.slotAt(this.pointerPosition(event))?.view !== this.tooltipHover
+      )
+        this.hideTooltip();
       return;
     }
     if (event.pointerId !== drag.pointerId) return;
-    if (!drag.moved && Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < 4) return;
+    if (
+      !drag.moved &&
+      Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < 4
+    )
+      return;
     drag.moved = true;
     this.suppressTooltipTap = true;
     this.hideTooltip();
@@ -479,7 +689,10 @@ export class GameUI {
       return;
     }
     if (event.key !== "Escape") return;
-    if (this.playerDrawer.expanded) { this.playerDrawer.close(); return; }
+    if (this.playerDrawer.expanded) {
+      this.playerDrawer.close();
+      return;
+    }
     if (this.activeTab === "loot") this.pendingLoot.closeMenu();
     else if (this.drag) this.cancelDrag();
     else if (this.tooltip.visible) this.hideTooltip();
@@ -497,35 +710,65 @@ export class GameUI {
   };
 
   private renderTabs(width: number): void {
-    for (const child of this.tabs.removeChildren()) child.destroy({ children: true });
+    for (const child of this.tabs.removeChildren())
+      child.destroy({ children: true });
     this.panel.visible = this.activeTab === "tablets";
     this.pendingLoot.visible = this.activeTab === "loot";
     this.challenges.visible = this.activeTab === "challenges";
-    const total = this.state?.pendingLoot.reduce((sum, entry) => sum + entry.count, 0) ?? 0;
+    const total =
+      this.state?.pendingLoot.reduce((sum, entry) => sum + entry.count, 0) ?? 0;
     const landscape = width >= this.canvas.clientHeight;
-    const entries = ([["tablets", "石板"], ["loot", "领取战利品"], ["challenges", "关卡"]] as const)
-      .filter(([tab]) => tab !== "challenges" || (this.state && challengesUnlocked(this.state)));
-    const barWidth = TAB_ICON_SIZE * entries.length + TAB_GAP * (entries.length - 1);
-    this.tabs.scale.set(landscape ? Math.max(0.001, Math.min(1, (this.uiHeight - 32) / barWidth)) : 1);
+    const entries = (
+      [
+        ["tablets", "石板"],
+        ["loot", "领取战利品"],
+        ["challenges", "关卡"],
+      ] as const
+    ).filter(
+      ([tab]) =>
+        tab !== "challenges" || (this.state && challengesUnlocked(this.state)),
+    );
+    const barWidth =
+      TAB_ICON_SIZE * entries.length + TAB_GAP * (entries.length - 1);
+    this.tabs.scale.set(
+      landscape
+        ? Math.max(0.001, Math.min(1, (this.uiHeight - 32) / barWidth))
+        : 1,
+    );
     this.canvas.title = "";
-    this.tabs.position.set(landscape ? 8 : (width - barWidth) / 2,
-      landscape ? 16 : this.uiHeight - TAB_BAR_HEIGHT + 8);
+    this.tabs.position.set(
+      landscape ? 8 : (width - barWidth) / 2,
+      landscape ? 16 : this.uiHeight - TAB_BAR_HEIGHT + 8,
+    );
     entries.forEach(([tab, label], index) => {
       const selected = this.activeTab === tab;
       const button = new Container();
-      button.position.set(landscape ? 0 : index * (TAB_ICON_SIZE + TAB_GAP), landscape ? index * (TAB_ICON_SIZE + TAB_GAP) : 0);
+      button.position.set(
+        landscape ? 0 : index * (TAB_ICON_SIZE + TAB_GAP),
+        landscape ? index * (TAB_ICON_SIZE + TAB_GAP) : 0,
+      );
       button.eventMode = "static";
       button.interactiveChildren = false;
       button.cursor = "pointer";
       button.hitArea = new Rectangle(0, 0, TAB_ICON_SIZE, TAB_ICON_SIZE);
-      button.addChild(new Graphics().roundRect(0, 0, TAB_ICON_SIZE, TAB_ICON_SIZE, 8)
-        .fill(selected ? 0x36545b : 0x16282e)
-        .stroke({ color: selected ? 0xb5d9c1 : 0x516768, width: 1 }));
+      button.addChild(
+        new Graphics()
+          .roundRect(0, 0, TAB_ICON_SIZE, TAB_ICON_SIZE, 8)
+          .fill(selected ? 0x36545b : 0x16282e)
+          .stroke({ color: selected ? 0xb5d9c1 : 0x516768, width: 1 }),
+      );
       button.label = label;
       if (tab === "challenges") {
-        const caption = new Text({ text: "关卡", resolution: 2, style: {
-          fontFamily: "system-ui, sans-serif", fontSize: 20, fontWeight: "bold", fill: 0xb5d9c1,
-        } });
+        const caption = new Text({
+          text: "关卡",
+          resolution: 2,
+          style: {
+            fontFamily: "system-ui, sans-serif",
+            fontSize: 20,
+            fontWeight: "bold",
+            fill: 0xb5d9c1,
+          },
+        });
         caption.anchor.set(0.5);
         caption.position.set(TAB_ICON_SIZE / 2);
         button.addChild(caption);
@@ -539,17 +782,33 @@ export class GameUI {
       }
       if (tab === "loot" && total > 0) {
         const badgeWidth = total > 99 ? 30 : 24;
-        button.addChild(new Graphics().roundRect(TAB_ICON_SIZE - badgeWidth, 0, badgeWidth, 22, 10)
-          .fill(0xb04e38).stroke({ color: 0xf6cc87, width: 1 }));
-        const count = new Text({ text: total > 99 ? "99+" : String(total), resolution: 2,
-          style: { fontFamily: "system-ui, sans-serif", fontSize: 12, fontWeight: "bold", fill: 0xffefca } });
+        button.addChild(
+          new Graphics()
+            .roundRect(TAB_ICON_SIZE - badgeWidth, 0, badgeWidth, 22, 10)
+            .fill(0xb04e38)
+            .stroke({ color: 0xf6cc87, width: 1 }),
+        );
+        const count = new Text({
+          text: total > 99 ? "99+" : String(total),
+          resolution: 2,
+          style: {
+            fontFamily: "system-ui, sans-serif",
+            fontSize: 12,
+            fontWeight: "bold",
+            fill: 0xffefca,
+          },
+        });
         count.anchor.set(0.5);
         count.position.set(TAB_ICON_SIZE - badgeWidth / 2, 11);
         button.addChild(count);
       }
-      button.on("pointerover", () => { this.canvas.title = label; });
-      button.on("pointerout", () => { this.canvas.title = ""; });
-      button.on("pointertap", event => {
+      button.on("pointerover", () => {
+        this.canvas.title = label;
+      });
+      button.on("pointerout", () => {
+        this.canvas.title = "";
+      });
+      button.on("pointertap", (event) => {
         event.stopPropagation();
         if (event.button !== 0 || this.activeTab === tab) return;
         this.cancelDrag();
@@ -570,14 +829,26 @@ export class GameUI {
     this.startScreen.layout(width, canvasHeight);
     const landscape = width >= canvasHeight;
     const stacked = !landscape;
-    const inventoryColumns = stacked ? STACKED_INVENTORY_COLUMNS : INVENTORY_COLUMNS;
-    const inventoryRows = Math.ceil(INVENTORY_COLUMNS * INVENTORY_ROWS / inventoryColumns);
-    const inventoryWidth = GRID_PADDING * 2 + SLOT_STEP * inventoryColumns - SLOT_GAP;
-    const inventoryHeight = GRID_PADDING * 2 + SLOT_STEP * inventoryRows - SLOT_GAP;
-    const contentWidth = stacked ? Math.max(BOARD_SIZE, inventoryWidth) : INVENTORY_X + inventoryWidth;
-    const contentHeight = stacked ? BOARD_SIZE + SECTION_GAP + inventoryHeight : Math.max(BOARD_SIZE, inventoryHeight);
+    const inventoryColumns = stacked
+      ? STACKED_INVENTORY_COLUMNS
+      : INVENTORY_COLUMNS;
+    const inventoryRows = Math.ceil(
+      (INVENTORY_COLUMNS * INVENTORY_ROWS) / inventoryColumns,
+    );
+    const inventoryWidth =
+      GRID_PADDING * 2 + SLOT_STEP * inventoryColumns - SLOT_GAP;
+    const inventoryHeight =
+      GRID_PADDING * 2 + SLOT_STEP * inventoryRows - SLOT_GAP;
+    const contentWidth = stacked
+      ? Math.max(BOARD_SIZE, inventoryWidth)
+      : INVENTORY_X + inventoryWidth;
+    const contentHeight = stacked
+      ? BOARD_SIZE + SECTION_GAP + inventoryHeight
+      : Math.max(BOARD_SIZE, inventoryHeight);
     if (this.inventoryBackground) {
-      this.inventoryBackground.texture = stacked ? this.backgrounds.inventoryWide : this.backgrounds.inventory;
+      this.inventoryBackground.texture = stacked
+        ? this.backgrounds.inventoryWide
+        : this.backgrounds.inventory;
       this.inventoryBackground.width = inventoryWidth;
       this.inventoryBackground.height = inventoryHeight;
     }
@@ -588,8 +859,13 @@ export class GameUI {
       );
     });
     // Choose the height closest to one third while preserving the aspect limits.
-    const battlefieldHeight = Math.max(width / BATTLEFIELD_MAX_ASPECT,
-      Math.min(canvasHeight * BATTLEFIELD_HEIGHT_FRACTION, width / BATTLEFIELD_MIN_ASPECT));
+    const battlefieldHeight = Math.max(
+      width / BATTLEFIELD_MAX_ASPECT,
+      Math.min(
+        canvasHeight * BATTLEFIELD_HEIGHT_FRACTION,
+        width / BATTLEFIELD_MIN_ASPECT,
+      ),
+    );
     const height = Math.max(1, canvasHeight - battlefieldHeight);
     this.uiHeight = height;
     const panelX = landscape ? TAB_RAIL_WIDTH : 0;
@@ -600,19 +876,32 @@ export class GameUI {
     this.challenges.position.set(panelX, 0);
     this.challenges.layout(panelWidth, panelHeight);
     this.renderTabs(width);
-    const scale = Math.max(0.001, Math.min(1,
-      (panelWidth - PANEL_PADDING * 2) / contentWidth,
-      (panelHeight - PANEL_PADDING * 2) / contentHeight,
-    ));
+    const scale = Math.max(
+      0.001,
+      Math.min(
+        1,
+        (panelWidth - PANEL_PADDING * 2) / contentWidth,
+        (panelHeight - PANEL_PADDING * 2) / contentHeight,
+      ),
+    );
     this.battlefield.setViewport(width, battlefieldHeight);
     this.root.position.set(0, battlefieldHeight);
-    const backgroundScale = Math.max(width / this.background.texture.width, height / this.background.texture.height);
+    const backgroundScale = Math.max(
+      width / this.background.texture.width,
+      height / this.background.texture.height,
+    );
     this.background.scale.set(backgroundScale);
     this.background.position.set(width / 2, height / 2);
     this.panel.scale.set(scale);
-    this.panel.position.set(panelX + (panelWidth - contentWidth * scale) / 2, (panelHeight - contentHeight * scale) / 2);
+    this.panel.position.set(
+      panelX + (panelWidth - contentWidth * scale) / 2,
+      (panelHeight - contentHeight * scale) / 2,
+    );
     this.panel.hitArea = new Rectangle(0, 0, contentWidth, contentHeight);
-    this.inventoryPanel.position.set(stacked ? (contentWidth - inventoryWidth) / 2 : INVENTORY_X, stacked ? BOARD_SIZE + SECTION_GAP : 0);
+    this.inventoryPanel.position.set(
+      stacked ? (contentWidth - inventoryWidth) / 2 : INVENTORY_X,
+      stacked ? BOARD_SIZE + SECTION_GAP : 0,
+    );
     this.clip.clear().rect(0, 0, width, height).fill(0xffffff);
     this.playerDrawer.layout(width, battlefieldHeight);
     this.layoutTutorial();
@@ -622,27 +911,53 @@ export class GameUI {
     this.levelTutorial.visible = false;
     if (this.state && levelTutorialPending(this.state)) {
       const selecting = this.activeTab === "challenges";
-      const target = selecting ? this.challenges.tutorialTarget : this.tabs.children.find(child => child.label === "关卡");
+      const target = selecting
+        ? this.challenges.tutorialTarget
+        : this.tabs.children.find((child) => child.label === "关卡");
       if (target) {
         const bounds = target.getBounds();
         const origin = this.root.toLocal(new Point(bounds.x, bounds.y));
-        this.levelTutorial.show(new Rectangle(origin.x, origin.y, bounds.width, bounds.height),
-          this.canvas.clientWidth, this.uiHeight, selecting);
+        this.levelTutorial.show(
+          new Rectangle(origin.x, origin.y, bounds.width, bounds.height),
+          this.canvas.clientWidth,
+          this.uiHeight,
+          selecting,
+        );
       }
     }
     const index = this.tutorialSource();
-    const source = this.slots.find(({ location }) => location.area === "inventory" && location.index === index);
-    const targetIndex = this.state?.tablets.findIndex(tablet => tablet === null);
-    const target = this.slots.find(({ location }) => location.area === "tablets" && location.index === targetIndex);
+    const source = this.slots.find(
+      ({ location }) =>
+        location.area === "inventory" && location.index === index,
+    );
+    const targetIndex = this.state?.tablets.findIndex(
+      (tablet) => tablet === null,
+    );
+    const target = this.slots.find(
+      ({ location }) =>
+        location.area === "tablets" && location.index === targetIndex,
+    );
     this.tutorial.visible = false;
     if (this.activeTab !== "tablets" || this.drag || !source || !target) return;
     const tablet = this.state!.inventory[index]!;
-    const name = tablet.kind === "tablet-skill" ? this.options.gameData.skillDefinitions[tablet.skill]?.name ?? "技能" : "技能";
+    const name =
+      tablet.kind === "tablet-skill"
+        ? (this.options.gameData.skillDefinitions[tablet.skill]?.name ?? "技能")
+        : "技能";
     this.tutorial.show(
-      this.root.toLocal(source.view.toGlobal(new Point(SLOT_SIZE / 2, SLOT_SIZE / 2))),
-      this.root.toLocal(target.view.toGlobal(new Point(SLOT_SIZE / 2, SLOT_SIZE / 2))),
-      SLOT_SIZE * this.panel.scale.x, this.canvas.clientWidth,
-      this.uiHeight - (this.canvas.clientWidth >= this.canvas.clientHeight ? 0 : TAB_BAR_HEIGHT), name,
+      this.root.toLocal(
+        source.view.toGlobal(new Point(SLOT_SIZE / 2, SLOT_SIZE / 2)),
+      ),
+      this.root.toLocal(
+        target.view.toGlobal(new Point(SLOT_SIZE / 2, SLOT_SIZE / 2)),
+      ),
+      SLOT_SIZE * this.panel.scale.x,
+      this.canvas.clientWidth,
+      this.uiHeight -
+        (this.canvas.clientWidth >= this.canvas.clientHeight
+          ? 0
+          : TAB_BAR_HEIGHT),
+      name,
     );
   }
 

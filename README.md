@@ -1,6 +1,6 @@
 # InfiniteBuild
-无限Build可能的游戏
 
+无限Build可能的游戏
 
 ## 应用层与展示接口
 
@@ -16,7 +16,11 @@
 import { Game } from "@infinite-build/core";
 import { GameApp } from "@infinite-build/app";
 
-const app = await GameApp.create({ canvas, gameData, game: new Game(gameData) });
+const app = await GameApp.create({
+  canvas,
+  gameData,
+  game: new Game(gameData),
+});
 // 创建后自动显示开始页，所有操作通过游戏内 UI 完成。
 window.addEventListener("pagehide", () => app.destroy(), { once: true });
 ```

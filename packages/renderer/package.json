@@ -10,7 +10,10 @@
     },
     "./assets/*": "./assets/*"
   },
-  "files": ["dist", "assets"],
+  "files": [
+    "dist",
+    "assets"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json"
   },

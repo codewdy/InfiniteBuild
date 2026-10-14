@@ -18,9 +18,7 @@ export class SkillTablet implements Tablet {
   }
   applyPlayer(modifier: Tablet.Modifier, player: PlayerCombatProfile): void {
     for (const type of SkillTrigger.eventTypes) {
-      const multiplier = Attribute.resolve(
-        modifier.attribute[`skill.${type}`],
-      );
+      const multiplier = Attribute.resolve(modifier.attribute[`skill.${type}`]);
       if (multiplier < 1e-6) continue;
       const skill: UnitSkill = {
         ...structuredClone(this.skill),

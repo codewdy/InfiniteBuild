@@ -21,8 +21,7 @@ export class SupportTablet implements Tablet {
     private readonly affixes: Affix.Spec[],
   ) {}
   applyModifier(modifiers: Tablet.Modifier[]): void {
-    const definitions =
-      this.ctx.gameData.affixDefinition.tablet.support;
+    const definitions = this.ctx.gameData.affixDefinition.tablet.support;
     const affixes = this.affixes.map((affix) => {
       const definition = definitions.pool[affix.id];
       if (!definition) {

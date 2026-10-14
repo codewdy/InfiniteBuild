@@ -15,7 +15,10 @@ export class PlayerUnit extends Unit {
     this.position = 0;
   }
   onStateChanged(ctx: BattleContext): void {
-    this.combatProfile = derivePlayerCombatProfile(ctx.gameData, ctx.playerState);
+    this.combatProfile = derivePlayerCombatProfile(
+      ctx.gameData,
+      ctx.playerState,
+    );
     this.skills = this.combatProfile.skills;
   }
   override calcBaseStatus(ctx: BattleContext): Status {

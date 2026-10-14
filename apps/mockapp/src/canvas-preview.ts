@@ -39,7 +39,10 @@ export function setupCanvasPreview(canvas: HTMLCanvasElement): void {
     height = Math.round(
       Math.min(
         2560,
-        Math.max(minHeight, Number.isFinite(height) ? height : customSize.height),
+        Math.max(
+          minHeight,
+          Number.isFinite(height) ? height : customSize.height,
+        ),
       ),
     );
     customSize = { width, height };
@@ -145,7 +148,9 @@ export function setupCanvasPreview(canvas: HTMLCanvasElement): void {
   window.addEventListener("blur", endResize);
   resizeHandle.addEventListener("keydown", (event) => {
     const delta = event.shiftKey ? 50 : 10;
-    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key))
+    if (
+      !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)
+    )
       return;
     event.preventDefault();
     setCustomSize(

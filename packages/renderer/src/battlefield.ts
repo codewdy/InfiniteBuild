@@ -1,4 +1,8 @@
-import type { BattlefieldOptions, BattlefieldState, BattlefieldResetOptions } from "./types.js";
+import type {
+  BattlefieldOptions,
+  BattlefieldState,
+  BattlefieldResetOptions,
+} from "./types.js";
 import {
   Application,
   Container,
@@ -131,8 +135,10 @@ export class Battlefield {
     this.battleProgressText.anchor.set(0.5);
     this.battleProgressText.style.fontWeight = "bold";
     this.battleProgressText.style.stroke = { color: 0x0d1424, width: 2 };
-    this.battleProgressBar.eventMode = this.battleProgressFrame.eventMode =
-      this.battleProgressText.eventMode = "none";
+    this.battleProgressBar.eventMode =
+      this.battleProgressFrame.eventMode =
+      this.battleProgressText.eventMode =
+        "none";
     this.playbackButtonIcon.anchor.set(0.5);
     this.playbackButtonIcon.eventMode = "none";
     this.playbackButtonText.anchor.set(1, 1);
@@ -140,9 +146,17 @@ export class Battlefield {
     this.playbackButtonText.eventMode = "none";
     this.playbackButtonText.style.stroke = { color: 0x0d1424, width: 3 };
     this.playbackButtonText.style.fontWeight = "bold";
-    this.playbackButton.addChild(this.playbackButtonIcon, this.playbackButtonText);
+    this.playbackButton.addChild(
+      this.playbackButtonIcon,
+      this.playbackButtonText,
+    );
     this.playbackButton.on("pointertap", (event) => {
-      if (event.button !== 0 || this.log?.status !== "Running" || this.transition) return;
+      if (
+        event.button !== 0 ||
+        this.log?.status !== "Running" ||
+        this.transition
+      )
+        return;
       event.stopPropagation();
       this.config.onTogglePlaying?.();
     });
@@ -155,7 +169,10 @@ export class Battlefield {
       this.playbackButtonText.visible = false;
     });
     this.battleProgress.addChild(
-      this.battleProgressBar, this.battleProgressFrame, this.battleProgressText, this.playbackButton,
+      this.battleProgressBar,
+      this.battleProgressFrame,
+      this.battleProgressText,
+      this.playbackButton,
     );
     // Two tiles cover any viewport because each tile is at least viewport-wide.
     for (let index = 0; index < 2; index++) {
@@ -166,8 +183,15 @@ export class Battlefield {
     this.observer = new ResizeObserver(() => this.resize());
   }
 
-  static async create(canvas: HTMLCanvasElement, options: BattlefieldOptions): Promise<Battlefield> {
-    const view = new Battlefield(canvas, await loadBattlefieldAssets(), options);
+  static async create(
+    canvas: HTMLCanvasElement,
+    options: BattlefieldOptions,
+  ): Promise<Battlefield> {
+    const view = new Battlefield(
+      canvas,
+      await loadBattlefieldAssets(),
+      options,
+    );
     await view.app.init({
       canvas,
       width: Math.max(1, canvas.clientWidth),
@@ -462,7 +486,8 @@ export class Battlefield {
       icon.anchor.set(0.5);
       shade.anchor.set(0.5);
       shade.mask = mask;
-      const name = this.config.skillDefinitions?.[event.skill]?.name ?? "未知技能";
+      const name =
+        this.config.skillDefinitions?.[event.skill]?.name ?? "未知技能";
       root.label = `${name} ${Math.round(progress * 100)}% (${event.uuid})`;
       root.addChild(icon, shade, mask);
       this.skillLayer.addChild(root);
@@ -492,38 +517,57 @@ export class Battlefield {
     const innerWidth = barWidth - insetX * 2;
     const innerHeight = barHeight - insetY * 2;
     this.battleProgress.visible = true;
-    this.battleProgress.position.set(padding, height - BATTLE_PROGRESS_BOTTOM * scale - barHeight);
+    this.battleProgress.position.set(
+      padding,
+      height - BATTLE_PROGRESS_BOTTOM * scale - barHeight,
+    );
     // Keep the carved end caps proportional while stretching only the center rails.
     this.battleProgressFrame.scale.set(frameScale);
     this.battleProgressFrame.width = barWidth / frameScale;
     this.battleProgressFrame.height = 124;
-    this.battleProgressBar.clear()
-      .rect(insetX, insetY, innerWidth, innerHeight).fill({ color: 0x0d2027, alpha: 0.92 });
+    this.battleProgressBar
+      .clear()
+      .rect(insetX, insetY, innerWidth, innerHeight)
+      .fill({ color: 0x0d2027, alpha: 0.92 });
     if (ratio > 0) {
       this.battleProgressBar
-        .rect(insetX, insetY, innerWidth * ratio, innerHeight).fill(0x329b94)
-        .rect(insetX, insetY, innerWidth * ratio, innerHeight * 0.25).fill(0x7eddd1);
+        .rect(insetX, insetY, innerWidth * ratio, innerHeight)
+        .fill(0x329b94)
+        .rect(insetX, insetY, innerWidth * ratio, innerHeight * 0.25)
+        .fill(0x7eddd1);
     }
     this.battleProgressText.text = [
       this.options.level?.join("-"),
       this.options.mapName,
       `${defeated}/${total}`,
-    ].filter(Boolean).join(" ");
+    ]
+      .filter(Boolean)
+      .join(" ");
     this.battleProgressText.scale.set(scale);
     const labelWidth = Math.max(1, barWidth - insetX * 2 - 8 * scale);
     if (this.battleProgressText.width > labelWidth) {
-      this.battleProgressText.scale.set(scale * labelWidth / this.battleProgressText.width);
+      this.battleProgressText.scale.set(
+        (scale * labelWidth) / this.battleProgressText.width,
+      );
     }
     this.battleProgressText.position.set(barWidth / 2, barHeight / 2);
-    const enabled = this.log!.status === "Running" && !!this.config.onTogglePlaying && !this.transition;
-    this.playbackButton.position.set(barWidth + buttonGap, (barHeight - buttonWidth) / 2);
+    const enabled =
+      this.log!.status === "Running" &&
+      !!this.config.onTogglePlaying &&
+      !this.transition;
+    this.playbackButton.position.set(
+      barWidth + buttonGap,
+      (barHeight - buttonWidth) / 2,
+    );
     this.playbackButton.eventMode = enabled ? "static" : "none";
     this.playbackButton.cursor = enabled ? "pointer" : "default";
     this.playbackButton.alpha = enabled ? 1 : 0.5;
     this.playbackButton.hitArea = new Rectangle(0, 0, buttonWidth, buttonWidth);
     this.playbackButtonIcon.texture = this.options.playing
-      ? this.assets.playbackIcons.pause : this.assets.playbackIcons.resume;
-    this.playbackButtonIcon.width = this.playbackButtonIcon.height = buttonWidth;
+      ? this.assets.playbackIcons.pause
+      : this.assets.playbackIcons.resume;
+    this.playbackButtonIcon.width = this.playbackButtonIcon.height =
+      buttonWidth;
     this.playbackButtonIcon.position.set(buttonWidth / 2, buttonWidth / 2);
     this.playbackButtonText.text = this.options.playing ? "暂停" : "继续";
     this.playbackButton.label = this.playbackButtonText.text;
@@ -561,7 +605,10 @@ export class Battlefield {
           : ((accumulated % 1) + 1) % 1;
       const x = padding + (index % columns) * (itemWidth + gap);
       const y =
-        height - bottomOffset - itemWidth - Math.floor(index / columns) * (itemWidth + gap);
+        height -
+        bottomOffset -
+        itemWidth -
+        Math.floor(index / columns) * (itemWidth + gap);
       bar.root.position.set(x + itemWidth / 2, y + itemWidth / 2);
       bar.icon.width = bar.icon.height = itemWidth;
       bar.shade.width = bar.shade.height = itemWidth;
@@ -666,12 +713,16 @@ export class Battlefield {
       root.eventMode = "static";
       root.cursor = "pointer";
       root.hitArea = new Rectangle(-28, -58, 56, 84);
-      root.on("pointertap", event => {
+      root.on("pointertap", (event) => {
         if (event.button !== 0) return;
         const definition = this.config.unitDefinitions?.[unit.kind];
         if (!definition) return;
         event.stopPropagation();
-        this.monsterInfo.show(definition, this.assets.characters[unit.kind], this.config.skillDefinitions ?? {});
+        this.monsterInfo.show(
+          definition,
+          this.assets.characters[unit.kind],
+          this.config.skillDefinitions ?? {},
+        );
         this.monsterInfo.layout(this.width, this.height);
       });
     }

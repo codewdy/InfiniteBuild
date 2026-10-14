@@ -1,5 +1,14 @@
-import type { BattleLog, BattleSpec, GameData, MapLevel, PlayerState } from "@infinite-build/core";
-export type { BattlefieldResult, BattlefieldResetOptions } from "@infinite-build/renderer";
+import type {
+  BattleLog,
+  BattleSpec,
+  GameData,
+  MapLevel,
+  PlayerState,
+} from "@infinite-build/core";
+export type {
+  BattlefieldResult,
+  BattlefieldResetOptions,
+} from "@infinite-build/renderer";
 
 export type SlotLocation = { area: "tablets" | "inventory"; index: number };
 export type PendingLootItem = PlayerState["pendingLoot"][number]["loot"];
@@ -17,5 +26,10 @@ export type GameUIOptions = {
 
 export type GameUIState = {
   player: PlayerState;
-  battle: { log: BattleLog; spec: BattleSpec; playing: boolean; frameDuration: number };
+  battle: {
+    log: BattleLog;
+    spec: BattleSpec;
+    playing: boolean;
+    frameDuration: number;
+  };
 };

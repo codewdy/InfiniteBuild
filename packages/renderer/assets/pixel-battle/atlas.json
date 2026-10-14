@@ -20,1942 +20,786 @@
       "alignment": "center"
     },
     "mage-idle": {
-      "frame": [
-        35,
-        50,
-        425,
-        350
-      ],
-      "size": [
-        448,
-        352
-      ],
+      "frame": [35, 50, 425, 350],
+      "size": [448, 352],
       "alignment": "feet"
     },
     "slime-idle": {
-      "frame": [
-        475,
-        100,
-        330,
-        305
-      ],
-      "size": [
-        448,
-        352
-      ],
+      "frame": [475, 100, 330, 305],
+      "size": [448, 352],
       "alignment": "feet"
     },
     "goblin-idle": {
-      "frame": [
-        865,
-        90,
-        350,
-        310
-      ],
-      "size": [
-        448,
-        352
-      ],
+      "frame": [865, 90, 350, 310],
+      "size": [448, 352],
       "alignment": "feet"
     },
     "mage-action": {
-      "frame": [
-        35,
-        405,
-        433,
-        315
-      ],
-      "size": [
-        448,
-        352
-      ],
+      "frame": [35, 405, 433, 315],
+      "size": [448, 352],
       "alignment": "feet"
     },
     "slime-action": {
-      "frame": [
-        470,
-        440,
-        330,
-        285
-      ],
-      "size": [
-        448,
-        352
-      ],
+      "frame": [470, 440, 330, 285],
+      "size": [448, 352],
       "alignment": "feet"
     },
     "goblin-action": {
-      "frame": [
-        800,
-        415,
-        420,
-        310
-      ],
-      "size": [
-        448,
-        352
-      ],
+      "frame": [800, 415, 420, 310],
+      "size": [448, 352],
       "alignment": "feet"
     },
     "fireball-0": {
-      "frame": [
-        95,
-        775,
-        220,
-        183
-      ],
-      "size": [
-        400,
-        300
-      ],
+      "frame": [95, 775, 220, 183],
+      "size": [400, 300],
       "alignment": "center"
     },
     "fireball-1": {
-      "frame": [
-        450,
-        735,
-        355,
-        217
-      ],
-      "size": [
-        400,
-        300
-      ],
+      "frame": [450, 735, 355, 217],
+      "size": [400, 300],
       "alignment": "center"
     },
     "fireball-2": {
-      "frame": [
-        825,
-        730,
-        390,
-        222
-      ],
-      "size": [
-        400,
-        300
-      ],
+      "frame": [825, 730, 390, 222],
+      "size": [400, 300],
       "alignment": "center"
     },
     "nova-ring": {
       "image": "nova-ring.png",
-      "frame": [
-        88,
-        88,
-        1078,
-        1078
-      ],
-      "size": [
-        1078,
-        1078
-      ],
+      "frame": [88, 88, 1078, 1078],
+      "size": [1078, 1078],
       "alignment": "center"
     },
     "settlement-victory": {
       "image": "settlement-icons.png",
-      "frame": [
-        10,
-        240,
-        316,
-        355
-      ],
-      "size": [
-        355,
-        355
-      ],
+      "frame": [10, 240, 316, 355],
+      "size": [355, 355],
       "alignment": "center"
     },
     "settlement-defeat": {
       "image": "settlement-icons.png",
-      "frame": [
-        338,
-        280,
-        270,
-        326
-      ],
-      "size": [
-        326,
-        326
-      ],
+      "frame": [338, 280, 270, 326],
+      "size": [326, 326],
       "alignment": "center"
     },
     "settlement-skill": {
       "image": "settlement-icons.png",
-      "frame": [
-        640,
-        272,
-        289,
-        323
-      ],
-      "size": [
-        323,
-        323
-      ],
+      "frame": [640, 272, 289, 323],
+      "size": [323, 323],
       "alignment": "center"
     },
     "settlement-passive": {
       "image": "settlement-icons.png",
-      "frame": [
-        945,
-        272,
-        299,
-        325
-      ],
-      "size": [
-        325,
-        325
-      ],
+      "frame": [945, 272, 299, 325],
+      "size": [325, 325],
       "alignment": "center"
     },
     "settlement-support-skill": {
       "image": "settlement-icons.png",
-      "frame": [
-        13,
-        695,
-        294,
-        306
-      ],
-      "size": [
-        306,
-        306
-      ],
+      "frame": [13, 695, 294, 306],
+      "size": [306, 306],
       "alignment": "center"
     },
     "settlement-support-passive": {
       "image": "settlement-icons.png",
-      "frame": [
-        329,
-        695,
-        284,
-        306
-      ],
-      "size": [
-        306,
-        306
-      ],
+      "frame": [329, 695, 284, 306],
+      "size": [306, 306],
       "alignment": "center"
     },
     "settlement-pending": {
       "image": "settlement-icons.png",
-      "frame": [
-        633,
-        737,
-        305,
-        263
-      ],
-      "size": [
-        305,
-        305
-      ],
+      "frame": [633, 737, 305, 263],
+      "size": [305, 305],
       "alignment": "center"
     },
     "settlement-xp": {
       "image": "settlement-icons.png",
-      "frame": [
-        950,
-        688,
-        290,
-        318
-      ],
-      "size": [
-        318,
-        318
-      ],
+      "frame": [950, 688, 290, 318],
+      "size": [318, 318],
       "alignment": "center"
     },
     "mage-walk-0": {
       "image": "mage-animations.png",
-      "frame": [
-        49,
-        64,
-        217,
-        226
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [49, 64, 217, 226],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        71.5,
-        74
-      ]
+      "offset": [71.5, 74]
     },
     "mage-walk-1": {
       "image": "mage-animations.png",
-      "frame": [
-        326,
-        64,
-        208,
-        226
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [326, 64, 208, 226],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        76.0,
-        74
-      ]
+      "offset": [76.0, 74]
     },
     "mage-walk-2": {
       "image": "mage-animations.png",
-      "frame": [
-        585,
-        64,
-        215,
-        226
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [585, 64, 215, 226],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        72.5,
-        74
-      ]
+      "offset": [72.5, 74]
     },
     "mage-walk-3": {
       "image": "mage-animations.png",
-      "frame": [
-        860,
-        64,
-        217,
-        226
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [860, 64, 217, 226],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        71.5,
-        74
-      ]
+      "offset": [71.5, 74]
     },
     "mage-cast-0": {
       "image": "mage-animations.png",
-      "frame": [
-        19,
-        314,
-        224,
-        242
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [19, 314, 224, 242],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        68.0,
-        58
-      ]
+      "offset": [68.0, 58]
     },
     "mage-cast-1": {
       "image": "mage-animations.png",
-      "frame": [
-        304,
-        329,
-        244,
-        227
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [304, 329, 244, 227],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        58.0,
-        73
-      ]
+      "offset": [58.0, 73]
     },
     "mage-cast-2": {
       "image": "mage-animations.png",
-      "frame": [
-        563,
-        344,
-        292,
-        212
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [563, 344, 292, 212],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        34.0,
-        88
-      ]
+      "offset": [34.0, 88]
     },
     "mage-cast-3": {
       "image": "mage-animations.png",
-      "frame": [
-        866,
-        345,
-        224,
-        211
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [866, 345, 224, 211],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        68.0,
-        89
-      ]
+      "offset": [68.0, 89]
     },
     "mage-attack-0": {
       "image": "mage-animations.png",
-      "frame": [
-        28,
-        585,
-        226,
-        233
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [28, 585, 226, 233],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        67.0,
-        66
-      ]
+      "offset": [67.0, 66]
     },
     "mage-attack-1": {
       "image": "mage-animations.png",
-      "frame": [
-        286,
-        598,
-        267,
-        219
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [286, 598, 267, 219],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        46.5,
-        79
-      ]
+      "offset": [46.5, 79]
     },
     "mage-attack-2": {
       "image": "mage-animations.png",
-      "frame": [
-        580,
-        612,
-        282,
-        207
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [580, 612, 282, 207],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        39.0,
-        93
-      ]
+      "offset": [39.0, 93]
     },
     "mage-attack-3": {
       "image": "mage-animations.png",
-      "frame": [
-        874,
-        604,
-        219,
-        215
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [874, 604, 219, 215],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        70.5,
-        85
-      ]
+      "offset": [70.5, 85]
     },
     "mage-hit-0": {
       "image": "mage-animations.png",
-      "frame": [
-        24,
-        841,
-        242,
-        246
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [24, 841, 242, 246],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        59.0,
-        54
-      ]
+      "offset": [59.0, 54]
     },
     "mage-hit-1": {
       "image": "mage-animations.png",
-      "frame": [
-        293,
-        862,
-        240,
-        225
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [293, 862, 240, 225],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        60.0,
-        75
-      ]
+      "offset": [60.0, 75]
     },
     "mage-hit-2": {
       "image": "mage-animations.png",
-      "frame": [
-        593,
-        871,
-        235,
-        216
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [593, 871, 235, 216],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        62.5,
-        84
-      ]
+      "offset": [62.5, 84]
     },
     "mage-hit-3": {
       "image": "mage-animations.png",
-      "frame": [
-        873,
-        865,
-        208,
-        222
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [873, 865, 208, 222],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        76.0,
-        78
-      ]
+      "offset": [76.0, 78]
     },
     "mage-death-0": {
       "image": "mage-animations.png",
-      "frame": [
-        40,
-        1133,
-        235,
-        207
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [40, 1133, 235, 207],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        62.5,
-        93
-      ]
+      "offset": [62.5, 93]
     },
     "mage-death-1": {
       "image": "mage-animations.png",
-      "frame": [
-        302,
-        1172,
-        231,
-        168
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [302, 1172, 231, 168],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        64.5,
-        132
-      ]
+      "offset": [64.5, 132]
     },
     "mage-death-2": {
       "image": "mage-animations.png",
-      "frame": [
-        546,
-        1203,
-        288,
-        136
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [546, 1203, 288, 136],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        36.0,
-        163
-      ]
+      "offset": [36.0, 163]
     },
     "mage-death-3": {
       "image": "mage-animations.png",
-      "frame": [
-        847,
-        1230,
-        252,
-        110
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [847, 1230, 252, 110],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        54.0,
-        190
-      ]
+      "offset": [54.0, 190]
     },
     "slime-walk-0": {
       "image": "slime-animations.png",
-      "frame": [
-        50,
-        144,
-        237,
-        146
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [50, 144, 237, 146],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        61.5,
-        152
-      ]
+      "offset": [61.5, 152]
     },
     "slime-walk-1": {
       "image": "slime-animations.png",
-      "frame": [
-        374,
-        52,
-        202,
-        238
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [374, 52, 202, 238],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        79.0,
-        60
-      ]
+      "offset": [79.0, 60]
     },
     "slime-walk-2": {
       "image": "slime-animations.png",
-      "frame": [
-        654,
-        52,
-        259,
-        186
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [654, 52, 259, 186],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        50.5,
-        60
-      ]
+      "offset": [50.5, 60]
     },
     "slime-walk-3": {
       "image": "slime-animations.png",
-      "frame": [
-        966,
-        173,
-        242,
-        119
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [966, 173, 242, 119],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        59.0,
-        181
-      ]
+      "offset": [59.0, 181]
     },
     "slime-cast-0": {
       "image": "slime-animations.png",
-      "frame": [
-        43,
-        356,
-        239,
-        190
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [43, 356, 239, 190],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        60.5,
-        110
-      ]
+      "offset": [60.5, 110]
     },
     "slime-cast-1": {
       "image": "slime-animations.png",
-      "frame": [
-        352,
-        306,
-        247,
-        236
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [352, 306, 247, 236],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        56.5,
-        60
-      ]
+      "offset": [56.5, 60]
     },
     "slime-cast-2": {
       "image": "slime-animations.png",
-      "frame": [
-        636,
-        365,
-        331,
-        178
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [636, 365, 331, 178],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        14.5,
-        119
-      ]
+      "offset": [14.5, 119]
     },
     "slime-cast-3": {
       "image": "slime-animations.png",
-      "frame": [
-        967,
-        354,
-        244,
-        192
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [967, 354, 244, 192],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        58.0,
-        108
-      ]
+      "offset": [58.0, 108]
     },
     "slime-attack-0": {
       "image": "slime-animations.png",
-      "frame": [
-        57,
-        612,
-        212,
-        156
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [57, 612, 212, 156],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        74.0,
-        141
-      ]
+      "offset": [74.0, 141]
     },
     "slime-attack-1": {
       "image": "slime-animations.png",
-      "frame": [
-        339,
-        599,
-        262,
-        171
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [339, 599, 262, 171],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        49.0,
-        128
-      ]
+      "offset": [49.0, 128]
     },
     "slime-attack-2": {
       "image": "slime-animations.png",
-      "frame": [
-        629,
-        613,
-        329,
-        144
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [629, 613, 329, 144],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        15.5,
-        142
-      ]
+      "offset": [15.5, 142]
     },
     "slime-attack-3": {
       "image": "slime-animations.png",
-      "frame": [
-        989,
-        603,
-        219,
-        168
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [989, 603, 219, 168],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        70.5,
-        132
-      ]
+      "offset": [70.5, 132]
     },
     "slime-hit-0": {
       "image": "slime-animations.png",
-      "frame": [
-        52,
-        817,
-        210,
-        191
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [52, 817, 210, 191],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        75.0,
-        109
-      ]
+      "offset": [75.0, 109]
     },
     "slime-hit-1": {
       "image": "slime-animations.png",
-      "frame": [
-        367,
-        838,
-        235,
-        170
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [367, 838, 235, 170],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        62.5,
-        130
-      ]
+      "offset": [62.5, 130]
     },
     "slime-hit-2": {
       "image": "slime-animations.png",
-      "frame": [
-        665,
-        852,
-        232,
-        156
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [665, 852, 232, 156],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        64.0,
-        144
-      ]
+      "offset": [64.0, 144]
     },
     "slime-hit-3": {
       "image": "slime-animations.png",
-      "frame": [
-        985,
-        839,
-        214,
-        169
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [985, 839, 214, 169],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        73.0,
-        131
-      ]
+      "offset": [73.0, 131]
     },
     "slime-death-0": {
       "image": "slime-animations.png",
-      "frame": [
-        41,
-        1046,
-        258,
-        180
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [41, 1046, 258, 180],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        51.0,
-        120
-      ]
+      "offset": [51.0, 120]
     },
     "slime-death-1": {
       "image": "slime-animations.png",
-      "frame": [
-        350,
-        1083,
-        251,
-        143
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [350, 1083, 251, 143],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        54.5,
-        157
-      ]
+      "offset": [54.5, 157]
     },
     "slime-death-2": {
       "image": "slime-animations.png",
-      "frame": [
-        656,
-        1139,
-        248,
-        87
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [656, 1139, 248, 87],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        56.0,
-        213
-      ]
+      "offset": [56.0, 213]
     },
     "slime-death-3": {
       "image": "slime-animations.png",
-      "frame": [
-        963,
-        1145,
-        253,
-        81
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [963, 1145, 253, 81],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        53.5,
-        219
-      ]
+      "offset": [53.5, 219]
     },
     "goblin-walk-0": {
       "image": "goblin-animations.png",
-      "frame": [
-        35,
-        54,
-        236,
-        223
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [35, 54, 236, 223],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        62.0,
-        76
-      ]
+      "offset": [62.0, 76]
     },
     "goblin-walk-1": {
       "image": "goblin-animations.png",
-      "frame": [
-        320,
-        55,
-        219,
-        222
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [320, 55, 219, 222],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        70.5,
-        77
-      ]
+      "offset": [70.5, 77]
     },
     "goblin-walk-2": {
       "image": "goblin-animations.png",
-      "frame": [
-        582,
-        55,
-        235,
-        222
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [582, 55, 235, 222],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        62.5,
-        77
-      ]
+      "offset": [62.5, 77]
     },
     "goblin-walk-3": {
       "image": "goblin-animations.png",
-      "frame": [
-        866,
-        52,
-        225,
-        226
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [866, 52, 225, 226],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        67.5,
-        74
-      ]
+      "offset": [67.5, 74]
     },
     "goblin-cast-0": {
       "image": "goblin-animations.png",
-      "frame": [
-        35,
-        323,
-        228,
-        224
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [35, 323, 228, 224],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        66.0,
-        75
-      ]
+      "offset": [66.0, 75]
     },
     "goblin-cast-1": {
       "image": "goblin-animations.png",
-      "frame": [
-        306,
-        318,
-        238,
-        229
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [306, 318, 238, 229],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        61.0,
-        70
-      ]
+      "offset": [61.0, 70]
     },
     "goblin-cast-2": {
       "image": "goblin-animations.png",
-      "frame": [
-        582,
-        329,
-        265,
-        219
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [582, 329, 265, 219],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        47.5,
-        81
-      ]
+      "offset": [47.5, 81]
     },
     "goblin-cast-3": {
       "image": "goblin-animations.png",
-      "frame": [
-        847,
-        323,
-        244,
-        224
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [847, 323, 244, 224],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        58.0,
-        75
-      ]
+      "offset": [58.0, 75]
     },
     "goblin-attack-0": {
       "image": "goblin-animations.png",
-      "frame": [
-        26,
-        574,
-        236,
-        248
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [26, 574, 236, 248],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        62.0,
-        49
-      ]
+      "offset": [62.0, 49]
     },
     "goblin-attack-1": {
       "image": "goblin-animations.png",
-      "frame": [
-        295,
-        583,
-        248,
-        240
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [295, 583, 248, 240],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        56.0,
-        58
-      ]
+      "offset": [56.0, 58]
     },
     "goblin-attack-2": {
       "image": "goblin-animations.png",
-      "frame": [
-        573,
-        611,
-        293,
-        214
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [573, 611, 293, 214],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        33.5,
-        86
-      ]
+      "offset": [33.5, 86]
     },
     "goblin-attack-3": {
       "image": "goblin-animations.png",
-      "frame": [
-        866,
-        606,
-        235,
-        218
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [866, 606, 235, 218],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        62.5,
-        81
-      ]
+      "offset": [62.5, 81]
     },
     "goblin-hit-0": {
       "image": "goblin-animations.png",
-      "frame": [
-        21,
-        878,
-        254,
-        218
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [21, 878, 254, 218],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        53.0,
-        81
-      ]
+      "offset": [53.0, 81]
     },
     "goblin-hit-1": {
       "image": "goblin-animations.png",
-      "frame": [
-        292,
-        869,
-        263,
-        227
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [292, 869, 263, 227],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        48.5,
-        72
-      ]
+      "offset": [48.5, 72]
     },
     "goblin-hit-2": {
       "image": "goblin-animations.png",
-      "frame": [
-        593,
-        895,
-        237,
-        202
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [593, 895, 237, 202],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        61.5,
-        98
-      ]
+      "offset": [61.5, 98]
     },
     "goblin-hit-3": {
       "image": "goblin-animations.png",
-      "frame": [
-        883,
-        868,
-        212,
-        228
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [883, 868, 212, 228],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        74.0,
-        71
-      ]
+      "offset": [74.0, 71]
     },
     "goblin-death-0": {
       "image": "goblin-animations.png",
-      "frame": [
-        52,
-        1132,
-        206,
-        219
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [52, 1132, 206, 219],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        77.0,
-        70
-      ]
+      "offset": [77.0, 70]
     },
     "goblin-death-1": {
       "image": "goblin-animations.png",
-      "frame": [
-        298,
-        1173,
-        241,
-        181
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [298, 1173, 241, 181],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        59.5,
-        111
-      ]
+      "offset": [59.5, 111]
     },
     "goblin-death-2": {
       "image": "goblin-animations.png",
-      "frame": [
-        554,
-        1222,
-        258,
-        135
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [554, 1222, 258, 135],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        51.0,
-        160
-      ]
+      "offset": [51.0, 160]
     },
     "goblin-death-3": {
       "image": "goblin-animations.png",
-      "frame": [
-        829,
-        1239,
-        276,
-        123
-      ],
-      "size": [
-        360,
-        300
-      ],
+      "frame": [829, 1239, 276, 123],
+      "size": [360, 300],
       "alignment": "feet",
-      "offset": [
-        42.0,
-        177
-      ]
+      "offset": [42.0, 177]
     },
     "fantasy-victory": {
       "image": "fantasy-icons.png",
-      "frame": [
-        42,
-        62,
-        385,
-        345
-      ],
-      "size": [
-        385,
-        385
-      ],
+      "frame": [42, 62, 385, 345],
+      "size": [385, 385],
       "alignment": "center"
     },
     "fantasy-defeat": {
       "image": "fantasy-icons.png",
-      "frame": [
-        465,
-        85,
-        337,
-        338
-      ],
-      "size": [
-        338,
-        338
-      ],
+      "frame": [465, 85, 337, 338],
+      "size": [338, 338],
       "alignment": "center"
     },
     "fantasy-xp": {
       "image": "fantasy-icons.png",
-      "frame": [
-        877,
-        93,
-        327,
-        320
-      ],
-      "size": [
-        327,
-        327
-      ],
+      "frame": [877, 93, 327, 320],
+      "size": [327, 327],
       "alignment": "center"
     },
     "fantasy-fireball": {
       "image": "fantasy-icons.png",
-      "frame": [
-        38,
-        460,
-        369,
-        342
-      ],
-      "size": [
-        369,
-        369
-      ],
+      "frame": [38, 460, 369, 342],
+      "size": [369, 369],
       "alignment": "center"
     },
     "fantasy-nova": {
       "image": "fantasy-icons.png",
-      "frame": [
-        450,
-        457,
-        370,
-        348
-      ],
-      "size": [
-        370,
-        370
-      ],
+      "frame": [450, 457, 370, 348],
+      "size": [370, 370],
       "alignment": "center"
     },
     "fantasy-passive": {
       "image": "fantasy-icons.png",
-      "frame": [
-        865,
-        459,
-        357,
-        343
-      ],
-      "size": [
-        357,
-        357
-      ],
+      "frame": [865, 459, 357, 343],
+      "size": [357, 357],
       "alignment": "center"
     },
     "fantasy-support-skill": {
       "image": "fantasy-icons.png",
-      "frame": [
-        39,
-        850,
-        373,
-        348
-      ],
-      "size": [
-        373,
-        373
-      ],
+      "frame": [39, 850, 373, 348],
+      "size": [373, 373],
       "alignment": "center"
     },
     "fantasy-support-passive": {
       "image": "fantasy-icons.png",
-      "frame": [
-        457,
-        852,
-        356,
-        345
-      ],
-      "size": [
-        356,
-        356
-      ],
+      "frame": [457, 852, 356, 345],
+      "size": [356, 356],
       "alignment": "center"
     },
     "fantasy-pending": {
       "image": "fantasy-icons.png",
-      "frame": [
-        863,
-        879,
-        352,
-        309
-      ],
-      "size": [
-        352,
-        352
-      ],
+      "frame": [863, 879, 352, 309],
+      "size": [352, 352],
       "alignment": "center"
     },
     "fantasy-fireball-0": {
       "image": "fantasy-effects.png",
-      "frame": [
-        55,
-        161,
-        258,
-        154
-      ],
-      "size": [
-        400,
-        300
-      ],
+      "frame": [55, 161, 258, 154],
+      "size": [400, 300],
       "alignment": "center"
     },
     "fantasy-fireball-1": {
       "image": "fantasy-effects.png",
-      "frame": [
-        393,
-        128,
-        298,
-        198
-      ],
-      "size": [
-        400,
-        300
-      ],
+      "frame": [393, 128, 298, 198],
+      "size": [400, 300],
       "alignment": "center"
     },
     "fantasy-fireball-2": {
       "image": "fantasy-effects.png",
-      "frame": [
-        736,
-        103,
-        326,
-        242
-      ],
-      "size": [
-        400,
-        300
-      ],
+      "frame": [736, 103, 326, 242],
+      "size": [400, 300],
       "alignment": "center"
     },
     "fantasy-fireball-3": {
       "image": "fantasy-effects.png",
-      "frame": [
-        1122,
-        129,
-        274,
-        194
-      ],
-      "size": [
-        400,
-        300
-      ],
+      "frame": [1122, 129, 274, 194],
+      "size": [400, 300],
       "alignment": "center"
     },
     "fantasy-nova-0": {
       "image": "fantasy-effects.png",
-      "frame": [
-        56,
-        409,
-        265,
-        264
-      ],
-      "size": [
-        400,
-        400
-      ],
+      "frame": [56, 409, 265, 264],
+      "size": [400, 400],
       "alignment": "center"
     },
     "fantasy-nova-1": {
       "image": "fantasy-effects.png",
-      "frame": [
-        390,
-        392,
-        300,
-        289
-      ],
-      "size": [
-        400,
-        400
-      ],
+      "frame": [390, 392, 300, 289],
+      "size": [400, 400],
       "alignment": "center"
     },
     "fantasy-nova-2": {
       "image": "fantasy-effects.png",
-      "frame": [
-        734,
-        372,
-        326,
-        323
-      ],
-      "size": [
-        400,
-        400
-      ],
+      "frame": [734, 372, 326, 323],
+      "size": [400, 400],
       "alignment": "center"
     },
     "fantasy-nova-3": {
       "image": "fantasy-effects.png",
-      "frame": [
-        1111,
-        396,
-        296,
-        283
-      ],
-      "size": [
-        400,
-        400
-      ],
+      "frame": [1111, 396, 296, 283],
+      "size": [400, 400],
       "alignment": "center"
     },
     "fantasy-attack-0": {
       "image": "fantasy-effects.png",
-      "frame": [
-        91,
-        807,
-        195,
-        160
-      ],
-      "size": [
-        400,
-        360
-      ],
+      "frame": [91, 807, 195, 160],
+      "size": [400, 360],
       "alignment": "center"
     },
     "fantasy-attack-1": {
       "image": "fantasy-effects.png",
-      "frame": [
-        404,
-        741,
-        283,
-        253
-      ],
-      "size": [
-        400,
-        360
-      ],
+      "frame": [404, 741, 283, 253],
+      "size": [400, 360],
       "alignment": "center"
     },
     "fantasy-attack-2": {
       "image": "fantasy-effects.png",
-      "frame": [
-        744,
-        736,
-        321,
-        287
-      ],
-      "size": [
-        400,
-        360
-      ],
+      "frame": [744, 736, 321, 287],
+      "size": [400, 360],
       "alignment": "center"
     },
     "fantasy-attack-3": {
       "image": "fantasy-effects.png",
-      "frame": [
-        1157,
-        773,
-        231,
-        210
-      ],
-      "size": [
-        400,
-        360
-      ],
+      "frame": [1157, 773, 231, 210],
+      "size": [400, 360],
       "alignment": "center"
     },
     "nova-shockwave": {
       "image": "nova-shockwave.png",
-      "frame": [
-        81,
-        95,
-        1103,
-        1069
-      ],
-      "size": [
-        1103,
-        1103
-      ],
+      "frame": [81, 95, 1103, 1069],
+      "size": [1103, 1103],
       "alignment": "center"
     },
     "tablet-support": {
       "image": "tablet-roles.png",
-      "frame": [
-        134,
-        142,
-        685,
-        632
-      ],
-      "size": [
-        685,
-        685
-      ],
+      "frame": [134, 142, 685, 632],
+      "size": [685, 685],
       "alignment": "center"
     },
     "tablet-passive": {
       "image": "tablet-roles.png",
-      "frame": [
-        987,
-        99,
-        687,
-        695
-      ],
-      "size": [
-        695,
-        695
-      ],
+      "frame": [987, 99, 687, 695],
+      "size": [695, 695],
       "alignment": "center"
     },
     "passive-quarter-attack": {
       "image": "passive-affix-quarters.png",
-      "frame": [
-        16,
-        15,
-        706,
-        694
-      ],
-      "size": [
-        706,
-        706
-      ],
+      "frame": [16, 15, 706, 694],
+      "size": [706, 706],
       "alignment": "center"
     },
     "passive-quarter-maxHp": {
       "image": "passive-affix-quarters.png",
-      "frame": [
-        738,
-        15,
-        705,
-        694
-      ],
-      "size": [
-        705,
-        705
-      ],
+      "frame": [738, 15, 705, 694],
+      "size": [705, 705],
       "alignment": "center"
     },
     "passive-quarter-empty": {
       "image": "passive-affix-quarters.png",
-      "frame": [
-        1459,
-        15,
-        705,
-        694
-      ],
-      "size": [
-        705,
-        705
-      ],
+      "frame": [1459, 15, 705, 694],
+      "size": [705, 705],
       "alignment": "center"
     },
     "tablet-passive-magic": {
       "image": "passive-rarities.png",
-      "frame": [
-        106,
-        118,
-        669,
-        675
-      ],
-      "size": [
-        675,
-        675
-      ],
+      "frame": [106, 118, 669, 675],
+      "size": [675, 675],
       "alignment": "center"
     },
     "tablet-passive-rare": {
       "image": "passive-rarities.png",
-      "frame": [
-        993,
-        118,
-        669,
-        675
-      ],
-      "size": [
-        675,
-        675
-      ],
+      "frame": [993, 118, 669, 675],
+      "size": [675, 675],
       "alignment": "center"
     },
     "tablet-support-rare": {
       "image": "tablet-roles-gold.png",
-      "frame": [
-        134,
-        142,
-        685,
-        632
-      ],
-      "size": [
-        685,
-        685
-      ],
+      "frame": [134, 142, 685, 632],
+      "size": [685, 685],
       "alignment": "center"
     },
     "fireball-magic": {
       "image": "fantasy-icons-magic.png",
-      "frame": [
-        38,
-        460,
-        369,
-        342
-      ],
-      "size": [
-        369,
-        369
-      ],
+      "frame": [38, 460, 369, 342],
+      "size": [369, 369],
       "alignment": "center"
     },
     "fireball-rare": {
       "image": "fantasy-icons-rare.png",
-      "frame": [
-        38,
-        460,
-        369,
-        342
-      ],
-      "size": [
-        369,
-        369
-      ],
+      "frame": [38, 460, 369, 342],
+      "size": [369, 369],
       "alignment": "center"
     },
     "nova-magic": {
       "image": "fantasy-icons-magic.png",
-      "frame": [
-        450,
-        457,
-        370,
-        348
-      ],
-      "size": [
-        370,
-        370
-      ],
+      "frame": [450, 457, 370, 348],
+      "size": [370, 370],
       "alignment": "center"
     },
     "nova-rare": {
       "image": "fantasy-icons-rare.png",
-      "frame": [
-        450,
-        457,
-        370,
-        348
-      ],
-      "size": [
-        370,
-        370
-      ],
+      "frame": [450, 457, 370, 348],
+      "size": [370, 370],
       "alignment": "center"
     },
     "support-distant-magic": {
       "image": "support-distant.png",
-      "frame": [
-        52,
-        293,
-        713,
-        438
-      ],
-      "size": [
-        713,
-        713
-      ],
+      "frame": [52, 293, 713, 438],
+      "size": [713, 713],
       "alignment": "center"
     },
     "support-distant-rare": {
       "image": "support-distant.png",
-      "frame": [
-        811,
-        293,
-        721,
-        438
-      ],
-      "size": [
-        721,
-        721
-      ],
+      "frame": [811, 293, 721, 438],
+      "size": [721, 721],
       "alignment": "center"
     },
     "support-line-magic": {
       "image": "support-line.png",
-      "frame": [
-        88,
-        203,
-        662,
-        652
-      ],
-      "size": [
-        662,
-        662
-      ],
+      "frame": [88, 203, 662, 652],
+      "size": [662, 662],
       "alignment": "center"
     },
     "support-line-rare": {
       "image": "support-line.png",
-      "frame": [
-        824,
-        203,
-        651,
-        652
-      ],
-      "size": [
-        652,
-        652
-      ],
+      "frame": [824, 203, 651, 652],
+      "size": [652, 652],
       "alignment": "center"
     },
     "support-opposite-magic": {
       "image": "support-opposite.png",
-      "frame": [
-        16,
-        287,
-        738,
-        457
-      ],
-      "size": [
-        738,
-        738
-      ],
+      "frame": [16, 287, 738, 457],
+      "size": [738, 738],
       "alignment": "center"
     },
     "support-opposite-rare": {
       "image": "support-opposite.png",
-      "frame": [
-        783,
-        287,
-        738,
-        457
-      ],
-      "size": [
-        738,
-        738
-      ],
+      "frame": [783, 287, 738, 457],
+      "size": [738, 738],
       "alignment": "center"
     },
     "support-diagonalPair-magic": {
       "image": "support-diagonalPair-v2.png",
-      "frame": [
-        52,
-        120,
-        709,
-        784
-      ],
-      "size": [
-        784,
-        784
-      ],
+      "frame": [52, 120, 709, 784],
+      "size": [784, 784],
       "alignment": "center"
     },
     "support-diagonalPair-rare": {
       "image": "support-diagonalPair-v2.png",
-      "frame": [
-        820,
-        120,
-        708,
-        784
-      ],
-      "size": [
-        784,
-        784
-      ],
+      "frame": [820, 120, 708, 784],
+      "size": [784, 784],
       "alignment": "center"
     },
     "support-diagonal-magic": {
       "image": "support-diagonal-v2.png",
-      "frame": [
-        202,
-        256,
-        499,
-        515
-      ],
-      "size": [
-        515,
-        515
-      ],
+      "frame": [202, 256, 499, 515],
+      "size": [515, 515],
       "alignment": "center"
     },
     "support-diagonal-rare": {
       "image": "support-diagonal-v2.png",
-      "frame": [
-        881,
-        256,
-        499,
-        515
-      ],
-      "size": [
-        515,
-        515
-      ],
+      "frame": [881, 256, 499, 515],
+      "size": [515, 515],
       "alignment": "center"
     }
   },
@@ -1994,12 +838,7 @@
           "loop": false
         },
         "hit": {
-          "frames": [
-            "mage-hit-0",
-            "mage-hit-1",
-            "mage-hit-2",
-            "mage-hit-3"
-          ],
+          "frames": ["mage-hit-0", "mage-hit-1", "mage-hit-2", "mage-hit-3"],
           "durationMs": 240,
           "loop": false
         },
@@ -2014,9 +853,7 @@
           "loop": false
         },
         "idle": {
-          "frames": [
-            "mage-walk-0"
-          ],
+          "frames": ["mage-walk-0"],
           "durationMs": 1000,
           "loop": true
         }
@@ -2076,9 +913,7 @@
           "loop": false
         },
         "idle": {
-          "frames": [
-            "slime-walk-0"
-          ],
+          "frames": ["slime-walk-0"],
           "durationMs": 1000,
           "loop": true
         }
@@ -2138,9 +973,7 @@
           "loop": false
         },
         "idle": {
-          "frames": [
-            "goblin-walk-0"
-          ],
+          "frames": ["goblin-walk-0"],
           "durationMs": 1000,
           "loop": true
         }
@@ -2154,9 +987,7 @@
       "fantasy-fireball-2",
       "fantasy-fireball-3"
     ],
-    "nova": [
-      "nova-shockwave"
-    ],
+    "nova": ["nova-shockwave"],
     "attack": [
       "fantasy-attack-0",
       "fantasy-attack-1",

@@ -1,13 +1,35 @@
 import { Assets, Rectangle, Texture } from "pixi.js";
 
-export type CharacterAnimation = "idle" | "walk" | "cast" | "attack" | "hit" | "death";
-export type CharacterClip = { frames: Texture[]; durationMs: number; loop: boolean };
+export type CharacterAnimation =
+  "idle" | "walk" | "cast" | "attack" | "hit" | "death";
+export type CharacterClip = {
+  frames: Texture[];
+  durationMs: number;
+  loop: boolean;
+};
 export type CharacterTextures = {
   scale: number;
   animations: Record<CharacterAnimation, CharacterClip>;
 };
-export type SupportDirectionIconName = `support-${"distant" | "line" | "opposite" | "diagonal" | "diagonalPair"}-${"magic" | "rare"}`;
-export type IconName = SupportDirectionIconName | "fireball" | "nova" | "fireball-magic" | "fireball-rare" | "nova-magic" | "nova-rare" | "passive" | "passive-magic" | "passive-rare" | "passive-quarter-empty" | "support-skill" | "support-passive" | "support-rare" | "pending" | "xp";
+export type SupportDirectionIconName =
+  `support-${"distant" | "line" | "opposite" | "diagonal" | "diagonalPair"}-${"magic" | "rare"}`;
+export type IconName =
+  | SupportDirectionIconName
+  | "fireball"
+  | "nova"
+  | "fireball-magic"
+  | "fireball-rare"
+  | "nova-magic"
+  | "nova-rare"
+  | "passive"
+  | "passive-magic"
+  | "passive-rare"
+  | "passive-quarter-empty"
+  | "support-skill"
+  | "support-passive"
+  | "support-rare"
+  | "pending"
+  | "xp";
 export type IconAsset = {
   image: string;
   frame: [number, number, number, number];
@@ -16,7 +38,15 @@ export type IconAsset = {
 };
 export type SettlementAssets = {
   emblems: Record<"Victory" | "Defeat", Texture>;
-  rewards: Record<"skill" | "passive" | "support-skill" | "support-passive" | "pending" | "xp", Texture>;
+  rewards: Record<
+    | "skill"
+    | "passive"
+    | "support-skill"
+    | "support-passive"
+    | "pending"
+    | "xp",
+    Texture
+  >;
 };
 export type BattlefieldAssets = {
   progressFrame: Texture;
@@ -36,17 +66,26 @@ type AtlasManifest = {
   playbackIcons: Record<"pause" | "resume", string>;
   backgrounds: Record<string, string>;
   image: string;
-  frames: Record<string, {
-    image?: string;
-    frame: [number, number, number, number];
-    size: [number, number];
-    alignment: "feet" | "center";
-    offset?: [number, number];
-  }>;
-  characters: Record<string, {
-    scale: number;
-    animations: Record<CharacterAnimation, { frames: string[]; durationMs: number; loop: boolean }>;
-  }>;
+  frames: Record<
+    string,
+    {
+      image?: string;
+      frame: [number, number, number, number];
+      size: [number, number];
+      alignment: "feet" | "center";
+      offset?: [number, number];
+    }
+  >;
+  characters: Record<
+    string,
+    {
+      scale: number;
+      animations: Record<
+        CharacterAnimation,
+        { frames: string[]; durationMs: number; loop: boolean }
+      >;
+    }
+  >;
   effects: { fireball: string[]; nova: string[]; attack: string[] };
   icons: Record<IconName, string>;
   affixIcons: Record<string, string>;
@@ -68,26 +107,33 @@ export function loadBattlefieldAssets(): Promise<BattlefieldAssets> {
 }
 
 /** HTML UI and Pixi settlements share the same icon regions and source images. */
-export async function loadBattlefieldIcons(): Promise<Record<IconName, IconAsset>> {
+export async function loadBattlefieldIcons(): Promise<
+  Record<IconName, IconAsset>
+> {
   return (await loadBattlefieldAssets()).icons;
 }
 
-export async function loadPassiveAffixIcons(): Promise<Record<string, IconAsset>> {
+export async function loadPassiveAffixIcons(): Promise<
+  Record<string, IconAsset>
+> {
   return (await loadBattlefieldAssets()).affixIcons;
 }
 
 async function loadAtlas(): Promise<BattlefieldAssets> {
   const base = new URL("../assets/pixel-battle/", import.meta.url);
   const response = await fetch(new URL("atlas.json", base));
-  if (!response.ok) throw new Error(`Failed to load battle atlas: ${response.status}`);
-  const manifest = await response.json() as AtlasManifest;
+  if (!response.ok)
+    throw new Error(`Failed to load battle atlas: ${response.status}`);
+  const manifest = (await response.json()) as AtlasManifest;
   const [atlas, backgroundEntries] = await Promise.all([
     Assets.load<Texture>(new URL(manifest.image, base).href),
-    Promise.all(Object.entries(manifest.backgrounds).map(async ([name, path]) => {
-      const texture = await Assets.load<Texture>(new URL(path, base).href);
-      texture.source.scaleMode = "nearest";
-      return [name, texture] as const;
-    })),
+    Promise.all(
+      Object.entries(manifest.backgrounds).map(async ([name, path]) => {
+        const texture = await Assets.load<Texture>(new URL(path, base).href);
+        texture.source.scaleMode = "nearest";
+        return [name, texture] as const;
+      }),
+    ),
   ]);
   atlas.source.scaleMode = "nearest";
   const images = new Map<string, Texture>([[manifest.image, atlas]]);
@@ -108,7 +154,10 @@ async function loadAtlas(): Promise<BattlefieldAssets> {
       orig: new Rectangle(0, 0, canvasWidth, canvasHeight),
       trim: new Rectangle(
         entry.offset?.[0] ?? (canvasWidth - width) / 2,
-        entry.offset?.[1] ?? (entry.alignment === "feet" ? canvasHeight - height : (canvasHeight - height) / 2),
+        entry.offset?.[1] ??
+          (entry.alignment === "feet"
+            ? canvasHeight - height
+            : (canvasHeight - height) / 2),
         width,
         height,
       ),
@@ -136,26 +185,60 @@ async function loadAtlas(): Promise<BattlefieldAssets> {
       resume: texture(manifest.playbackIcons.resume),
     },
     backgrounds: Object.fromEntries(backgroundEntries),
-    characters: Object.fromEntries(Object.entries(manifest.characters).map(([kind, poses]) => [
-      kind, {
-        scale: poses.scale,
-        animations: Object.fromEntries(Object.entries(poses.animations).map(([name, clip]) => {
-          if (!clip.frames.length || !Number.isFinite(clip.durationMs) || clip.durationMs <= 0) {
-            throw new Error(`Invalid character animation: ${kind}.${name}`);
-          }
-          return [name, { ...clip, frames: clip.frames.map(texture) }];
-        })) as CharacterTextures["animations"],
-      },
-    ])),
+    characters: Object.fromEntries(
+      Object.entries(manifest.characters).map(([kind, poses]) => [
+        kind,
+        {
+          scale: poses.scale,
+          animations: Object.fromEntries(
+            Object.entries(poses.animations).map(([name, clip]) => {
+              if (
+                !clip.frames.length ||
+                !Number.isFinite(clip.durationMs) ||
+                clip.durationMs <= 0
+              ) {
+                throw new Error(`Invalid character animation: ${kind}.${name}`);
+              }
+              return [name, { ...clip, frames: clip.frames.map(texture) }];
+            }),
+          ) as CharacterTextures["animations"],
+        },
+      ]),
+    ),
     fireball: manifest.effects.fireball.map(texture),
     nova: manifest.effects.nova.map(texture),
     attack: manifest.effects.attack.map(texture),
-    skillTablets: Object.fromEntries(Object.entries(manifest.skillTablets).map(([skill, name]) => [skill, texture(name)])),
-    icons: Object.fromEntries(Object.entries(manifest.icons).map(([name, key]) => [name, iconAsset(key)])) as Record<IconName, IconAsset>,
-    affixIcons: Object.fromEntries(Object.entries(manifest.affixIcons).map(([name, key]) => [name, iconAsset(key)])),
+    skillTablets: Object.fromEntries(
+      Object.entries(manifest.skillTablets).map(([skill, name]) => [
+        skill,
+        texture(name),
+      ]),
+    ),
+    icons: Object.fromEntries(
+      Object.entries(manifest.icons).map(([name, key]) => [
+        name,
+        iconAsset(key),
+      ]),
+    ) as Record<IconName, IconAsset>,
+    affixIcons: Object.fromEntries(
+      Object.entries(manifest.affixIcons).map(([name, key]) => [
+        name,
+        iconAsset(key),
+      ]),
+    ),
     settlement: {
-      emblems: Object.fromEntries(Object.entries(manifest.settlement.emblems).map(([kind, name]) => [kind, texture(name)])) as SettlementAssets["emblems"],
-      rewards: Object.fromEntries(Object.entries(manifest.settlement.rewards).map(([kind, name]) => [kind, texture(name)])) as SettlementAssets["rewards"],
+      emblems: Object.fromEntries(
+        Object.entries(manifest.settlement.emblems).map(([kind, name]) => [
+          kind,
+          texture(name),
+        ]),
+      ) as SettlementAssets["emblems"],
+      rewards: Object.fromEntries(
+        Object.entries(manifest.settlement.rewards).map(([kind, name]) => [
+          kind,
+          texture(name),
+        ]),
+      ) as SettlementAssets["rewards"],
     },
   };
 }

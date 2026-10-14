@@ -114,20 +114,34 @@ namespace validator {
     }
     return undefined;
   }
-  export function mapProgress(src: PlayerState, dst: PlayerState): string | undefined {
-    if (!deepEqual(src.currentMapLevel, dst.currentMapLevel) ||
-        !deepEqual(src.highestUnlockedMapLevel, dst.highestUnlockedMapLevel)) {
+  export function mapProgress(
+    src: PlayerState,
+    dst: PlayerState,
+  ): string | undefined {
+    if (
+      !deepEqual(src.currentMapLevel, dst.currentMapLevel) ||
+      !deepEqual(src.highestUnlockedMapLevel, dst.highestUnlockedMapLevel)
+    ) {
       return "Map progress must not change through changeState.";
     }
     return undefined;
   }
-  export function tutorial(src: PlayerState, dst: PlayerState): string | undefined {
+  export function tutorial(
+    src: PlayerState,
+    dst: PlayerState,
+  ): string | undefined {
     if (!deepEqual(src.tutorial, dst.tutorial)) {
       return "Tutorial progress must not change through changeState.";
     }
     return undefined;
   }
-  export const validators = { inventory, tablet, pendingLoot, mapProgress, tutorial };
+  export const validators = {
+    inventory,
+    tablet,
+    pendingLoot,
+    mapProgress,
+    tutorial,
+  };
 }
 
 export function stateValidate(

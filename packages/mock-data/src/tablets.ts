@@ -6,10 +6,31 @@ import { passiveAffixes } from "./affixes.js";
 export const supportTabletOptions = [
   { id: "adjacent", name: "相邻单格", delta: [[1, 0]] },
   { id: "distant", name: "远距单格", delta: [[2, 0]] },
-  { id: "line", name: "同向双格", delta: [[1, 0], [2, 0]] },
+  {
+    id: "line",
+    name: "同向双格",
+    delta: [
+      [1, 0],
+      [2, 0],
+    ],
+  },
   { id: "diagonal", name: "斜向单格", delta: [[1, -1]] },
-  { id: "opposite", name: "双向两格", delta: [[1, 0], [-1, 0]] },
-  { id: "diagonalPair", name: "斜向双格", delta: [[1, -1], [1, 1]] },
+  {
+    id: "opposite",
+    name: "双向两格",
+    delta: [
+      [1, 0],
+      [-1, 0],
+    ],
+  },
+  {
+    id: "diagonalPair",
+    name: "斜向双格",
+    delta: [
+      [1, -1],
+      [1, 1],
+    ],
+  },
 ] satisfies TabletDefinition["targetSelection"];
 
 export const tabletDefinition: TabletDefinition = {

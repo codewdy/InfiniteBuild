@@ -1,4 +1,9 @@
-import type { BattleLog, MapLevel, UnitDefinition, SkillDefinition } from "@infinite-build/core";
+import type {
+  BattleLog,
+  MapLevel,
+  UnitDefinition,
+  SkillDefinition,
+} from "@infinite-build/core";
 
 /** Fixed definitions and interaction callbacks, supplied once at creation. */
 export type BattlefieldOptions = {
@@ -27,4 +32,3 @@ export type BattlefieldResult = {
     count: number;
   }[];
 };
-

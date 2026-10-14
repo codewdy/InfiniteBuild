@@ -8,7 +8,10 @@ function rewardText(value: string, fill: number): Text {
     text: value,
     resolution: 2,
     style: {
-      fontFamily: "monospace", fontSize: 16, fontWeight: "bold", fill,
+      fontFamily: "monospace",
+      fontSize: 16,
+      fontWeight: "bold",
+      fill,
       stroke: { color: 0x101827, width: 3 },
       dropShadow: { color: 0x080d18, alpha: 0.7, blur: 2, distance: 2 },
     },
@@ -20,9 +23,13 @@ export class BattleResultOverlay extends Container {
   private readonly card = new Container();
   private readonly emblem = new Sprite();
   private readonly title = new Text({
-    text: "", resolution: 2,
+    text: "",
+    resolution: 2,
     style: {
-      fontFamily: "system-ui, sans-serif", fontSize: 48, fontWeight: "900", fill: 0xffdf9a,
+      fontFamily: "system-ui, sans-serif",
+      fontSize: 48,
+      fontWeight: "900",
+      fill: 0xffdf9a,
       letterSpacing: 5,
       stroke: { color: 0x202337, width: 5 },
       dropShadow: { color: 0x080d18, alpha: 0.85, blur: 4, distance: 3 },
@@ -52,10 +59,15 @@ export class BattleResultOverlay extends Container {
     this.title.style.fill = victory ? 0xffdf9a : 0xffa6ac;
     this.emblem.texture = this.assets.emblems[result.outcome];
     // Sprites are disposable; atlas textures stay shared across all settlements.
-    for (const child of this.rewardRow.removeChildren()) child.destroy({ children: true });
+    for (const child of this.rewardRow.removeChildren())
+      child.destroy({ children: true });
     this.cells.length = 0;
     for (const reward of result.rewards) {
-      this.addReward(this.assets.rewards[reward.kind], `×${reward.count}`, 0xf3f1e9);
+      this.addReward(
+        this.assets.rewards[reward.kind],
+        `×${reward.count}`,
+        0xf3f1e9,
+      );
     }
     this.addReward(this.assets.rewards.xp, `+${result.xpGain} XP`, 0xc4f0df);
     this.shownAt = performance.now();
@@ -123,7 +135,8 @@ export class BattleResultOverlay extends Container {
     const age = now - this.shownAt;
     const remaining = this.expiresAt - now;
     this.alpha = Math.min(1, age / 100, remaining / 180);
-    if (width !== this.viewportWidth || height !== this.viewportHeight) this.layout(width, height);
+    if (width !== this.viewportWidth || height !== this.viewportHeight)
+      this.layout(width, height);
     const entrance = 1 - Math.min(1, age / 140);
     this.card.y = this.cardY + Math.round(6 * entrance * entrance);
   }

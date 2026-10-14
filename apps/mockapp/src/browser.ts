@@ -8,5 +8,9 @@ if (!canvas) throw new Error("Missing game canvas.");
 
 setupCanvasPreview(canvas);
 
-const app = await GameApp.create({ canvas, gameData, game: new Game(gameData) });
+const app = await GameApp.create({
+  canvas,
+  gameData,
+  game: new Game(gameData),
+});
 window.addEventListener("pagehide", () => app.destroy(), { once: true });

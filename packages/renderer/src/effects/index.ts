@@ -2,7 +2,11 @@ import type { BattleEvent } from "@infinite-build/core";
 import { createFireball } from "./fireball.js";
 import { createNova } from "./nova.js";
 import { createAttack } from "./attack.js";
-import type { EffectCreateContext, EffectFactory, SkillEffect } from "./types.js";
+import type {
+  EffectCreateContext,
+  EffectFactory,
+  SkillEffect,
+} from "./types.js";
 
 // Add new effect factories here; the battlefield only handles their lifecycle.
 const factories: Readonly<Record<string, EffectFactory>> = {
@@ -11,11 +15,26 @@ const factories: Readonly<Record<string, EffectFactory>> = {
   attack: createAttack,
 };
 
-export function createSkillEffect(event: BattleEvent.Effect, context: EffectCreateContext): SkillEffect | undefined {
+export function createSkillEffect(
+  event: BattleEvent.Effect,
+  context: EffectCreateContext,
+): SkillEffect | undefined {
   const duration = event.payload.durationFrames;
-  if (typeof duration !== "number" || !Number.isFinite(duration) || duration <= 0) return;
-  const factory = Object.hasOwn(factories, event.effect) ? factories[event.effect] : undefined;
+  if (
+    typeof duration !== "number" ||
+    !Number.isFinite(duration) ||
+    duration <= 0
+  )
+    return;
+  const factory = Object.hasOwn(factories, event.effect)
+    ? factories[event.effect]
+    : undefined;
   return factory?.(event, context, duration);
 }
 
-export type { SkillEffect, EffectFactory, EffectCreateContext, EffectDrawContext } from "./types.js";
+export type {
+  SkillEffect,
+  EffectFactory,
+  EffectCreateContext,
+  EffectDrawContext,
+} from "./types.js";

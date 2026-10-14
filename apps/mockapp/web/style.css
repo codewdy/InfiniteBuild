@@ -1,21 +1,89 @@
-:root { color-scheme: dark; font-family: system-ui, sans-serif; color: #e6edf7; background: #0d1424; }
-* { box-sizing: border-box; }
-body { margin: 0; }
-main { padding: 24px; }
-.battlefield-panel { max-width: 1152px; margin-inline: auto; }
-.panel-title { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
-h2 { margin: 0; font-size: 16px; }
-p, .resolution-control { color: #92a3b9; font-size: 13px; }
-select, button { border: 1px solid #3a4a63; background: #202d42; color: #e6edf7; border-radius: 7px; padding: 8px 12px; font: inherit; cursor: pointer; }
-select { max-width: 100%; }
-.resolution-control { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
-.battlefield-viewport { display: flex; justify-content: center; overflow: hidden; }
-.battlefield-stage { position: relative; flex: none; }
-canvas { display: block; position: absolute; top: 0; left: 0; transform-origin: top left; touch-action: none; }
-:focus-visible { outline: 2px solid #ffd477; outline-offset: 2px; }
-canvas:focus-visible { outline-offset: -2px; }
-[hidden] { display: none !important; }
-@media (max-width: 700px) { main { padding: 16px 12px; } }
+:root {
+  color-scheme: dark;
+  font-family: system-ui, sans-serif;
+  color: #e6edf7;
+  background: #0d1424;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+main {
+  padding: 24px;
+}
+.battlefield-panel {
+  max-width: 1152px;
+  margin-inline: auto;
+}
+.panel-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+h2 {
+  margin: 0;
+  font-size: 16px;
+}
+p,
+.resolution-control {
+  color: #92a3b9;
+  font-size: 13px;
+}
+select,
+button {
+  border: 1px solid #3a4a63;
+  background: #202d42;
+  color: #e6edf7;
+  border-radius: 7px;
+  padding: 8px 12px;
+  font: inherit;
+  cursor: pointer;
+}
+select {
+  max-width: 100%;
+}
+.resolution-control {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.battlefield-viewport {
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+}
+.battlefield-stage {
+  position: relative;
+  flex: none;
+}
+canvas {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
+  touch-action: none;
+}
+:focus-visible {
+  outline: 2px solid #ffd477;
+  outline-offset: 2px;
+}
+canvas:focus-visible {
+  outline-offset: -2px;
+}
+[hidden] {
+  display: none !important;
+}
+@media (max-width: 700px) {
+  main {
+    padding: 16px 12px;
+  }
+}
 
 .custom-resolution:not([hidden]) {
   display: flex;
