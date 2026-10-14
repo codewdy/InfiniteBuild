@@ -21,7 +21,7 @@ export const attack = GameData.defineSkill({
       }
     }
     if (!target) return;
-    yield* Skill.prepared();
+    yield* Skill.ready();
     ctx.events.addEffect({
       effect: "attack",
       source: self.id,
@@ -43,7 +43,7 @@ export const selfDestruct = GameData.defineSkill({
     `自爆，对半径 ${radius} 内的敌人造成 ${damage} 点伤害。`,
   *caster(ctx, self, skill) {
     const { radius, damage } = skill.params;
-    yield* Skill.prepared();
+    yield* Skill.ready();
     for (const unit of ctx.units) {
       if (
         unit.faction === self.faction ||
@@ -80,7 +80,7 @@ export const fireball = GameData.defineSkill({
       }
     }
     if (!target) return;
-    yield* Skill.prepared();
+    yield* Skill.ready();
     const durationFrames = Math.max(
       1,
       Math.ceil(nearestDistance / projectileSpeed),
@@ -116,7 +116,7 @@ export const nova = GameData.defineSkill({
   *caster(ctx, self, skill) {
     const { radius, damage, durationFrames } = skill.params;
     const center = self.position;
-    yield* Skill.prepared();
+    yield* Skill.ready();
     ctx.events.addEffect({
       effect: "nova",
       source: self.id,

@@ -5,15 +5,15 @@ import type { Status } from "./status.js";
 import type { SkillTrigger } from "./skill-trigger.js";
 
 export namespace Skill {
-  export type SkillPrepared = { kind: "SkillPrepared" };
+  export type SkillReady = { kind: "SkillReady" };
 
   export const waitFrames = TaskScheduler.waitFrames;
-  export function* prepared(): Generator<SkillPrepared, void, void> {
-    yield { kind: "SkillPrepared" };
+  export function* ready(): Generator<SkillReady, void, void> {
+    yield { kind: "SkillReady" };
   }
 
   export type Routine = Generator<
-    SkillPrepared | TaskScheduler.Suspension,
+    SkillReady | TaskScheduler.Suspension,
     void,
     void
   >;
@@ -49,13 +49,13 @@ export namespace Skill {
     trigger: SkillTrigger.EventType,
   ): boolean {
     const caster = skill.caster(ctx, unit, skill);
-    const prepareInfo = caster.next();
-    if (prepareInfo.done) {
+    const readyInfo = caster.next();
+    if (readyInfo.done) {
       return false;
     }
-    if (prepareInfo.value.kind !== "SkillPrepared") {
+    if (readyInfo.value.kind !== "SkillReady") {
       caster.return();
-      throw new Error("skill must yield SkillPrepared before waiting");
+      throw new Error("skill must yield SkillReady before waiting");
     }
     if (trigger === "onUpdate") {
       ctx.events.addCast({
