@@ -34,6 +34,9 @@ export type PlayerState = {
   tutorial: {
     completed: string[];
   };
+  config: {
+    autoAdvanceLevel: boolean;
+  };
 };
 
 export function derivePlayerCombatProfile(

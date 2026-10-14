@@ -8,6 +8,7 @@ export type PendingLootItem = PlayerState["pendingLoot"][number]["loot"];
 export type GameUIOptions = {
   gameData: GameData;
   onSelectLevel?: (level: MapLevel) => void;
+  onAutoAdvanceLevelChange?: (enabled: boolean) => void;
   onMoveTablet?: (uuid: string, target: SlotLocation) => void;
   onRotateTablet?: (uuid: string) => void;
   onClaimLoot?: (loot: PendingLootItem, count?: number) => void;

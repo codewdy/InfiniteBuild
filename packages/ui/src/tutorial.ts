@@ -11,3 +11,15 @@ export function completedTutorials(previous: PlayerState, current: PlayerState):
   );
   return equippedSkill ? [EQUIP_SKILL_TUTORIAL] : [];
 }
+
+export const SELECT_LEVEL_TUTORIAL = "select-level-1-2";
+
+/** Progress beyond 1-1 is granted by core only after a victory. */
+export function challengesUnlocked(state: PlayerState): boolean {
+  const [chapter, level] = state.highestUnlockedMapLevel;
+  return chapter > 1 || (chapter === 1 && level >= 2);
+}
+
+export function levelTutorialPending(state: PlayerState): boolean {
+  return challengesUnlocked(state) && !state.tutorial.completed.includes(SELECT_LEVEL_TUTORIAL);
+}

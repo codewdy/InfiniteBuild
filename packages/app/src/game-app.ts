@@ -11,6 +11,8 @@ import {
   GameUI,
   completedTutorials,
   EQUIP_SKILL_TUTORIAL,
+  SELECT_LEVEL_TUTORIAL,
+  levelTutorialPending,
 } from "@infinite-build/ui";
 import type {
   BattlefieldResult,
@@ -51,6 +53,11 @@ export class GameApp {
       onRotateTablet: (uuid) => app.rotateTablet(uuid),
       onClaimLoot: (loot, count) => app.claimLoot(loot, count),
       onSelectLevel: (level) => app.selectLevel(level),
+      onAutoAdvanceLevelChange: (enabled) => {
+        const player = app.player;
+        player.config.autoAdvanceLevel = enabled;
+        app.changeState(player);
+      },
       onTogglePlaying: () => app.togglePlaying(),
     });
     try {
@@ -95,9 +102,13 @@ export class GameApp {
   private selectLevel(level: MapLevel): void {
     if (this.destroyed || !this.started) return;
     // Validate/start before resetting presentation, so a rejected level keeps the current battle intact.
+    const pending = levelTutorialPending(this.player);
     const task = this.game.startLevel(level);
+    const completed = pending && level[0] === 1 && level[1] === 2;
+    if (completed) this.game.completeTutorial(SELECT_LEVEL_TUTORIAL);
     this.replaceBattle(task);
-    this.publish();
+    if (completed) this.resume();
+    else this.publish();
   }
 
   private changeState(state: PlayerState): GameInterface.ValidateError | null {
@@ -162,7 +173,11 @@ export class GameApp {
   }
 
   private get tutorialPending(): boolean {
-    return !this.player.tutorial.completed.includes(EQUIP_SKILL_TUTORIAL);
+    const player = this.player;
+    return (
+      !player.tutorial.completed.includes(EQUIP_SKILL_TUTORIAL) ||
+      levelTutorialPending(player)
+    );
   }
 
   private afterPlayerChange(): void {
@@ -181,10 +196,33 @@ export class GameApp {
         result: outcome,
         frame: this.log.frame,
       });
-      this.replaceBattle(this.game.startLevel());
+      if (levelTutorialPending(this.player)) this.stopTimer();
+      else
+        this.replaceBattle(this.game.startLevel(this.nextBattleLevel(outcome)));
       this.view.showBattleResult(this.result(settlement, outcome));
     }
     this.publish();
+  }
+
+  private nextBattleLevel(outcome: "Victory" | "Defeat"): MapLevel {
+    const player = this.player;
+    const current = this.task.spec.level;
+    if (outcome !== "Victory" || !player.config.autoAdvanceLevel)
+      return current;
+    const compare = (a: MapLevel, b: MapLevel) => a[0] - b[0] || a[1] - b[1];
+    // Settlement may unlock another level, so compare against the battle's starting progress.
+    if (compare(current, this.task.player.highestUnlockedMapLevel) !== 0)
+      return current;
+    return (
+      this.data.mapLevelDefinitions
+        .map((definition) => definition.level)
+        .filter(
+          (level) =>
+            compare(level, current) > 0 &&
+            compare(level, player.highestUnlockedMapLevel) <= 0,
+        )
+        .sort(compare)[0] ?? current
+    );
   }
 
   private replaceBattle(task: GameInterface.Battle): void {

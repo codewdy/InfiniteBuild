@@ -1,5 +1,6 @@
+import { LevelTutorialView } from "./level-tutorial.js";
 import type { SlotLocation, GameUIOptions, GameUIState, BattlefieldResetOptions, BattlefieldResult } from "./types.js";
-import { EQUIP_SKILL_TUTORIAL } from "./tutorial.js";
+import { EQUIP_SKILL_TUTORIAL, challengesUnlocked, levelTutorialPending } from "./tutorial.js";
 import { EquipTutorialView } from "./equip-tutorial.js";
 import { StartScreenView } from "./start-screen.js";
 import { ChallengesView } from "./challenges.js";
@@ -50,6 +51,7 @@ export class GameUI {
   private readonly clip = new Graphics();
   private readonly tooltip = new TabletTooltipView();
   private readonly tutorial = new EquipTutorialView();
+  private readonly levelTutorial = new LevelTutorialView();
   private tooltipSelection?: { uuid: string; location: SlotLocation };
   private tooltipHover?: Container;
   private readonly tabletHighlights: Graphics[] = [];
@@ -81,7 +83,7 @@ export class GameUI {
     private readonly art: TabletArt,
     private readonly backgrounds: DrawerAssets,
   ) {
-    this.challenges = new ChallengesView(options.gameData, options.onSelectLevel);
+    this.challenges = new ChallengesView(options.gameData, options.onSelectLevel, options.onAutoAdvanceLevelChange);
     this.pendingLoot = new PendingLootView(art.icons, backgrounds.randomSkill, options.onClaimLoot);
     this.panel.addChild(this.boardPanel, this.inventoryPanel);
     this.panel.eventMode = "static";
@@ -91,7 +93,7 @@ export class GameUI {
     this.background = new Sprite(backgrounds.background);
     this.background.anchor.set(0.5);
     this.background.eventMode = "none";
-    this.root.addChild(this.background, this.panel, this.pendingLoot, this.challenges, this.tabs, this.tutorial, this.tooltip, this.clip);
+    this.root.addChild(this.background, this.panel, this.pendingLoot, this.challenges, this.tabs, this.tutorial, this.levelTutorial, this.tooltip, this.clip);
     this.root.mask = this.clip;
     battlefield.mountOverlay(this.root);
     this.startScreen = new StartScreenView(backgrounds.background);
@@ -160,7 +162,7 @@ export class GameUI {
     const inventoryCapacity = this.options.gameData.playerDefinition.inventoryCapacity;
     this.challenges.update(state);
     this.state = state;
-    const key = JSON.stringify([state.tablets, state.inventory, state.pendingLoot, state.tutorial, inventoryCapacity]);
+    const key = JSON.stringify([state.tablets, state.inventory, state.pendingLoot, state.tutorial, state.currentMapLevel, state.highestUnlockedMapLevel, state.config, inventoryCapacity]);
     if (key === this.contentKey) return;
     this.contentKey = key;
     this.state = state;
@@ -488,12 +490,13 @@ export class GameUI {
     this.challenges.visible = this.activeTab === "challenges";
     const total = this.state?.pendingLoot.reduce((sum, entry) => sum + entry.count, 0) ?? 0;
     const landscape = width >= this.canvas.clientHeight;
-    const barWidth = TAB_ICON_SIZE * 3 + TAB_GAP * 2;
+    const entries = ([["tablets", "石板"], ["loot", "领取战利品"], ["challenges", "关卡"]] as const)
+      .filter(([tab]) => tab !== "challenges" || (this.state && challengesUnlocked(this.state)));
+    const barWidth = TAB_ICON_SIZE * entries.length + TAB_GAP * (entries.length - 1);
     this.tabs.scale.set(landscape ? Math.max(0.001, Math.min(1, (this.uiHeight - 32) / barWidth)) : 1);
     this.canvas.title = "";
     this.tabs.position.set(landscape ? 8 : (width - barWidth) / 2,
       landscape ? 16 : this.uiHeight - TAB_BAR_HEIGHT + 8);
-    const entries = [["tablets", "石板"], ["loot", "领取战利品"], ["challenges", "关卡"]] as const;
     entries.forEach(([tab, label], index) => {
       const selected = this.activeTab === tab;
       const button = new Container();
@@ -602,6 +605,17 @@ export class GameUI {
   }
 
   private layoutTutorial(): void {
+    this.levelTutorial.visible = false;
+    if (this.state && levelTutorialPending(this.state)) {
+      const selecting = this.activeTab === "challenges";
+      const target = selecting ? this.challenges.tutorialTarget : this.tabs.children.find(child => child.label === "关卡");
+      if (target) {
+        const bounds = target.getBounds();
+        const origin = this.root.toLocal(new Point(bounds.x, bounds.y));
+        this.levelTutorial.show(new Rectangle(origin.x, origin.y, bounds.width, bounds.height),
+          this.canvas.clientWidth, this.uiHeight, selecting);
+      }
+    }
     const index = this.tutorialSource();
     const source = this.slots.find(({ location }) => location.area === "inventory" && location.index === index);
     const targetIndex = this.state?.tablets.findIndex(tablet => tablet === null);
