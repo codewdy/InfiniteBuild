@@ -17,14 +17,3 @@
   formatting changes.
 - If the formatter is unavailable, report the limitation instead of silently
   substituting another formatter.
-
-## Validation
-
-- Use `pnpm` for workspace commands.
-- After formatting, run checks appropriate to the change. Use `pnpm build` for
-  changes spanning package interfaces; a targeted package build is sufficient for
-  isolated changes.
-- Run `pnpm exec eslint` with explicit changed TypeScript file paths.
-- Run `git diff --check` before reporting completion.
-- Documentation-only changes need formatting and diff checks, not a build.
-- Report which checks passed and any checks that could not be completed.
