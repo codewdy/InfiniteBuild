@@ -1,5 +1,5 @@
 import type { BattleEvent, BattleLog } from "@infinite-build/core";
-import type { Sprite } from "pixi.js";
+import type { Sprite, Texture } from "pixi.js";
 import type { BattlefieldAssets } from "@infinite-build/assets";
 
 export type EffectDrawContext = {
@@ -27,4 +27,5 @@ export type EffectFactory = (
   event: BattleEvent.Effect,
   context: EffectCreateContext,
   duration: number,
+  frames: Texture[],
 ) => SkillEffect | undefined;

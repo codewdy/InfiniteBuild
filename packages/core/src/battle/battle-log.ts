@@ -19,6 +19,13 @@ export namespace BattleEvent {
     castRate: number;
     progress: number;
   };
+  /** A skill execution started; this does not imply a hit or a visual effect. */
+  export type Cast = {
+    kind: "Cast";
+    source: number;
+    skill: string;
+    uuid: string;
+  };
   export type Effect = {
     kind: "Effect";
     effect: string;
@@ -26,7 +33,7 @@ export namespace BattleEvent {
     skill: string;
     payload: Record<string, unknown>;
   };
-  export type Event = Damage | Move | PlayerSkillProgress | Effect;
+  export type Event = Damage | Move | PlayerSkillProgress | Cast | Effect;
 }
 export type BattleStatus = "Running" | "Victory" | "Defeat";
 export type BattleLog = {

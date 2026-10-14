@@ -597,5 +597,11 @@
       "alignment": "feet",
       "offset": [59.0, 181]
     }
+  },
+  "castAnimations": {
+    "attack": "attack",
+    "selfDestruct": "cast",
+    "fireball": "cast",
+    "nova": "cast"
   }
 }

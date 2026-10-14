@@ -60,6 +60,12 @@ export async function checkAssets(root) {
     ]) {
       for (const id of Object.values(manifest[field] ?? {})) reference(id);
     }
+    for (const id of Object.values(manifest.affixCategories ?? {}))
+      reference(id);
+    for (const visual of Object.values(manifest.affixVisuals ?? {}))
+      if (visual.icon !== undefined) reference(visual.icon);
+    if (manifest.defaultAffixIcon !== undefined)
+      reference(manifest.defaultAffixIcon);
     if (manifest.progressFrame !== undefined) reference(manifest.progressFrame);
     for (const entries of Object.values(manifest.settlement ?? {}))
       for (const id of Object.values(entries)) reference(id);

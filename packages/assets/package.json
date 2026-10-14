@@ -16,8 +16,7 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "check": "node scripts/check.mjs",
-    "test": "node --test test/*.test.mjs"
+    "check": "node scripts/check.mjs"
   },
   "dependencies": {
     "pixi.js": "^8.22.0"

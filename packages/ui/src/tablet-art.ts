@@ -4,7 +4,7 @@ import {
   resolveSupportTabletIcon,
   supportTabletScale,
 } from "@infinite-build/renderer";
-import type { IconName, TabletArt } from "@infinite-build/assets";
+import type { TabletArt } from "@infinite-build/assets";
 export { loadTabletArt } from "@infinite-build/assets";
 export type { TabletArt } from "@infinite-build/assets";
 
@@ -25,7 +25,7 @@ export function createSupportTabletArt(
   stone.position.set(size * (0.5 + dx), size * (0.5 + dy));
   const scale = supportTabletScale(
     stone.texture.frame,
-    icons["support-skill"].frame,
+    icons["support-skill"]!.frame,
     appearance.icon.startsWith("support-diagonal-"),
   );
   stone.width = size * scale.x;
@@ -53,11 +53,7 @@ export function createTabletArt(
       quadrant === 1 || quadrant === 2 ? half : 0,
       quadrant >= 2 ? half : 0,
     );
-    const sprite = new Sprite(
-      affix
-        ? (assets.affixes[affix.id] ?? assets.icons["passive-quarter-empty"])
-        : assets.icons["passive-quarter-empty"],
-    );
+    const sprite = new Sprite(assets.affixIcon(affix?.id));
     sprite.anchor.set(0.5);
     sprite.position.set(half / 2);
     sprite.width = sprite.height = half;
@@ -81,19 +77,13 @@ export function createTabletArt(
     art.addChild(center);
     return art;
   }
-  const skill =
-    tablet.kind === "tablet-skill" && tablet.skill === "nova"
-      ? "nova"
-      : "fireball";
-  const icon: IconName =
+  const center = new Sprite(
     tablet.kind === "tablet-skill"
-      ? tablet.rarity === "normal"
-        ? skill
-        : `${skill}-${tablet.rarity}`
-      : tablet.rarity === "rare"
-        ? "passive-rare"
-        : "passive-magic";
-  const center = new Sprite(assets.icons[icon]);
+      ? assets.skillIcon(tablet.skill, tablet.rarity)
+      : assets.icons[
+          tablet.rarity === "rare" ? "passive-rare" : "passive-magic"
+        ],
+  );
   center.anchor.set(0.5);
   center.position.set(size / 2);
   center.width = center.height = size * 0.7;

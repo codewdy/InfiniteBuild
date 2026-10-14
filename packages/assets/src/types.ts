@@ -1,3 +1,4 @@
+import type { EffectVisual } from "./visuals.js";
 import type { Texture } from "pixi.js";
 export type CharacterAnimation =
   "idle" | "walk" | "cast" | "attack" | "hit" | "death";
@@ -12,23 +13,7 @@ export type CharacterTextures = {
 };
 export type SupportDirectionIconName =
   `support-${"distant" | "line" | "opposite" | "diagonal" | "diagonalPair"}-${"magic" | "rare"}`;
-export type IconName =
-  | SupportDirectionIconName
-  | "fireball"
-  | "nova"
-  | "fireball-magic"
-  | "fireball-rare"
-  | "nova-magic"
-  | "nova-rare"
-  | "passive"
-  | "passive-magic"
-  | "passive-rare"
-  | "passive-quarter-empty"
-  | "support-skill"
-  | "support-passive"
-  | "support-rare"
-  | "pending"
-  | "xp";
+export type IconName = string;
 export type IconAsset = {
   image: string;
   frame: [number, number, number, number];
@@ -52,9 +37,10 @@ export type BattlefieldAssets = {
   playbackIcons: Record<"pause" | "resume", Texture>;
   backgrounds: Record<string, Texture>;
   characters: Record<string, CharacterTextures>;
-  fireball: Texture[];
-  nova: Texture[];
-  attack: Texture[];
+  effects: Record<string, Texture[]>;
+  effectVisuals: Record<string, EffectVisual>;
+  castAnimations: Record<string, "cast" | "attack">;
+  defaultSkillIcon: Texture;
   icons: Record<IconName, IconAsset>;
   affixIcons: Record<string, IconAsset>;
   skillTablets: Record<string, Texture>;

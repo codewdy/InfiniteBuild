@@ -32,5 +32,6 @@ export function cast(
   unit: Unit,
   skill: SkillContext,
 ): void {
+  ctx.events.addCast({ source: unit.id, skill: skill.skill, uuid: skill.uuid });
   ctx.taskScheduler.start(() => skill.caster(ctx, unit, skill));
 }

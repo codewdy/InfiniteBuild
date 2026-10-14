@@ -1,7 +1,7 @@
 import { Sprite } from "pixi.js";
 import type { EffectFactory } from "./types.js";
 
-export const createNova: EffectFactory = (event, context, duration) => {
+export const createWave: EffectFactory = (event, context, duration, frames) => {
   const { center, radius } = event.payload;
   if (
     typeof center !== "number" ||
@@ -11,7 +11,6 @@ export const createNova: EffectFactory = (event, context, duration) => {
     radius < 0
   )
     return;
-  const frames = context.assets.nova;
   const sprite = new Sprite({ texture: frames[0]!, roundPixels: true });
   sprite.anchor.set(0.5);
   return {

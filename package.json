@@ -6,7 +6,7 @@
     "build": "pnpm -r run build",
     "mock": "pnpm run build && pnpm --filter @infinite-build/mockapp start",
     "mock:web": "pnpm run build && pnpm --filter @infinite-build/mockapp web",
-    "assets:check": "pnpm --filter @infinite-build/assets check"
+    "assets:check": "pnpm --filter @infinite-build/mock-data... build && pnpm --filter @infinite-build/assets build && pnpm --filter @infinite-build/assets check && node scripts/check-visuals.mjs"
   },
   "devDependencies": {
     "eslint": "^9.39.4",

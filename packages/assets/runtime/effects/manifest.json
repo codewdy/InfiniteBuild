@@ -69,5 +69,19 @@
       "size": [1103, 1103],
       "alignment": "center"
     }
+  },
+  "effectVisuals": {
+    "fireball": {
+      "renderer": "projectile",
+      "frames": "fireball"
+    },
+    "nova": {
+      "renderer": "wave",
+      "frames": "nova"
+    },
+    "attack": {
+      "renderer": "target-strike",
+      "frames": "attack"
+    }
   }
 }

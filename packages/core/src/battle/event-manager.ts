@@ -4,6 +4,7 @@ export class EventManager {
   private events: BattleEvent.Event[] = [];
   private damageCounts = new Map<number, number>();
   private effectCounts = new Map<number, number>();
+  private castSources = new Set<number>();
 
   constructor(private gameData: GameData) {}
 
@@ -11,6 +12,7 @@ export class EventManager {
     this.events = [];
     this.damageCounts.clear();
     this.effectCounts.clear();
+    this.castSources.clear();
   }
 
   addEvent(event: BattleEvent.Event): void {
@@ -23,6 +25,9 @@ export class EventManager {
         break;
       case "PlayerSkillProgress":
         this.addPlayerSkillProgress(event);
+        break;
+      case "Cast":
+        this.addCast(event);
         break;
       case "Effect":
         this.addEffect(event);
@@ -46,6 +51,12 @@ export class EventManager {
     event: Omit<BattleEvent.PlayerSkillProgress, "kind">,
   ): void {
     this.events.push({ ...event, kind: "PlayerSkillProgress" });
+  }
+
+  addCast(event: Omit<BattleEvent.Cast, "kind">): void {
+    if (this.castSources.has(event.source)) return;
+    this.castSources.add(event.source);
+    this.events.push({ ...event, kind: "Cast" });
   }
 
   addEffect(event: Omit<BattleEvent.Effect, "kind">): void {

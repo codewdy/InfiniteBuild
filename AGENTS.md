@@ -25,7 +25,6 @@
   changes spanning package interfaces; a targeted package build is sufficient for
   isolated changes.
 - Run `pnpm exec eslint` with explicit changed TypeScript file paths.
-- Run relevant existing tests when behavior changes, and run `git diff --check`
-  before reporting completion.
+- Run `git diff --check` before reporting completion.
 - Documentation-only changes need formatting and diff checks, not a build.
 - Report which checks passed and any checks that could not be completed.

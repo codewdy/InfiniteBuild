@@ -1,3 +1,4 @@
+import { resolveAffixFrame, resolveSkillIcon } from "./visuals.js";
 import type { BattleManifest } from "./manifest.js";
 import type { Texture } from "pixi.js";
 import { assetURL, loadGroup } from "./loader.js";
@@ -60,13 +61,19 @@ export async function loadBattlefieldAssets(): Promise<BattlefieldAssets> {
         },
       ]),
     ),
-    fireball: manifest.effects.fireball.map(texture),
-    nova: manifest.effects.nova.map(texture),
-    attack: manifest.effects.attack.map(texture),
+    effects: Object.fromEntries(
+      Object.entries(manifest.effects).map(([id, frames]) => [
+        id,
+        frames.map(texture),
+      ]),
+    ),
+    effectVisuals: manifest.effectVisuals,
+    castAnimations: manifest.castAnimations,
+    defaultSkillIcon: texture(manifest.icons[manifest.defaultSkillIcon]!),
     skillTablets: Object.fromEntries(
-      Object.entries(manifest.skillTablets).map(([skill, name]) => [
+      Object.keys(manifest.skillIcons).map((skill) => [
         skill,
-        texture(name),
+        texture(manifest.icons[resolveSkillIcon(manifest, skill)]!),
       ]),
     ),
     icons: Object.fromEntries(
@@ -76,9 +83,9 @@ export async function loadBattlefieldAssets(): Promise<BattlefieldAssets> {
       ]),
     ) as Record<IconName, IconAsset>,
     affixIcons: Object.fromEntries(
-      Object.entries(manifest.affixIcons).map(([name, key]) => [
+      Object.keys(manifest.affixVisuals).map((name) => [
         name,
-        iconAsset(key),
+        iconAsset(resolveAffixFrame(manifest, name)),
       ]),
     ),
     settlement: {
@@ -120,8 +127,17 @@ async function loadIcons(
   field: "icons" | "affixIcons",
 ): Promise<Record<string, IconAsset>> {
   const { manifest, textures } = await loadGroup("tablets");
+  const entries =
+    field === "icons"
+      ? manifest.icons!
+      : Object.fromEntries(
+          Object.keys(manifest.affixVisuals!).map((id) => [
+            id,
+            resolveAffixFrame(manifest as BattleManifest, id),
+          ]),
+        );
   return Object.fromEntries(
-    Object.entries(manifest[field]!).map(([name, id]) => {
+    Object.entries(entries).map(([name, id]) => {
       const entry = manifest.frames[id]!;
       const source = textures[id]!.source;
       return [

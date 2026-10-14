@@ -10,3 +10,15 @@ export { loadTabletArt } from "./tablet-art.js";
 export type { TabletArt } from "./tablet-art.js";
 export type * from "./types.js";
 export type { AssetGroup, AssetManifest, FrameDefinition } from "./manifest.js";
+export {
+  resolveSkillIcon,
+  resolveAffixFrame,
+  effectRenderers,
+} from "./visuals.js";
+export type {
+  SkillIcon,
+  AffixVisual,
+  EffectVisual,
+  EffectRenderer,
+  VisualMappings,
+} from "./visuals.js";

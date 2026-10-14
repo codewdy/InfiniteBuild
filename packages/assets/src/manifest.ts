@@ -1,3 +1,4 @@
+import type { SkillIcon, EffectVisual, AffixVisual } from "./visuals.js";
 import type {
   CharacterAnimation,
   IconName,
@@ -41,10 +42,16 @@ export type BattleManifest = {
       >;
     }
   >;
-  effects: { fireball: string[]; nova: string[]; attack: string[] };
+  effects: Record<string, string[]>;
+  effectVisuals: Record<string, EffectVisual>;
+  skillIcons: Record<string, SkillIcon>;
+  castAnimations: Record<string, "cast" | "attack">;
+  defaultSkillIcon: string;
+  affixVisuals: Record<string, AffixVisual>;
+  affixCategories: Record<string, string>;
+  defaultAffixIcon: string;
   icons: Record<IconName, string>;
-  affixIcons: Record<string, string>;
-  skillTablets: Record<string, string>;
+
   settlement: {
     [K in keyof SettlementAssets]: Record<keyof SettlementAssets[K], string>;
   };

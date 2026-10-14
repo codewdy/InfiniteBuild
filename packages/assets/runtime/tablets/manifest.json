@@ -26,16 +26,6 @@
     "support-diagonal-magic": "support-diagonal-magic",
     "support-diagonal-rare": "support-diagonal-rare"
   },
-  "affixIcons": {
-    "attack": "passive-quarter-attack",
-    "attackPercent": "passive-quarter-attack",
-    "maxHp": "passive-quarter-maxHp",
-    "maxHpPercent": "passive-quarter-maxHp"
-  },
-  "skillTablets": {
-    "fireball": "fantasy-fireball",
-    "nova": "fantasy-nova"
-  },
   "settlement": {
     "emblems": {
       "Victory": "fantasy-victory",
@@ -218,6 +208,52 @@
       "frame": [134, 142, 685, 632],
       "size": [685, 685],
       "alignment": "center"
+    }
+  },
+  "defaultSkillIcon": "passive",
+  "affixCategories": {
+    "offense": "passive-quarter-attack",
+    "vitality": "passive-quarter-maxHp",
+    "utility": "passive-quarter-empty"
+  },
+  "affixVisuals": {
+    "attack": {
+      "category": "offense"
+    },
+    "attackPercent": {
+      "category": "offense"
+    },
+    "maxHp": {
+      "category": "vitality"
+    },
+    "maxHpPercent": {
+      "category": "vitality"
+    },
+    "onUpdateCastRate": {
+      "category": "utility"
+    }
+  },
+  "defaultAffixIcon": "passive-quarter-empty",
+  "skillIcons": {
+    "attack": {
+      "icon": "passive"
+    },
+    "selfDestruct": {
+      "icon": "passive"
+    },
+    "fireball": {
+      "icon": "fireball",
+      "rarityIcons": {
+        "magic": "fireball-magic",
+        "rare": "fireball-rare"
+      }
+    },
+    "nova": {
+      "icon": "nova",
+      "rarityIcons": {
+        "magic": "nova-magic",
+        "rare": "nova-rare"
+      }
     }
   }
 }

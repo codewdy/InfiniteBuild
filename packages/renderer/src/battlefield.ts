@@ -346,6 +346,7 @@ export class Battlefield {
       return false;
     });
     for (const event of log.events) {
+      if (event.kind === "Cast") this.addCast(event);
       if (event.kind === "Effect") this.addEffect(event, previous);
       if (event.kind === "Damage") {
         const view = this.views.get(event.dst);
@@ -472,8 +473,7 @@ export class Battlefield {
       if (event.kind !== "PlayerSkillProgress") continue;
       const progress = Math.max(0, Math.min(1, event.progress));
       const texture =
-        this.assets.skillTablets[event.skill] ??
-        this.assets.settlement.rewards.skill;
+        this.assets.skillTablets[event.skill] ?? this.assets.defaultSkillIcon;
       const root = new Container();
       const icon = new Sprite({ texture, roundPixels: true });
       const shade = new Sprite({
@@ -746,16 +746,19 @@ export class Battlefield {
     };
   }
 
+  private addCast(event: BattleEvent.Cast): void {
+    const source = this.views.get(event.source);
+    if (!source || source.deadAt !== undefined) return;
+    source.action = {
+      kind: this.assets.castAnimations[event.skill] ?? "cast",
+      startedAt: this.animationTime,
+    };
+  }
+
   private addEffect(event: BattleEvent.Effect, previous?: BattleLog): void {
     const source = this.views.get(event.source);
+    // Targeted effects can update facing, but never restart a casting action.
     if (source && source.deadAt === undefined) {
-      source.action = {
-        kind:
-          event.skill === "attack" || event.effect === "attack"
-            ? "attack"
-            : "cast",
-        startedAt: this.animationTime,
-      };
       const targetId = event.payload.to;
       const target =
         typeof targetId === "number" ? this.views.get(targetId) : undefined;
