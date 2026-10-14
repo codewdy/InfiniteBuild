@@ -1,5 +1,5 @@
 import { Container, Graphics, Rectangle, Sprite, Text } from "pixi.js";
-import type { SkillDefinition, UnitDefinition } from "@infinite-build/core";
+import type { Skill, UnitDefinition } from "@infinite-build/core";
 import type { CharacterTextures } from "@infinite-build/assets";
 
 const triggerNames: Record<string, string> = {
@@ -47,7 +47,7 @@ export class MonsterInfo extends Container {
   show(
     definition: UnitDefinition,
     poses: CharacterTextures | undefined,
-    skills: Readonly<Record<string, SkillDefinition>>,
+    skills: Readonly<Record<string, Skill.Definition>>,
   ): void {
     for (const child of this.panel.removeChildren())
       child.destroy({ children: true });

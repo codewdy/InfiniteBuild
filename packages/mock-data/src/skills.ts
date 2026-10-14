@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { GameData, hit } from "@infinite-build/core";
+import { GameData, hit, Skill, TaskScheduler } from "@infinite-build/core";
 import { ignite } from "./buffs.js";
 
 export const attack = GameData.defineSkill({
@@ -21,6 +21,7 @@ export const attack = GameData.defineSkill({
       }
     }
     if (!target) return;
+    yield* Skill.prepared();
     ctx.events.addEffect({
       effect: "attack",
       source: self.id,
@@ -42,6 +43,7 @@ export const selfDestruct = GameData.defineSkill({
     `自爆，对半径 ${radius} 内的敌人造成 ${damage} 点伤害。`,
   *caster(ctx, self, skill) {
     const { radius, damage } = skill.params;
+    yield* Skill.prepared();
     for (const unit of ctx.units) {
       if (
         unit.faction === self.faction ||
@@ -78,6 +80,7 @@ export const fireball = GameData.defineSkill({
       }
     }
     if (!target) return;
+    yield* Skill.prepared();
     const durationFrames = Math.max(
       1,
       Math.ceil(nearestDistance / projectileSpeed),
@@ -92,7 +95,7 @@ export const fireball = GameData.defineSkill({
         durationFrames,
       },
     });
-    yield* ctx.taskScheduler.waitFrames(durationFrames);
+    yield* Skill.waitFrames(durationFrames);
     if (!target.isDead) {
       hit(ctx, self, target, damage);
       target.applyBuff(ignite.id, damage * 0.01, 20);
@@ -113,6 +116,7 @@ export const nova = GameData.defineSkill({
   *caster(ctx, self, skill) {
     const { radius, damage, durationFrames } = skill.params;
     const center = self.position;
+    yield* Skill.prepared();
     ctx.events.addEffect({
       effect: "nova",
       source: self.id,
@@ -125,7 +129,7 @@ export const nova = GameData.defineSkill({
     });
     const hitUnits = new Set<number>();
     for (let frame = 1; frame <= durationFrames; frame++) {
-      yield* ctx.taskScheduler.waitFrames(1);
+      yield* Skill.waitFrames(1);
       const waveRadius = (radius * frame) / durationFrames;
       for (const unit of ctx.units) {
         if (

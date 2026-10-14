@@ -1,9 +1,5 @@
-export type Suspension = { kind: "WaitFrames"; frames: number };
-
-export type Routine = Generator<Suspension, void, void>;
-
 type ScheduledTask = {
-  routine: Routine;
+  routine: TaskScheduler.Routine;
   resumeFrame: number;
   done: boolean;
 };
@@ -12,13 +8,9 @@ export class TaskScheduler {
   private frame: number = 0;
   private tasks: ScheduledTask[] = [];
 
-  *waitFrames(frames: number): Routine {
-    yield { kind: "WaitFrames", frames };
-  }
-
   /** Executes immediately until the first yield, then schedules its continuation. */
-  start(task: () => Routine): void {
-    const scheduled = { routine: task(), resumeFrame: this.frame, done: false };
+  start(task: TaskScheduler.Routine): void {
+    const scheduled = { routine: task, resumeFrame: this.frame, done: false };
     this.tasks.push(scheduled);
     this.resume(scheduled);
   }
@@ -74,5 +66,15 @@ export class TaskScheduler {
     while (this.frame < frame) {
       this.tick();
     }
+  }
+}
+
+export namespace TaskScheduler {
+  export type Suspension = { kind: "WaitFrames"; frames: number };
+
+  export type Routine = Generator<Suspension, void, void>;
+
+  export function* waitFrames(frames: number): Routine {
+    yield { kind: "WaitFrames", frames };
   }
 }

@@ -1,4 +1,4 @@
-import { cast, type SkillContext, type SkillParams } from "./skill.js";
+import { Skill } from "./skill.js";
 import type { Unit } from "./unit.js";
 import type { BattleContext } from "../battle.js";
 import type { RandomGenerator } from "../../random-generator.js";
@@ -7,7 +7,7 @@ import { Status } from "./status.js";
 export type UnitSkill = {
   skill: string;
   uuid: string;
-  params: SkillParams;
+  params: Skill.Params;
   castRate?: number;
 };
 export type UnitSkills = Partial<Record<SkillTrigger.EventType, UnitSkill[]>>;
@@ -20,7 +20,7 @@ function isAccumulateType(
   );
 }
 
-type Skills = Partial<Record<SkillTrigger.EventType, SkillContext[]>>;
+type Skills = Partial<Record<SkillTrigger.EventType, Skill.Context[]>>;
 
 export class SkillTrigger {
   progress = new Map<string, number>();
@@ -84,7 +84,7 @@ export class SkillTrigger {
     for (const skill of this.skills[type] ?? []) {
       const { uuid, castRate } = skill;
       if (castRate === undefined) {
-        cast(ctx, unit, skill);
+        Skill.cast(ctx, unit, skill, type);
         continue;
       }
       if (!Number.isFinite(castRate) || castRate < 0) {
@@ -101,7 +101,7 @@ export class SkillTrigger {
           uuid,
           Math.max(0, (this.progress.get(uuid) ?? 0) - 1),
         );
-        cast(ctx, unit, skill);
+        Skill.cast(ctx, unit, skill, type);
       }
     }
   }
@@ -114,7 +114,7 @@ export class SkillTrigger {
     for (const skill of this.skills[type] ?? []) {
       const { uuid, castRate } = skill;
       if (castRate === undefined) {
-        cast(ctx, unit, skill);
+        Skill.cast(ctx, unit, skill, type);
         continue;
       }
       if (!Number.isFinite(castRate) || castRate < 0) {
@@ -124,7 +124,7 @@ export class SkillTrigger {
       const chance = castRate - casts;
       if (chance > 0 && ctx.rng.rand() < chance) casts += 1;
       for (let index = 0; index < casts; index++) {
-        cast(ctx, unit, skill);
+        Skill.cast(ctx, unit, skill, type);
       }
     }
   }

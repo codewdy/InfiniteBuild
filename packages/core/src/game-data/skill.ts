@@ -1,19 +1,15 @@
 import type { z } from "zod";
-import type {
-  SkillCaster,
-  SkillContext,
-  SkillDefinition,
-} from "../battle/combat/skill.js";
+import type { Skill } from "../battle/combat/skill.js";
 import type { UnitSkill } from "../battle/combat/skill-trigger.js";
 
 type TypedSkillCaster<Schema extends z.ZodObject> = (
-  ctx: Parameters<SkillCaster>[0],
-  unit: Parameters<SkillCaster>[1],
-  skill: Omit<SkillContext, "params"> & { params: z.output<Schema> },
-) => ReturnType<SkillCaster>;
+  ctx: Parameters<Skill.Caster>[0],
+  unit: Parameters<Skill.Caster>[1],
+  skill: Omit<Skill.Context, "params"> & { params: z.output<Schema> },
+) => ReturnType<Skill.Caster>;
 
 type TypedSkillDefinition<Schema extends z.ZodObject> = Omit<
-  SkillDefinition,
+  Skill.Definition,
   "caster" | "description"
 > & {
   id: string;
@@ -30,7 +26,7 @@ type TypedUnitSkill<Schema extends z.ZodObject> = Omit<
 
 type ResolvedSkillDefinition<Schema extends z.ZodObject> = {
   id: string;
-  definition: SkillDefinition;
+  definition: Skill.Definition;
   skill: (definition: TypedUnitSkill<Schema>) => UnitSkill;
 };
 
@@ -42,7 +38,7 @@ export function defineSkill<Schema extends z.ZodObject>(
     id,
     definition: {
       ...fields,
-      caster: caster as SkillCaster,
+      caster: caster as Skill.Caster,
       description: (values) => description(params.parse(values)),
     },
     skill(unitSkill) {
@@ -56,7 +52,7 @@ export function defineSkill<Schema extends z.ZodObject>(
 }
 
 export function skills(
-  lst: { id: string; definition: SkillDefinition }[],
-): Record<string, SkillDefinition> {
+  lst: { id: string; definition: Skill.Definition }[],
+): Record<string, Skill.Definition> {
   return Object.fromEntries(lst.map(({ id, definition }) => [id, definition]));
 }

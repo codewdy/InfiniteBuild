@@ -1,5 +1,6 @@
 export { Game } from "./game.js";
 export { Battle } from "./battle/battle.js";
+export { TaskScheduler } from "./battle/task-scheduler.js";
 export { spawnUnits, move, fixPosition } from "./battle/combat/movement.js";
 export { hit, damage } from "./battle/combat/damage.js";
 export { updateStatus, resolveDeath } from "./battle/combat/unit-status.js";
@@ -7,13 +8,7 @@ export type { BattleSpec } from "./battle/battle.js";
 export type { BattleEvent, BattleLog } from "./battle/battle-log.js";
 export { SkillTrigger } from "./battle/combat/skill-trigger.js";
 export type { UnitSkill, UnitSkills } from "./battle/combat/skill-trigger.js";
-export { cast } from "./battle/combat/skill.js";
-export type {
-  SkillDefinition,
-  SkillParams,
-  SkillContext,
-  SkillCaster,
-} from "./battle/combat/skill.js";
+export { Skill } from "./battle/combat/skill.js";
 export type { UnitDefinition } from "./battle/combat/regular-unit.js";
 export type { PlayerDefinition } from "./player/definition.js";
 export { SkillTablet } from "./player/tablet/skill.js";

@@ -2,7 +2,7 @@ import type {
   BattleLog,
   MapLevel,
   UnitDefinition,
-  SkillDefinition,
+  Skill,
 } from "@infinite-build/core";
 
 /** Fixed definitions and interaction callbacks, supplied once at creation. */
@@ -10,7 +10,7 @@ export type BattlefieldOptions = {
   vision: number;
   onTogglePlaying?: () => void;
   unitDefinitions?: Readonly<Record<string, UnitDefinition>>;
-  skillDefinitions?: Readonly<Record<string, SkillDefinition>>;
+  skillDefinitions?: Readonly<Record<string, Skill.Definition>>;
 };
 
 export type BattlefieldState = {
