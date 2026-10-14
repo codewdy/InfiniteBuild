@@ -51,6 +51,7 @@ export class SkillTrigger {
             params: structuredClone(params),
             status,
             rawStatus: Status.resolve(status),
+            ready: true,
           };
         }),
       ]),
@@ -82,6 +83,7 @@ export class SkillTrigger {
       );
     }
     for (const skill of this.skills[type] ?? []) {
+      if (!skill.ready) continue;
       const { uuid, castRate } = skill;
       if (castRate === undefined) {
         Skill.cast(ctx, unit, skill, type);
@@ -96,7 +98,7 @@ export class SkillTrigger {
       }
       this.progress.set(uuid, progress);
       // Read back progress after each cast, since casting can trigger more damage.
-      while ((this.progress.get(uuid) ?? 0) >= 1 - 1e-6) {
+      while (skill.ready && (this.progress.get(uuid) ?? 0) >= 1 - 1e-6) {
         this.progress.set(
           uuid,
           Math.max(0, (this.progress.get(uuid) ?? 0) - 1),
@@ -112,6 +114,7 @@ export class SkillTrigger {
     type: SkillTrigger.ChanceType,
   ): void {
     for (const skill of this.skills[type] ?? []) {
+      if (!skill.ready) continue;
       const { uuid, castRate } = skill;
       if (castRate === undefined) {
         Skill.cast(ctx, unit, skill, type);
@@ -123,7 +126,7 @@ export class SkillTrigger {
       let casts = Math.floor(castRate);
       const chance = castRate - casts;
       if (chance > 0 && ctx.rng.rand() < chance) casts += 1;
-      for (let index = 0; index < casts; index++) {
+      for (let index = 0; index < casts && skill.ready; index++) {
         Skill.cast(ctx, unit, skill, type);
       }
     }

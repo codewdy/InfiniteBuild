@@ -40,6 +40,7 @@ export namespace Skill {
     params: Params;
     status: Status;
     rawStatus: Status.RawStatus;
+    ready: boolean;
   };
 
   export function cast(
@@ -47,11 +48,13 @@ export namespace Skill {
     unit: Unit,
     skill: Context,
     trigger: SkillTrigger.EventType,
-  ): boolean {
+  ): void {
+    if (!skill.ready) return;
     const caster = skill.caster(ctx, unit, skill);
     const readyInfo = caster.next();
     if (readyInfo.done) {
-      return false;
+      skill.ready = false;
+      return;
     }
     if (readyInfo.value.kind !== "SkillReady") {
       caster.return();
@@ -65,6 +68,5 @@ export namespace Skill {
       });
     }
     ctx.taskScheduler.start(caster as TaskScheduler.Routine);
-    return true;
   }
 }
