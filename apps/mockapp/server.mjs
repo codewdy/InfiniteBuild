@@ -54,7 +54,7 @@ async function snapshot(directory) {
   return files.sort().join("\n");
 }
 
-const sourceDirectories = ["packages/core/src", "packages/mock-data/src", "packages/renderer/src", "packages/ui/src", "apps/mockapp/src"];
+const sourceDirectories = ["packages/core/src", "packages/mock-data/src", "packages/renderer/src", "packages/ui/src", "packages/app/src", "apps/mockapp/src"];
 const sourceSnapshot = () => Promise.all(sourceDirectories.map((path) => snapshot(resolve(workspace, path))));
 let sources = (await sourceSnapshot()).join("\n");
 const webSnapshot = async () => (await Promise.all([
@@ -89,6 +89,7 @@ const roots = {
   "/ui/": uiRoot,
   "/renderer/": rendererRoot,
   "/app/": resolve(base, "dist"),
+  "/game-app/": resolve(workspace, "packages/app/dist"),
   "/core/": resolve(base, "../../packages/core/dist"),
   "/mock-data/": resolve(base, "../../packages/mock-data/dist"),
   "/zod/": dirname(mockDataRequire.resolve("zod")),

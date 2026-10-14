@@ -1,3 +1,4 @@
+import type { BattlefieldOptions, BattlefieldState, BattlefieldResetOptions } from "./types.js";
 import {
   Application,
   Container,
@@ -9,7 +10,7 @@ import {
 } from "pixi.js";
 import { MonsterInfo } from "./monster-info.js";
 import { BattleResultOverlay } from "./battle-result.js";
-import type { BattlefieldResult } from "./battle-result.js";
+import type { BattlefieldResult } from "./types.js";
 import { loadBattlefieldAssets } from "./battlefield-assets.js";
 import type {
   BattlefieldAssets,
@@ -18,7 +19,7 @@ import type {
 } from "./battlefield-assets.js";
 import { createSkillEffect } from "./effects/index.js";
 import type { SkillEffect } from "./effects/index.js";
-import type { BattleEvent, BattleLog, MapLevel, UnitDefinition, SkillDefinition } from "@infinite-build/core";
+import type { BattleEvent, BattleLog } from "@infinite-build/core";
 
 // Preserve the original character proportions at the reference battlefield height.
 const REFERENCE_HEIGHT = 290;
@@ -49,19 +50,6 @@ type View = {
   deadAt?: number;
 };
 type Damage = { text: Text; position: number; y: number; start: number };
-
-export type BattlefieldOptions = {
-  background: string;
-  vision: number;
-  frameDuration: number;
-  playing: boolean;
-  level?: Readonly<MapLevel>;
-  mapName?: string;
-  onTogglePlaying?: () => void;
-  skillNames?: Readonly<Record<string, string>>;
-  unitDefinitions?: Readonly<Record<string, UnitDefinition>>;
-  skillDefinitions?: Readonly<Record<string, SkillDefinition>>;
-};
 
 /** Presentation only: battle logs remain the authority for time and positions. */
 export class Battlefield {
@@ -105,9 +93,8 @@ export class Battlefield {
   private readonly views = new Map<number, View>();
   private readonly observer: ResizeObserver;
   private log?: BattleLog;
-  private options: BattlefieldOptions = {
+  private options: Omit<BattlefieldState, "log"> = {
     background: "",
-    vision: 20,
     frameDuration: 200,
     playing: false,
   };
@@ -129,6 +116,7 @@ export class Battlefield {
   private constructor(
     private readonly canvas: HTMLCanvasElement,
     private readonly assets: BattlefieldAssets,
+    private readonly config: BattlefieldOptions,
   ) {
     this.resultOverlay = new BattleResultOverlay(assets.settlement);
     this.battleProgressFrame = new NineSliceSprite({
@@ -156,7 +144,7 @@ export class Battlefield {
     this.playbackButton.on("pointertap", (event) => {
       if (event.button !== 0 || this.log?.status !== "Running" || this.transition) return;
       event.stopPropagation();
-      this.options.onTogglePlaying?.();
+      this.config.onTogglePlaying?.();
     });
     this.playbackButton.on("pointerover", () => {
       this.playbackButtonIcon.tint = 0xbcece5;
@@ -178,8 +166,8 @@ export class Battlefield {
     this.observer = new ResizeObserver(() => this.resize());
   }
 
-  static async create(canvas: HTMLCanvasElement): Promise<Battlefield> {
-    const view = new Battlefield(canvas, await loadBattlefieldAssets());
+  static async create(canvas: HTMLCanvasElement, options: BattlefieldOptions): Promise<Battlefield> {
+    const view = new Battlefield(canvas, await loadBattlefieldAssets(), options);
     await view.app.init({
       canvas,
       width: Math.max(1, canvas.clientWidth),
@@ -254,7 +242,8 @@ export class Battlefield {
     });
   }
 
-  update(log: BattleLog, options: BattlefieldOptions): void {
+  update(state: BattlefieldState): void {
+    const { log, ...options } = state;
     const background = this.assets.backgrounds[options.background];
     if (!background)
       throw new Error(`Unknown battle background: ${options.background}`);
@@ -361,9 +350,9 @@ export class Battlefield {
     this.resultOverlay.show(result, durationMs);
   }
 
-  reset(fadeToNextBattle: boolean = false): void {
+  reset({ transition = false }: BattlefieldResetOptions = {}): void {
     this.clearTransition();
-    if (fadeToNextBattle && this.log) {
+    if (transition && this.log) {
       this.draw();
       const snapshot = new Sprite(
         this.app.renderer.generateTexture({
@@ -473,7 +462,7 @@ export class Battlefield {
       icon.anchor.set(0.5);
       shade.anchor.set(0.5);
       shade.mask = mask;
-      const name = this.options.skillNames?.[event.skill] ?? "未知技能";
+      const name = this.config.skillDefinitions?.[event.skill]?.name ?? "未知技能";
       root.label = `${name} ${Math.round(progress * 100)}% (${event.uuid})`;
       root.addChild(icon, shade, mask);
       this.skillLayer.addChild(root);
@@ -526,7 +515,7 @@ export class Battlefield {
       this.battleProgressText.scale.set(scale * labelWidth / this.battleProgressText.width);
     }
     this.battleProgressText.position.set(barWidth / 2, barHeight / 2);
-    const enabled = this.log!.status === "Running" && !!this.options.onTogglePlaying && !this.transition;
+    const enabled = this.log!.status === "Running" && !!this.config.onTogglePlaying && !this.transition;
     this.playbackButton.position.set(barWidth + buttonGap, (barHeight - buttonWidth) / 2);
     this.playbackButton.eventMode = enabled ? "static" : "none";
     this.playbackButton.cursor = enabled ? "pointer" : "default";
@@ -679,10 +668,10 @@ export class Battlefield {
       root.hitArea = new Rectangle(-28, -58, 56, 84);
       root.on("pointertap", event => {
         if (event.button !== 0) return;
-        const definition = this.options.unitDefinitions?.[unit.kind];
+        const definition = this.config.unitDefinitions?.[unit.kind];
         if (!definition) return;
         event.stopPropagation();
-        this.monsterInfo.show(definition, this.assets.characters[unit.kind], this.options.skillDefinitions ?? {});
+        this.monsterInfo.show(definition, this.assets.characters[unit.kind], this.config.skillDefinitions ?? {});
         this.monsterInfo.layout(this.width, this.height);
       });
     }
@@ -786,12 +775,12 @@ export class Battlefield {
     const right = width - left;
     const x = (position: number) =>
       left +
-      ((position - origin + 2) / (this.options.vision + 4)) * (right - left);
+      ((position - origin + 2) / (this.config.vision + 4)) * (right - left);
     this.drawBackground(
       origin,
       width,
       height,
-      (right - left) / (this.options.vision + 4),
+      (right - left) / (this.config.vision + 4),
     );
     this.clip.clear().rect(0, 0, width, height).fill(0xffffff);
     this.drawSkillBars(width, height, this.skillSubframe(now));

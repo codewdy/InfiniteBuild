@@ -3,7 +3,7 @@ import type { Texture } from "pixi.js";
 import type { PlayerState } from "@infinite-build/core";
 import { createSupportTabletArt, type TabletArt } from "./tablet-art.js";
 
-export type PendingLootItem = PlayerState["pendingLoot"][number]["loot"];
+import type { PendingLootItem } from "./types.js";
 
 const rarityNames = { normal: "普通", magic: "魔法", rare: "稀有" } as const;
 const LOOT_ICON_SIZE = 72;

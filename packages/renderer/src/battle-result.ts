@@ -1,15 +1,7 @@
+import type { BattlefieldResult } from "./types.js";
 import { Container, Sprite, Text } from "pixi.js";
 import type { Texture } from "pixi.js";
 import type { SettlementAssets } from "./battlefield-assets.js";
-
-export type BattlefieldResult = {
-  outcome: "Victory" | "Defeat";
-  xpGain: number;
-  rewards: readonly {
-    kind: "skill" | "passive" | "support-skill" | "support-passive" | "pending";
-    count: number;
-  }[];
-};
 
 function rewardText(value: string, fill: number): Text {
   return new Text({
