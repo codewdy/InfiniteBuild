@@ -1,22 +1,12 @@
-import { z } from "zod";
 import { GameData, damage as dealDamage } from "@infinite-build/core";
 
 export const ignite = GameData.defineBuff({
   id: "ignite",
-  params: z.object({}),
   stack: "Independent",
-  threshold: 1,
-  modifier(level) {
-    return {
-      triggers: {
-        onUpdate: [
-          (self, ctx) => {
-            if (self.isDead) return;
-            dealDamage(ctx, null, self, level);
-          },
-        ],
-      },
-    };
+  onUpdate(self, ctx) {
+    if (self.isDead) return;
+    const level = self.rawStatus.attributes["buff.ignite"] ?? 0;
+    dealDamage(ctx, null, self, level);
   },
 });
 

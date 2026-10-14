@@ -1,17 +1,10 @@
 import { StackingPolicy } from "./stacking-policy.js";
 import type { Status } from "./status.js";
 
-export type BuffParams = Record<string, unknown>;
-
 export type BuffDefinition = {
   stack: StackingPolicy.Kind;
   threshold?: number;
-  modifier: (
-    level: number,
-    params: BuffParams,
-    totalDuration: number,
-    current: number,
-  ) => Status.Modifier;
+  modifier: (level: number) => Status.Modifier;
 };
 
 export type BuffStatus = {
@@ -21,7 +14,6 @@ export type BuffStatus = {
 
 export class Buff {
   private readonly policy: StackingPolicy.Base;
-  private params: BuffParams = {};
 
   private readonly threshold: number;
   private readonly createModifier: BuffDefinition["modifier"];
@@ -39,7 +31,7 @@ export class Buff {
     this.policy = new StackingPolicy.Kinds[definition.stack]();
   }
 
-  stack(params: BuffParams, level: number, duration: number): void {
+  stack(level: number, duration: number): void {
     if (!Number.isFinite(level) || level <= 0) {
       throw new RangeError("level must be a finite positive number");
     }
@@ -47,12 +39,13 @@ export class Buff {
       throw new RangeError("duration must be finite");
     }
     if (duration <= 0) return;
-    if (this.policy instanceof StackingPolicy.Unique && level < this.policy.getLevel()) {
+    if (
+      this.policy instanceof StackingPolicy.Unique &&
+      level < this.policy.getLevel()
+    ) {
       return;
     }
-    const snapshot = structuredClone(params);
     this.policy.stack(level, duration);
-    this.params = snapshot;
   }
 
   getLevel(): number {
@@ -76,14 +69,7 @@ export class Buff {
   }
 
   modifier(): Status.Modifier {
-    return this.valid()
-      ? this.createModifier(
-          this.getLevel(),
-          this.params,
-          this.getTotalDuration(),
-          this.getCurrentDuration(),
-        )
-      : {};
+    return this.valid() ? this.createModifier(this.getLevel()) : {};
   }
 }
 
@@ -94,12 +80,7 @@ export class BuffManager {
     private readonly definitions: Record<string, BuffDefinition> = {},
   ) {}
 
-  stack(
-    buff: string,
-    level: number,
-    duration: number,
-    params: BuffParams = {},
-  ): void {
+  stack(buff: string, level: number, duration: number): void {
     duration = Math.floor(duration) + 1;
     if (duration <= 0) {
       return;
@@ -108,7 +89,7 @@ export class BuffManager {
     if (!definition) throw new Error(`Unknown buff: ${buff}`);
     const existing = this.buffs.find((entry) => entry.name === buff);
     const instance = existing ?? new Buff(buff, definition);
-    instance.stack(params, level, duration);
+    instance.stack(level, duration);
     if (!existing && instance.valid()) {
       this.buffs.push(instance);
     }
@@ -129,8 +110,14 @@ export class BuffManager {
   }
 
   getModifiers(): Status.Modifier[] {
-    return this.buffs
-      .filter((buff) => buff.valid())
-      .map((buff) => buff.modifier());
+    const buffs = this.buffs.filter((buff) => buff.valid());
+    return [
+      ...buffs.map((buff) => buff.modifier()),
+      {
+        attributes: Object.fromEntries(
+          buffs.map((buff) => [`buff.${buff.name}`, { base: buff.getLevel() }]),
+        ),
+      },
+    ];
   }
 }
