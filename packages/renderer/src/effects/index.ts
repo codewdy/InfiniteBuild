@@ -21,15 +21,17 @@ export function createSkillEffect(
   event: BattleEvent.Effect,
   context: EffectCreateContext,
 ): SkillEffect | undefined {
-  const duration = event.payload.durationFrames;
+  const visual = context.assets.effectVisuals[event.effect];
+  if (!visual) return;
+  // Projectiles end on arrival; only timed effects require durationFrames.
+  const duration =
+    visual.renderer === "projectile" ? Infinity : event.payload.durationFrames;
   if (
     typeof duration !== "number" ||
-    !Number.isFinite(duration) ||
+    (visual.renderer !== "projectile" && !Number.isFinite(duration)) ||
     duration <= 0
   )
     return;
-  const visual = context.assets.effectVisuals[event.effect];
-  if (!visual) return;
   const frames = context.assets.effects[visual.frames];
   if (!frames?.length) return;
   const factory = effectFactories[visual.renderer];

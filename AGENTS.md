@@ -17,3 +17,16 @@
   formatting changes.
 - If the formatter is unavailable, report the limitation instead of silently
   substituting another formatter.
+
+## Unit death handling
+
+- In all logic, use only the unit death flag (`isDead` in the current codebase,
+  referred to as `is_dead`) to decide whether death prevents further event
+  processing. Do not use `hp <= 0` or require `hp > 0` as an additional event
+  processing guard.
+- HP-based death resolution sets the death flag; until that flag is set, a unit
+  must not be treated as dead when deciding whether to process subsequent events.
+
+## Tests
+
+- Do not add tests unless the user explicitly requests them.

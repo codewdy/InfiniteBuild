@@ -847,18 +847,16 @@ export class Battlefield {
       );
       this.drawUnit(view, id);
     }
-    const subframe = this.subframe(now);
-    for (const effect of this.effects) {
-      const t = Math.max(
-        0,
-        Math.min(
-          1,
-          (this.log.frame + subframe - effect.start) / effect.duration,
-        ),
-      );
-      effect.sprite.visible = t < 1;
-      if (t >= 1) continue;
-      effect.update(t, {
+    const effectFrame = this.log.frame + this.subframe(now);
+    this.effects = this.effects.filter((effect) => {
+      const elapsedFrames = Math.max(0, effectFrame - effect.start);
+      const t = Math.min(1, elapsedFrames / effect.duration);
+      if (t >= 1) {
+        effect.sprite.destroy();
+        return false;
+      }
+      const finished = effect.update(t, {
+        elapsedFrames,
         x,
         targetPosition: (id) => {
           const target = this.views.get(id);
@@ -867,7 +865,9 @@ export class Battlefield {
             : undefined;
         },
       });
-    }
+      if (finished) effect.sprite.destroy();
+      return !finished;
+    });
     this.damage = this.damage.filter((entry) => {
       const t = (now - entry.start) / 850;
       if (t >= 1) {

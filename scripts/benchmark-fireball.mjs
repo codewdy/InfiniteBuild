@@ -9,7 +9,7 @@ import { gameData, playerState } from "../packages/mock-data/dist/index.js";
 
 // Run via pnpm benchmark:fireball, or after building:
 // node scripts/benchmark-fireball.mjs --counts=0,100,500,1000,2000
-//   --flight-frames=1,10,60 --frames=1000 --warmup=300 --rounds=5
+//   --flight-frames=1,5,10 --frames=1000 --warmup=300 --rounds=5
 //   --output=/tmp/fireball-benchmark.json
 // One stationary enemy casts at a stationary player through the normal
 // SkillTrigger. Real fireball damage, ignite, scheduler and logs are included.
@@ -186,7 +186,7 @@ if (options.worker) {
 } else {
   const counts = list(options.counts ?? "0,100,500,1000,2000", 0);
   if (!counts.includes(0)) counts.unshift(0);
-  const flights = list(options["flight-frames"] ?? "1,10,60");
+  const flights = list(options["flight-frames"] ?? "1,5,10");
   const frames = integer(options.frames ?? 1000);
   const warmup = Math.max(
     integer(options.warmup ?? 300, 0),

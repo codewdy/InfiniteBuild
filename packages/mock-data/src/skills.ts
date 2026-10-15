@@ -74,7 +74,7 @@ export const fireball = GameData.defineSkill({
     let target: typeof self | undefined;
     let nearestDistance = Infinity;
     for (const unit of ctx.units) {
-      if (unit.faction === self.faction || unit.hp <= 0) continue;
+      if (unit.faction === self.faction || unit.isDead) continue;
       const distance = Math.abs(unit.position - self.position);
       if (distance <= range && distance < nearestDistance) {
         target = unit;
@@ -83,10 +83,6 @@ export const fireball = GameData.defineSkill({
     }
     if (!target) return;
     yield* Skill.ready();
-    const durationFrames = Math.max(
-      1,
-      Math.ceil(nearestDistance / projectileSpeed),
-    );
     ctx.events.addEffect({
       effect: "fireball",
       source: self.id,
@@ -94,13 +90,27 @@ export const fireball = GameData.defineSkill({
       payload: {
         from: self.position,
         to: target.id,
-        durationFrames,
+        projectileSpeed,
       },
     });
-    yield* Skill.waitFrames(durationFrames);
-    if (!target.isDead) {
-      hit(ctx, self, target, damage);
-      target.applyBuff(ignite.id, damage * 0.01, 20);
+    let projectilePosition = self.position;
+    let previousTargetPosition = target.position;
+    while (true) {
+      yield* Skill.waitFrames(1);
+      if (target.isDead) return;
+      const distance = target.position - projectilePosition;
+      // Movement runs after scheduled tasks. A target may have crossed the
+      // projectile since the previous tick, even if it is now far away.
+      const crossedProjectile =
+        Math.sign(previousTargetPosition - projectilePosition) !==
+        Math.sign(distance);
+      if (crossedProjectile || Math.abs(distance) <= projectileSpeed) {
+        hit(ctx, self, target, damage);
+        target.applyBuff(ignite.id, damage * 0.01, 20);
+        return;
+      }
+      projectilePosition += Math.sign(distance) * projectileSpeed;
+      previousTargetPosition = target.position;
     }
   },
 });

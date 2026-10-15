@@ -3,6 +3,7 @@ import type { Sprite, Texture } from "pixi.js";
 import type { BattlefieldAssets } from "@infinite-build/assets";
 
 export type EffectDrawContext = {
+  elapsedFrames: number;
   x: (position: number) => number;
   targetPosition: (id: number) => number | undefined;
 };
@@ -11,7 +12,8 @@ export type SkillEffect = {
   sprite: Sprite;
   start: number;
   duration: number;
-  update: (progress: number, context: EffectDrawContext) => void;
+  /** Return true when the effect has finished and can be destroyed. */
+  update: (progress: number, context: EffectDrawContext) => boolean | void;
 };
 
 export type EffectCreateContext = {
