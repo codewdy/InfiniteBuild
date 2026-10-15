@@ -62,63 +62,34 @@ export const fireball = GameData.defineSkill({
   id: "fireball",
   params: z.object({
     damage: z.number().nonnegative(),
-    range: z.number().nonnegative(),
     projectileSpeed: z.number().positive(),
     bounce: z.number().int().positive().default(1),
     maxFrame: z.number().int().positive().default(100),
   }),
   name: "火球",
-  targetingRange: (_ctx, _self, skill) => skill.params.range,
-  description: ({ damage, range, projectileSpeed, bounce, maxFrame }) =>
-    `向射程 ${range} 内最近的敌人发射火球，每帧飞行 ${projectileSpeed} 个距离单位，每段最多飞行 ${maxFrame} 帧，命中造成 ${damage} 点伤害并施加点燃，最多弹射 ${bounce - 1} 次。`,
+  targetingRange: (_ctx, _self, skill) =>
+    skill.params.projectileSpeed * (skill.params.maxFrame ?? 100) * 0.9,
+  description: ({ damage, projectileSpeed, bounce, maxFrame }) =>
+    `向射程 ${projectileSpeed * maxFrame * 0.9} 内随机一个敌人发射火球，每帧飞行 ${projectileSpeed} 个距离单位，每段最多飞行 ${maxFrame} 帧，命中造成 ${damage} 点伤害并施加点燃，最多弹射 ${bounce - 1} 次。`,
   *cast(ctx, self, skill) {
     const {
       damage,
-      range,
       projectileSpeed,
       bounce = 1,
       maxFrame = 100,
     } = skill.params;
-    let target: typeof self | undefined;
-    let nearestDistance = Infinity;
-    for (const unit of ctx.units) {
-      if (unit.faction === self.faction || unit.isDead) continue;
-      const distance = Math.abs(unit.position - self.position);
-      if (distance <= range && distance < nearestDistance) {
-        target = unit;
-        nearestDistance = distance;
-      }
-    }
-    if (!target) return;
     yield* Skill.ready();
-    let fromUnit = self;
-    Projectile.submit({
+    Projectile.fire({
       ctx,
-      unit: target,
-      start: self.position,
+      effect: "fireball",
+      source: self,
+      from: self,
       speed: projectileSpeed,
       maxFrame,
       bounce,
-      hitUnit: [],
-      onSubmit(start, unit) {
-        ctx.events.addEffect({
-          effect: "fireball",
-          source: self.id,
-          skill: "fireball",
-          payload: {
-            from: start,
-            fromUnit: fromUnit.id,
-            to: unit.id,
-            direction: Math.sign(unit.position - start),
-            projectileSpeed,
-            maxFrame,
-          },
-        });
-      },
       onHit(unit) {
         hit(ctx, self, unit, damage);
         unit.applyBuff(ignite.id, damage * 0.01, 20);
-        fromUnit = unit;
       },
     });
   },

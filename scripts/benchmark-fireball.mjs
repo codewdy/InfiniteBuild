@@ -66,11 +66,10 @@ function createBattle(count, flightFrames) {
           castRate: count,
           params: {
             damage: 100,
-            range: 120,
             projectileSpeed: 60 / flightFrames,
             bounce: 3,
-            // maxFrame: Math.max(100, flightFrames + 1),
-            maxFrame: flightFrames + 1,
+            // Include the 10% targeting margin without changing flight time.
+            maxFrame: Math.ceil(flightFrames / 0.9),
           },
         },
       },

@@ -761,8 +761,8 @@ export class Battlefield {
     if (
       source &&
       source.deadAt === undefined &&
-      (event.payload.fromUnit === undefined ||
-        event.payload.fromUnit === event.source)
+      (this.assets.effectVisuals[event.effect]?.renderer !== "projectile" ||
+        event.payload.from === event.source)
     ) {
       const targetId = event.payload.to;
       const target =

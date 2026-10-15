@@ -70,7 +70,6 @@ export const gameData: GameData = {
         castRate: 0.5,
         params: {
           damage: 10,
-          range: battlefieldVisionRange,
           projectileSpeed: 1,
           bounce: 3,
         },
