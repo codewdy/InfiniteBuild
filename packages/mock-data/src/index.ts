@@ -34,6 +34,8 @@ export const playerState: PlayerState = {
   tablets: Array.from({ length: TabletMap.idSize }, () => null),
 };
 
+const battlefieldVisionRange = 20;
+
 export const gameData: GameData = {
   affixDefinition: {
     tablet: {
@@ -66,7 +68,12 @@ export const gameData: GameData = {
       fireball: fireball.skill({
         uuid: "player-fireball-template",
         castRate: 0.5,
-        params: { damage: 10, range: 5, projectileSpeed: 1 },
+        params: {
+          damage: 10,
+          range: battlefieldVisionRange,
+          projectileSpeed: 1,
+          bounce: 3,
+        },
       }),
       nova: nova.skill({
         uuid: "player-nova-template",
@@ -76,7 +83,7 @@ export const gameData: GameData = {
     },
   },
   config: {
-    map: { spawnMinimumSize: 5, visionRange: 20 },
+    map: { spawnMinimumSize: 5, visionRange: battlefieldVisionRange },
     event: { maxEventPerUnit: { damage: 10, effect: 10 } },
   },
   skillDefinitions,

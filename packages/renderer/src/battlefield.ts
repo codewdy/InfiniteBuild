@@ -758,7 +758,12 @@ export class Battlefield {
   private addEffect(event: BattleEvent.Effect, previous?: BattleLog): void {
     const source = this.views.get(event.source);
     // Targeted effects can update facing, but never restart a casting action.
-    if (source && source.deadAt === undefined) {
+    if (
+      source &&
+      source.deadAt === undefined &&
+      (event.payload.fromUnit === undefined ||
+        event.payload.fromUnit === event.source)
+    ) {
       const targetId = event.payload.to;
       const target =
         typeof targetId === "number" ? this.views.get(targetId) : undefined;
@@ -848,6 +853,7 @@ export class Battlefield {
       this.drawUnit(view, id);
     }
     const effectFrame = this.log.frame + this.subframe(now);
+    const activeUnitIds = new Set(this.log.units.map((unit) => unit.id));
     this.effects = this.effects.filter((effect) => {
       const elapsedFrames = Math.max(0, effectFrame - effect.start);
       const t = Math.min(1, elapsedFrames / effect.duration);
@@ -860,7 +866,7 @@ export class Battlefield {
         x,
         targetPosition: (id) => {
           const target = this.views.get(id);
-          return target
+          return target && activeUnitIds.has(id)
             ? target.from + (target.position - target.from) * progress
             : undefined;
         },

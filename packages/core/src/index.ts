@@ -9,6 +9,7 @@ export type { BattleEvent, BattleLog } from "./battle/battle-log.js";
 export { SkillTrigger } from "./battle/combat/skill-trigger.js";
 export type { UnitSkill, UnitSkills } from "./battle/combat/skill-trigger.js";
 export { Skill } from "./battle/combat/skill.js";
+export { Projectile } from "./battle/combat/projectile.js";
 export type { UnitDefinition } from "./battle/combat/regular-unit.js";
 export type { PlayerDefinition } from "./player/definition.js";
 export { SkillTablet } from "./player/tablet/skill.js";

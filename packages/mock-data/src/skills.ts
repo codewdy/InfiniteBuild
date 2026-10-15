@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { GameData, hit, Skill, TaskScheduler } from "@infinite-build/core";
+import { GameData, hit, Projectile, Skill } from "@infinite-build/core";
 import { ignite } from "./buffs.js";
 
 export const attack = GameData.defineSkill({
@@ -64,13 +64,21 @@ export const fireball = GameData.defineSkill({
     damage: z.number().nonnegative(),
     range: z.number().nonnegative(),
     projectileSpeed: z.number().positive(),
+    bounce: z.number().int().positive().default(1),
+    maxFrame: z.number().int().positive().default(100),
   }),
   name: "火球",
   targetingRange: (_ctx, _self, skill) => skill.params.range,
-  description: ({ damage, range, projectileSpeed }) =>
-    `向射程 ${range} 内最近的敌人发射火球，每帧飞行 ${projectileSpeed} 个距离单位，命中造成 ${damage} 点伤害并施加点燃。`,
+  description: ({ damage, range, projectileSpeed, bounce, maxFrame }) =>
+    `向射程 ${range} 内最近的敌人发射火球，每帧飞行 ${projectileSpeed} 个距离单位，每段最多飞行 ${maxFrame} 帧，命中造成 ${damage} 点伤害并施加点燃，最多弹射 ${bounce - 1} 次。`,
   *cast(ctx, self, skill) {
-    const { damage, range, projectileSpeed } = skill.params;
+    const {
+      damage,
+      range,
+      projectileSpeed,
+      bounce = 1,
+      maxFrame = 100,
+    } = skill.params;
     let target: typeof self | undefined;
     let nearestDistance = Infinity;
     for (const unit of ctx.units) {
@@ -83,35 +91,36 @@ export const fireball = GameData.defineSkill({
     }
     if (!target) return;
     yield* Skill.ready();
-    ctx.events.addEffect({
-      effect: "fireball",
-      source: self.id,
-      skill: "fireball",
-      payload: {
-        from: self.position,
-        to: target.id,
-        projectileSpeed,
+    let fromUnit = self;
+    Projectile.submit({
+      ctx,
+      unit: target,
+      start: self.position,
+      speed: projectileSpeed,
+      maxFrame,
+      bounce,
+      hitUnit: [],
+      onSubmit(start, unit) {
+        ctx.events.addEffect({
+          effect: "fireball",
+          source: self.id,
+          skill: "fireball",
+          payload: {
+            from: start,
+            fromUnit: fromUnit.id,
+            to: unit.id,
+            direction: Math.sign(unit.position - start),
+            projectileSpeed,
+            maxFrame,
+          },
+        });
+      },
+      onHit(unit) {
+        hit(ctx, self, unit, damage);
+        unit.applyBuff(ignite.id, damage * 0.01, 20);
+        fromUnit = unit;
       },
     });
-    let projectilePosition = self.position;
-    let previousTargetPosition = target.position;
-    while (true) {
-      yield* Skill.waitFrames(1);
-      if (target.isDead) return;
-      const distance = target.position - projectilePosition;
-      // Movement runs after scheduled tasks. A target may have crossed the
-      // projectile since the previous tick, even if it is now far away.
-      const crossedProjectile =
-        Math.sign(previousTargetPosition - projectilePosition) !==
-        Math.sign(distance);
-      if (crossedProjectile || Math.abs(distance) <= projectileSpeed) {
-        hit(ctx, self, target, damage);
-        target.applyBuff(ignite.id, damage * 0.01, 20);
-        return;
-      }
-      projectilePosition += Math.sign(distance) * projectileSpeed;
-      previousTargetPosition = target.position;
-    }
   },
 });
 

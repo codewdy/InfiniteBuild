@@ -23,12 +23,14 @@ export function createSkillEffect(
 ): SkillEffect | undefined {
   const visual = context.assets.effectVisuals[event.effect];
   if (!visual) return;
-  // Projectiles end on arrival; only timed effects require durationFrames.
+  // Projectiles can end on arrival, but never outlive their simulation task.
   const duration =
-    visual.renderer === "projectile" ? Infinity : event.payload.durationFrames;
+    visual.renderer === "projectile"
+      ? event.payload.maxFrame
+      : event.payload.durationFrames;
   if (
     typeof duration !== "number" ||
-    (visual.renderer !== "projectile" && !Number.isFinite(duration)) ||
+    !Number.isFinite(duration) ||
     duration <= 0
   )
     return;

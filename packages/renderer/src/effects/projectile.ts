@@ -7,7 +7,7 @@ export const createProjectile: EffectFactory = (
   duration,
   frames,
 ) => {
-  const { from, to, projectileSpeed } = event.payload;
+  const { from, fromUnit, to, projectileSpeed, direction } = event.payload;
   if (
     typeof from !== "number" ||
     !Number.isFinite(from) ||
@@ -15,17 +15,19 @@ export const createProjectile: EffectFactory = (
     !Number.isSafeInteger(to) ||
     typeof projectileSpeed !== "number" ||
     !Number.isFinite(projectileSpeed) ||
-    projectileSpeed <= 0
+    projectileSpeed <= 0 ||
+    (direction !== -1 && direction !== 0 && direction !== 1)
   )
     return;
   const target =
     context.log.units.find((unit) => unit.id === to) ??
     context.previous?.units.find((unit) => unit.id === to);
   if (!target) return;
+  const origin =
+    context.log.units.find((unit) => unit.id === fromUnit) ??
+    context.previous?.units.find((unit) => unit.id === fromUnit);
   const sprite = new Sprite({ texture: frames[0]!, roundPixels: true });
   sprite.anchor.set(0.75, 0.5);
-  let projectilePosition = from;
-  let previousTargetPosition = target.position;
   let elapsed = 0;
   let verticalProgress = 0;
   return {
@@ -35,32 +37,38 @@ export const createProjectile: EffectFactory = (
     update(_t, { x, targetPosition: position, elapsedFrames }) {
       const targetPosition = position(to);
       if (targetPosition === undefined) return true;
-      const distance = targetPosition - projectilePosition;
-      const travel = projectileSpeed * Math.max(0, elapsedFrames - elapsed);
-      const crossedProjectile =
-        Math.sign(previousTargetPosition - projectilePosition) !==
-        Math.sign(distance);
-      if (crossedProjectile || Math.abs(distance) <= travel) return true;
+      elapsedFrames = Math.max(elapsed, elapsedFrames);
+      // Match Projectile.run: each segment keeps its launch direction.
+      const projectilePosition =
+        from + direction * projectileSpeed * elapsedFrames;
+      if (
+        (direction === 0 && elapsedFrames >= 1) ||
+        (direction !== 0 &&
+          elapsedFrames > 0 &&
+          Math.sign(targetPosition - projectilePosition) !== direction)
+      )
+        return true;
 
+      const previousPosition = from + direction * projectileSpeed * elapsed;
+      const travel = projectileSpeed * (elapsedFrames - elapsed);
+      const distance = Math.abs(targetPosition - previousPosition);
+      const progress = distance === 0 ? 1 : Math.min(1, travel / distance);
+      const sourceY = origin
+        ? context.unitY(origin.id, origin.kind)
+        : context.sourceY;
       const targetY = context.unitY(to, target.kind);
-      const y =
-        context.sourceY + (targetY - context.sourceY) * verticalProgress;
+      const y = sourceY + (targetY - sourceY) * verticalProgress;
       sprite.rotation = Math.atan2(
         targetY - y,
-        x(targetPosition) - x(projectilePosition),
+        x(targetPosition) - x(previousPosition),
       );
-      projectilePosition += Math.sign(distance) * travel;
-      verticalProgress +=
-        (1 - verticalProgress) * (travel / Math.abs(distance));
-      previousTargetPosition = targetPosition;
-      elapsed = Math.max(elapsed, elapsedFrames);
+      verticalProgress += (1 - verticalProgress) * progress;
+      elapsed = elapsedFrames;
       sprite.scale.set(0.16 * context.unitScale);
       sprite.texture = frames[Math.floor(elapsed) % frames.length]!;
       sprite.position.set(
         Math.round(x(projectilePosition)),
-        Math.round(
-          context.sourceY + (targetY - context.sourceY) * verticalProgress,
-        ),
+        Math.round(sourceY + (targetY - sourceY) * verticalProgress),
       );
       return false;
     },
