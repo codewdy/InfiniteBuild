@@ -2,11 +2,21 @@ import type { BattleContext } from "../battle.js";
 import type { Unit } from "./unit.js";
 import { Status } from "./status.js";
 
+export const baseModifier: Status.Modifier = {
+  attributes: {
+    maxHp: { min: 1 },
+    speed: { min: 0 },
+  },
+};
+
 export function updateStatus(ctx: BattleContext, unit: Unit): void {
   // stack reserves one extra frame so advancing first preserves the requested duration.
   unit.buffs.update();
   const modifiers = unit.buffs.getModifiers();
-  const status = Status.apply(unit.calcBaseStatus(ctx), modifiers);
+  const status = Status.apply(unit.calcBaseStatus(ctx), [
+    baseModifier,
+    ...modifiers,
+  ]);
   unit.status = status;
   unit.rawStatus = Status.resolve(unit.status);
   const maxHp = Math.max(1, unit.rawStatus.attributes.maxHp ?? 0);

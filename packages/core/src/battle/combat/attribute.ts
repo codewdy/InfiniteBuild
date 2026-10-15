@@ -1,4 +1,6 @@
 export type Attribute = {
+  min?: number;
+  max?: number;
   base?: number;
   inc?: number;
   more?: number;
@@ -14,16 +16,30 @@ export namespace Attribute {
   }
 
   export function merge(...sources: (Attribute | undefined)[]): Attribute {
+    let min: number | undefined;
+    let max: number | undefined;
     let base = 0;
     let inc = 0;
     let multiplier = 1;
     for (const value of sources) {
       if (!value) continue;
+      if (value.min !== undefined) {
+        min = min === undefined ? value.min : Math.max(min, value.min);
+      }
+      if (value.max !== undefined) {
+        max = max === undefined ? value.max : Math.min(max, value.max);
+      }
       base += value.base ?? 0;
       inc += value.inc ?? 0;
       multiplier *= 1 + (value.more ?? 0);
     }
-    return { base, inc, more: multiplier - 1 };
+    return {
+      ...(min === undefined ? {} : { min }),
+      ...(max === undefined ? {} : { max }),
+      base,
+      inc,
+      more: multiplier - 1,
+    };
   }
 
   export function mergeDict(...sources: (Dict | undefined)[]): Dict {
@@ -42,8 +58,12 @@ export namespace Attribute {
   }
 
   export function resolve(value: Attribute | undefined): number {
-    return (
-      (value?.base ?? 0) * (1 + (value?.inc ?? 0)) * (1 + (value?.more ?? 0))
+    const result =
+      (value?.base ?? 0) * (1 + (value?.inc ?? 0)) * (1 + (value?.more ?? 0));
+    // If the bounds conflict, the upper limit takes precedence.
+    return Math.min(
+      value?.max ?? Infinity,
+      Math.max(value?.min ?? -Infinity, result),
     );
   }
 
