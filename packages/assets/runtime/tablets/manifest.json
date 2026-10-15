@@ -24,7 +24,8 @@
     "support-diagonalPair-magic": "support-diagonalPair-magic",
     "support-diagonalPair-rare": "support-diagonalPair-rare",
     "support-diagonal-magic": "support-diagonal-magic",
-    "support-diagonal-rare": "support-diagonal-rare"
+    "support-diagonal-rare": "support-diagonal-rare",
+    "chainLightning": "tablet-chain-lightning"
   },
   "settlement": {
     "emblems": {
@@ -208,6 +209,12 @@
       "frame": [134, 142, 685, 632],
       "size": [685, 685],
       "alignment": "center"
+    },
+    "tablet-chain-lightning": {
+      "image": "tablets/chain-lightning.png",
+      "frame": [0, 0, 1254, 1254],
+      "size": [1254, 1254],
+      "alignment": "center"
     }
   },
   "defaultSkillIcon": "passive",
@@ -254,6 +261,9 @@
         "magic": "nova-magic",
         "rare": "nova-rare"
       }
+    },
+    "chainLightning": {
+      "icon": "chainLightning"
     }
   }
 }

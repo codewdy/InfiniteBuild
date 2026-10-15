@@ -40,6 +40,7 @@ export function checkVisuals(manifest, { skills, affixes, renderers }) {
   for (const [id, effect] of Object.entries(effects)) {
     if (!renderers.includes(effect.renderer))
       errors.push(`effect ${id}: unknown renderer ${effect.renderer}`);
+    if (effect.renderer === "lightning") continue;
     const sequence = manifest.effects?.[effect.frames];
     if (!Array.isArray(sequence) || !sequence.length)
       errors.push(`effect ${id}: missing frame sequence ${effect.frames}`);

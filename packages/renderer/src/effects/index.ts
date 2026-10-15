@@ -1,5 +1,6 @@
 import type { EffectRenderer } from "@infinite-build/assets";
 import type { BattleEvent } from "@infinite-build/core";
+import { createLightning } from "./lightning.js";
 import { createProjectile } from "./projectile.js";
 import { createWave } from "./wave.js";
 import { createTargetStrike } from "./target-strike.js";
@@ -13,6 +14,7 @@ import type {
 export const effectFactories: Readonly<Record<EffectRenderer, EffectFactory>> =
   {
     projectile: createProjectile,
+    lightning: createLightning,
     wave: createWave,
     "target-strike": createTargetStrike,
   };
@@ -25,17 +27,20 @@ export function createSkillEffect(
   if (!visual) return;
   // Projectiles can end on arrival, but never outlive their simulation task.
   const duration =
-    visual.renderer === "projectile"
-      ? event.payload.maxFrame
-      : event.payload.durationFrames;
+    visual.renderer === "lightning"
+      ? 3
+      : visual.renderer === "projectile"
+        ? event.payload.maxFrame
+        : event.payload.durationFrames;
   if (
     typeof duration !== "number" ||
     !Number.isFinite(duration) ||
     duration <= 0
   )
     return;
-  const frames = context.assets.effects[visual.frames];
-  if (!frames?.length) return;
+  const frames =
+    "frames" in visual ? context.assets.effects[visual.frames] : [];
+  if (!frames || ("frames" in visual && !frames.length)) return;
   const factory = effectFactories[visual.renderer];
   return factory?.(event, context, duration, frames);
 }

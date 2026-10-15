@@ -1,6 +1,13 @@
-export const effectRenderers = ["projectile", "wave", "target-strike"] as const;
+export const effectRenderers = [
+  "projectile",
+  "wave",
+  "target-strike",
+  "lightning",
+] as const;
 export type EffectRenderer = (typeof effectRenderers)[number];
-export type EffectVisual = { renderer: EffectRenderer; frames: string };
+export type EffectVisual =
+  | { renderer: Exclude<EffectRenderer, "lightning">; frames: string }
+  | { renderer: "lightning" };
 export type SkillIcon = {
   icon: string;
   rarityIcons?: Record<string, string>;

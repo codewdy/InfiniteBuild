@@ -1,5 +1,5 @@
 import type { BattleEvent, BattleLog } from "@infinite-build/core";
-import type { Sprite, Texture } from "pixi.js";
+import type { Container, Texture } from "pixi.js";
 import type { BattlefieldAssets } from "@infinite-build/assets";
 
 export type EffectDrawContext = {
@@ -9,7 +9,7 @@ export type EffectDrawContext = {
 };
 
 export type SkillEffect = {
-  sprite: Sprite;
+  sprite: Container;
   start: number;
   duration: number;
   /** Return true when the effect has finished and can be destroyed. */

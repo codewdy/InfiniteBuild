@@ -757,11 +757,12 @@ export class Battlefield {
 
   private addEffect(event: BattleEvent.Effect, previous?: BattleLog): void {
     const source = this.views.get(event.source);
+    const renderer = this.assets.effectVisuals[event.effect]?.renderer;
     // Targeted effects can update facing, but never restart a casting action.
     if (
       source &&
       source.deadAt === undefined &&
-      (this.assets.effectVisuals[event.effect]?.renderer !== "projectile" ||
+      ((renderer !== "projectile" && renderer !== "lightning") ||
         event.payload.from === event.source)
     ) {
       const targetId = event.payload.to;

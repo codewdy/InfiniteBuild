@@ -89,6 +89,31 @@ export const fireball = GameData.defineSkill({
   },
 });
 
+export const chainLightning = GameData.defineSkill({
+  id: "chainLightning",
+  params: z.object({
+    damage: z.number().nonnegative(),
+    range: z.number().nonnegative(),
+  }),
+  name: "闪电链",
+  targetingRange: (_ctx, _self, skill) => skill.params.range,
+  description: ({ damage, range }) =>
+    `向射程 ${range} 内随机一个敌人释放闪电，额外弹射 3 次，在同一帧对最多 4 个不同敌人各造成 ${damage} 点伤害。`,
+  *cast(ctx, self, skill) {
+    const { damage, range } = skill.params;
+    yield* Skill.ready();
+    Projectile.fire({
+      ctx,
+      source: self,
+      from: self,
+      effect: "chainLightning",
+      range,
+      bounce: 4,
+      onHit: (unit) => hit(ctx, self, unit, damage),
+    });
+  },
+});
+
 export const nova = GameData.defineSkill({
   id: "nova",
   params: z.object({
@@ -137,5 +162,6 @@ export const skillDefinitions = GameData.skills([
   attack,
   selfDestruct,
   fireball,
+  chainLightning,
   nova,
 ]);

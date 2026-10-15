@@ -82,6 +82,9 @@
     "attack": {
       "renderer": "target-strike",
       "frames": "attack"
+    },
+    "chainLightning": {
+      "renderer": "lightning"
     }
   }
 }

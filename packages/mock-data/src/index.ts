@@ -12,7 +12,13 @@ export { rollPassiveTablet, passiveTabletOptions } from "./tablets.js";
 export type { MockTablet, TabletKind } from "./tablets.js";
 import type { BattleSpec, GameData, PlayerState } from "@infinite-build/core";
 
-import { attack, fireball, nova, skillDefinitions } from "./skills.js";
+import {
+  attack,
+  fireball,
+  chainLightning,
+  nova,
+  skillDefinitions,
+} from "./skills.js";
 import { buffDefinitions } from "./buffs.js";
 import { passiveAffixes, supportSkillAffixes } from "./affixes.js";
 export { passiveAffixes, supportSkillAffixes } from "./affixes.js";
@@ -31,7 +37,9 @@ export const playerState: PlayerState = {
   config: { autoAdvanceLevel: false, minimumEnemyCount: 2 },
   level: 1,
   xp: 0,
-  tablets: Array.from({ length: TabletMap.idSize }, () => null),
+  tablets: Array.from({ length: TabletMap.idSize }, (_, slot) =>
+    slot === 1 ? createTablet("chainLightning", slot) : null,
+  ),
 };
 
 const battlefieldVisionRange = 20;
@@ -74,6 +82,11 @@ export const gameData: GameData = {
           range: battlefieldVisionRange,
           bounce: 3,
         },
+      }),
+      chainLightning: chainLightning.skill({
+        uuid: "player-chain-lightning-template",
+        castRate: 0.2,
+        params: { damage: 10, range: battlefieldVisionRange },
       }),
       nova: nova.skill({
         uuid: "player-nova-template",

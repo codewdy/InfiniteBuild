@@ -602,6 +602,7 @@
     "attack": "attack",
     "selfDestruct": "cast",
     "fireball": "cast",
-    "nova": "cast"
+    "nova": "cast",
+    "chainLightning": "cast"
   }
 }

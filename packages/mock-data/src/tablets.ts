@@ -55,7 +55,7 @@ export function rollPassiveTablet(
   };
 }
 
-export type TabletKind = "fireball" | "nova";
+export type TabletKind = "fireball" | "nova" | "chainLightning";
 export type MockTablet = TabletSpec.Skill;
 
 export const tabletOptions = [
@@ -63,6 +63,11 @@ export const tabletOptions = [
     kind: "fireball",
     name: "火球",
     description: "10 伤害 · 每 2 帧施放 · 射程 5",
+  },
+  {
+    kind: "chainLightning",
+    name: "闪电链",
+    description: "10 伤害 · 每 5 帧施放 · 同帧弹射 3 次",
   },
   {
     kind: "nova",
