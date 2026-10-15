@@ -71,6 +71,7 @@ export const gameData: GameData = {
         params: {
           damage: 10,
           projectileSpeed: 1,
+          range: battlefieldVisionRange,
           bounce: 3,
         },
       }),

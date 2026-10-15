@@ -64,20 +64,14 @@ export const fireball = GameData.defineSkill({
     damage: z.number().nonnegative(),
     projectileSpeed: z.number().positive(),
     bounce: z.number().int().positive().default(1),
-    maxFrame: z.number().int().positive().default(100),
+    range: z.number().nonnegative(),
   }),
   name: "火球",
-  targetingRange: (_ctx, _self, skill) =>
-    skill.params.projectileSpeed * (skill.params.maxFrame ?? 100) * 0.9,
-  description: ({ damage, projectileSpeed, bounce, maxFrame }) =>
-    `向射程 ${projectileSpeed * maxFrame * 0.9} 内随机一个敌人发射火球，每帧飞行 ${projectileSpeed} 个距离单位，每段最多飞行 ${maxFrame} 帧，命中造成 ${damage} 点伤害并施加点燃，最多弹射 ${bounce - 1} 次。`,
+  targetingRange: (_ctx, _self, skill) => skill.params.range,
+  description: ({ damage, projectileSpeed, bounce, range }) =>
+    `向射程 ${range} 内随机一个敌人发射火球，每帧飞行 ${projectileSpeed} 个距离单位，命中造成 ${damage} 点伤害并施加点燃，最多弹射 ${bounce - 1} 次。`,
   *cast(ctx, self, skill) {
-    const {
-      damage,
-      projectileSpeed,
-      bounce = 1,
-      maxFrame = 100,
-    } = skill.params;
+    const { damage, projectileSpeed, bounce = 1, range } = skill.params;
     yield* Skill.ready();
     Projectile.fire({
       ctx,
@@ -85,7 +79,7 @@ export const fireball = GameData.defineSkill({
       source: self,
       from: self,
       speed: projectileSpeed,
-      maxFrame,
+      range,
       bounce,
       onHit(unit) {
         hit(ctx, self, unit, damage);

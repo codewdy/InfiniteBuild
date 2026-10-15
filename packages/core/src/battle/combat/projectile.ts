@@ -9,7 +9,7 @@ export namespace Projectile {
     source: Unit;
     from: Unit;
     speed?: number;
-    maxFrame: number;
+    range: number;
     effect: string;
     onHit: (unit: Unit) => void;
     bounce: number;
@@ -22,11 +22,9 @@ export namespace Projectile {
     arg: Arg & { hitUnit?: Unit[] },
     count: number,
   ): UnitList {
-    const range =
-      arg.speed === undefined ? Infinity : arg.speed * arg.maxFrame * 0.9;
     const position = arg.from.position;
     return arg.ctx.units
-      .inPositionRange(position - range, position + range)
+      .inPositionRange(position - arg.range, position + arg.range)
       .filter(
         (unit) =>
           unit.faction !== arg.source.faction &&
@@ -54,7 +52,8 @@ export namespace Projectile {
   function* run(state: State): TaskScheduler.Routine {
     let position = state.from.position;
     const direction = Math.sign(state.to.position - position);
-    for (let i: number = 0; i < state.maxFrame; i++) {
+    const duration = state.range / (state.speed ?? 1) + 2;
+    for (let i: number = 0; i < duration; i++) {
       yield* TaskScheduler.waitFrames(1);
       if (state.to.isDead) return;
       if (direction == 0) {
@@ -77,7 +76,7 @@ export namespace Projectile {
         from: state.from.id,
         to: state.to.id,
         projectileSpeed: state.speed,
-        maxFrame: state.maxFrame,
+        maxFrame: state.speed == undefined ? 0 : state.range / state.speed + 2,
       },
     });
     if (state.speed == undefined) {
