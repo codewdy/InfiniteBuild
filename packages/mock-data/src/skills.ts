@@ -6,9 +6,10 @@ export const attack = GameData.defineSkill({
   id: "attack",
   params: z.object({ range: z.number().nonnegative() }),
   name: "攻击",
+  targetingRange: (_ctx, _self, skill) => skill.params.range,
   description: ({ range }) =>
     `攻击射程 ${range} 内最近的敌人，造成攻击力 10% 的伤害。`,
-  *caster(ctx, self, skill) {
+  *cast(ctx, self, skill) {
     let target: typeof self | undefined;
     let nearestDistance = Infinity;
     for (const unit of ctx.units) {
@@ -41,7 +42,7 @@ export const selfDestruct = GameData.defineSkill({
   name: "自爆",
   description: ({ damage, radius }) =>
     `自爆，对半径 ${radius} 内的敌人造成 ${damage} 点伤害。`,
-  *caster(ctx, self, skill) {
+  *cast(ctx, self, skill) {
     const { radius, damage } = skill.params;
     yield* Skill.ready();
     for (const unit of ctx.units) {
@@ -65,9 +66,10 @@ export const fireball = GameData.defineSkill({
     projectileSpeed: z.number().positive(),
   }),
   name: "火球",
+  targetingRange: (_ctx, _self, skill) => skill.params.range,
   description: ({ damage, range, projectileSpeed }) =>
     `向射程 ${range} 内最近的敌人发射火球，每帧飞行 ${projectileSpeed} 个距离单位，命中造成 ${damage} 点伤害并施加点燃。`,
-  *caster(ctx, self, skill) {
+  *cast(ctx, self, skill) {
     const { damage, range, projectileSpeed } = skill.params;
     let target: typeof self | undefined;
     let nearestDistance = Infinity;
@@ -113,7 +115,7 @@ export const nova = GameData.defineSkill({
   name: "新星",
   description: ({ damage, radius, durationFrames }) =>
     `释放新星，在 ${durationFrames} 帧内扩散至半径 ${radius}，对每个敌人造成 ${damage} 点伤害。`,
-  *caster(ctx, self, skill) {
+  *cast(ctx, self, skill) {
     const { radius, damage, durationFrames } = skill.params;
     const center = self.position;
     yield* Skill.ready();

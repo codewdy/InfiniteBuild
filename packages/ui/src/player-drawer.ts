@@ -153,7 +153,6 @@ export class PlayerDrawerView extends Container {
         this.xpBar
           .roundRect(0, 65, Math.max(8, 480 * ratio), 8, 4)
           .fill(0x82e6ce);
-      this.cells[3]!.text = this.number(profile.move.speed);
       this.cells[4]!.text = `${state.inventory.filter(Boolean).length} / ${this.data.playerDefinition.inventoryCapacity}`;
       this.cells[5]!.text = `${state.tablets.filter(Boolean).length} / ${state.tablets.length}`;
       this.progressLabel.text = `当前关卡 ${state.currentMapLevel.join("-")}   ·   最高解锁 ${state.highestUnlockedMapLevel.join("-")}`;
@@ -164,6 +163,7 @@ export class PlayerDrawerView extends Container {
     this.cells[0]!.text = `${this.number(player?.hp ?? 0)} / ${this.number(attributes.maxHp ?? 0)}`;
     this.cells[1]!.text = this.number(attributes.attack ?? 0);
     this.cells[2]!.text = this.number(attributes.defense ?? 0);
+    this.cells[3]!.text = this.number(attributes.speed ?? 0);
   }
 
   layout(width: number, height: number): void {

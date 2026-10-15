@@ -1,5 +1,5 @@
 import { Unit } from "./unit.js";
-import { move } from "./movement.js";
+import { move, moveBySkillRange } from "./movement.js";
 import type { BattleContext } from "../battle.js";
 import type { Status } from "./status.js";
 import { derivePlayerCombatProfile } from "../../player/state.js";
@@ -25,43 +25,21 @@ export class PlayerUnit extends Unit {
     return this.combatProfile!.status;
   }
   override onMove(ctx: BattleContext): void {
-    const { speed, range, count, safeRange } = this.combatProfile!.move;
-    const visionRange = ctx.gameData.config.map.visionRange;
-    const enemyPositions: number[] = [];
-    for (const unit of ctx.units) {
-      const distance = unit.position - this.position;
-      if (
-        unit.faction !== this.faction &&
-        distance >= 0 &&
-        distance <= visionRange
-      ) {
-        enemyPositions.push(unit.position);
-      }
-    }
-
-    enemyPositions.sort((a, b) => a - b);
-    const nearestPosition = enemyPositions[0];
-    const safeMoveDistance =
-      nearestPosition === undefined
-        ? speed
-        : Math.min(
-            speed,
-            Math.max(0, nearestPosition - this.position - safeRange),
-          );
-
-    if (enemyPositions.length < count && ctx.pendingSpawns.length > 0) {
-      move(ctx, this, 1, safeMoveDistance);
+    if ((this.rawStatus.attributes.speed ?? 0) <= 0) {
       return;
     }
-    if (enemyPositions.length === 0 || count <= 0) return;
-
-    const targetPosition =
-      enemyPositions[Math.min(count, enemyPositions.length) - 1]!;
-    const distanceToMove = Math.min(
-      safeMoveDistance,
-      Math.max(0, targetPosition - this.position - range),
-    );
-    move(ctx, this, 1, distanceToMove);
+    const { minimumEnemyCount } = this.combatProfile!.config;
+    let enemyCount = 0;
+    for (const unit of ctx.units) {
+      if (unit.faction !== this.faction && ctx.allSpawns.has(unit)) {
+        enemyCount += 1;
+      }
+    }
+    if (enemyCount < minimumEnemyCount && ctx.pendingSpawns.length > 0) {
+      move(ctx, this, 1, this.rawStatus.attributes.speed ?? 0);
+      return;
+    }
+    moveBySkillRange(ctx, this);
   }
   override onUpdate(ctx: BattleContext): void {
     super.onUpdate(ctx);

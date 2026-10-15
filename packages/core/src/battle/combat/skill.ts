@@ -5,36 +5,39 @@ import type { Status } from "./status.js";
 import type { SkillTrigger } from "./skill-trigger.js";
 
 export namespace Skill {
-  export type SkillReady = { kind: "SkillReady" };
+  export type Ready = { kind: "SkillReady" };
 
   export const waitFrames = TaskScheduler.waitFrames;
-  export function* ready(): Generator<SkillReady, void, void> {
+  export function* ready(): Generator<Ready, void, void> {
     yield { kind: "SkillReady" };
   }
 
-  export type Routine = Generator<
-    SkillReady | TaskScheduler.Suspension,
-    void,
-    void
-  >;
+  export type Routine = Generator<Ready | TaskScheduler.Suspension, void, void>;
 
-  export type Caster = (
+  export type Cast = (
     ctx: BattleContext,
     unit: Unit,
     skill: Context,
   ) => Routine;
+  export type TargetingRange = (
+    ctx: BattleContext,
+    unit: Unit,
+    skill: Context,
+  ) => number;
   export type Params = Record<string, unknown>;
 
   export type Definition = {
     name: string;
     description: (params: Params) => string;
-    caster: Caster;
+    targetingRange?: TargetingRange;
+    cast: Cast;
   };
 
   export type Context = {
     uuid: string;
     skill: string;
-    caster: Caster;
+    targetingRange?: TargetingRange;
+    cast: Cast;
     castRate?: number;
     battleContext: BattleContext;
     params: Params;
@@ -50,14 +53,14 @@ export namespace Skill {
     trigger: SkillTrigger.EventType,
   ): void {
     if (!skill.ready) return;
-    const caster = skill.caster(ctx, unit, skill);
-    const readyInfo = caster.next();
+    const routine = skill.cast(ctx, unit, skill);
+    const readyInfo = routine.next();
     if (readyInfo.done) {
       skill.ready = false;
       return;
     }
     if (readyInfo.value.kind !== "SkillReady") {
-      caster.return();
+      routine.return();
       throw new Error("skill must yield SkillReady before waiting");
     }
     if (trigger === "onUpdate") {
@@ -67,6 +70,6 @@ export namespace Skill {
         uuid: skill.uuid,
       });
     }
-    ctx.taskScheduler.start(caster as TaskScheduler.Routine);
+    ctx.taskScheduler.start(routine as TaskScheduler.Routine);
   }
 }

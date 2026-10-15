@@ -28,10 +28,9 @@ export const playerState: PlayerState = {
   ],
   inventory: [createTablet("fireball", TabletMap.idSize)],
   tutorial: { completed: [] },
-  config: { autoAdvanceLevel: false },
+  config: { autoAdvanceLevel: false, minimumEnemyCount: 2 },
   level: 1,
   xp: 0,
-  move: { speed: 1, safeRange: 1, range: 5, count: 2 },
   tablets: Array.from({ length: TabletMap.idSize }, () => null),
 };
 
@@ -59,6 +58,7 @@ export const gameData: GameData = {
     baseStatus: {
       attributes: Attribute.createDictByRaw({
         maxHp: 10,
+        speed: 1,
       }),
       triggers: {},
     },
@@ -85,8 +85,7 @@ export const gameData: GameData = {
     Slime: {
       kind: "Slime",
       name: "史莱姆",
-      status: { attributes: { maxHp: 20, attack: 5, defense: 0 } },
-      move: { speed: 0.5, range: { min: 1.5, max: 2 } },
+      status: { attributes: { maxHp: 20, attack: 5, defense: 0, speed: 0.5 } },
       skills: {
         onUpdate: [
           attack.skill({
@@ -100,8 +99,7 @@ export const gameData: GameData = {
     Goblin: {
       kind: "Goblin",
       name: "哥布林",
-      status: { attributes: { maxHp: 30, attack: 5, defense: 0 } },
-      move: { speed: 1, range: { min: 2.5, max: 3 } },
+      status: { attributes: { maxHp: 30, attack: 5, defense: 0, speed: 1 } },
       skills: {
         onUpdate: [
           attack.skill({

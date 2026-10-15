@@ -8,7 +8,7 @@ import type { Loot } from "./loot.js";
 import type { MapLevel } from "../battle/spawn.js";
 
 export type PlayerCombatProfile = {
-  move: PlayerState["move"];
+  config: PlayerState["config"];
   skills: UnitSkills;
   status: Status;
 };
@@ -17,12 +17,6 @@ export type PlayerState = {
   level: number;
   /** Total accumulated experience; leveling up does not consume it. */
   xp: number;
-  move: {
-    speed: number;
-    safeRange: number;
-    range: number;
-    count: number;
-  };
   tablets: TabletSpec.Slot[];
   inventory: Inventory;
   pendingLoot: {
@@ -36,6 +30,7 @@ export type PlayerState = {
   };
   config: {
     autoAdvanceLevel: boolean;
+    minimumEnemyCount: number;
   };
 };
 
@@ -44,7 +39,7 @@ export function derivePlayerCombatProfile(
   state: PlayerState,
 ): PlayerCombatProfile {
   const player: PlayerCombatProfile = {
-    move: { ...state.move },
+    config: { ...state.config },
     skills: {},
     status: Status.apply(game.playerDefinition.baseStatus, []),
   };

@@ -2,19 +2,26 @@ import type { z } from "zod";
 import type { Skill } from "../battle/combat/skill.js";
 import type { UnitSkill } from "../battle/combat/skill-trigger.js";
 
-type TypedSkillCaster<Schema extends z.ZodObject> = (
-  ctx: Parameters<Skill.Caster>[0],
-  unit: Parameters<Skill.Caster>[1],
+type TypedSkillCast<Schema extends z.ZodObject> = (
+  ctx: Parameters<Skill.Cast>[0],
+  unit: Parameters<Skill.Cast>[1],
   skill: Omit<Skill.Context, "params"> & { params: z.output<Schema> },
-) => ReturnType<Skill.Caster>;
+) => ReturnType<Skill.Cast>;
+
+type TypedTargetingRange<Schema extends z.ZodObject> = (
+  ctx: Parameters<Skill.TargetingRange>[0],
+  unit: Parameters<Skill.TargetingRange>[1],
+  skill: Omit<Skill.Context, "params"> & { params: z.output<Schema> },
+) => ReturnType<Skill.TargetingRange>;
 
 type TypedSkillDefinition<Schema extends z.ZodObject> = Omit<
   Skill.Definition,
-  "caster" | "description"
+  "cast" | "description" | "targetingRange"
 > & {
   id: string;
   params: Schema;
-  caster: TypedSkillCaster<NoInfer<Schema>>;
+  cast: TypedSkillCast<NoInfer<Schema>>;
+  targetingRange?: TypedTargetingRange<NoInfer<Schema>>;
   description: (params: z.output<NoInfer<Schema>>) => string;
 };
 type TypedUnitSkill<Schema extends z.ZodObject> = Omit<
@@ -33,12 +40,14 @@ type ResolvedSkillDefinition<Schema extends z.ZodObject> = {
 export function defineSkill<Schema extends z.ZodObject>(
   definition: TypedSkillDefinition<Schema>,
 ): ResolvedSkillDefinition<Schema> {
-  const { id, params, caster, description, ...fields } = definition;
+  const { id, params, cast, targetingRange, description, ...fields } =
+    definition;
   return {
     id,
     definition: {
       ...fields,
-      caster: caster as Skill.Caster,
+      cast: cast as Skill.Cast,
+      targetingRange: targetingRange as Skill.TargetingRange | undefined,
       description: (values) => description(params.parse(values)),
     },
     skill(unitSkill) {
