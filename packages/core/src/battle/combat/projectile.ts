@@ -16,14 +16,17 @@ export namespace Projectile {
   };
   function hit(state: State) {
     const target = state.unit;
-    if (target.isDead || state.hitUnit.includes(target)) return;
+    if (target.isDead) return;
     const position = target.position;
     state.hitUnit.push(target);
     state.onHit(target);
     if (state.bounce <= 1) return;
 
+    const range =
+      state.speed === undefined ? Infinity : state.speed * state.maxFrame * 0.9;
     const nextTarget = state.ctx.units
       .ofFaction(target.faction)
+      .inPositionRange(position - range, position + range)
       .filter((unit) => !unit.isDead && !state.hitUnit.includes(unit))
       .randomChoice();
     if (!nextTarget) return;

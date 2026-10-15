@@ -5,14 +5,20 @@ import os from "node:os";
 import { performance } from "node:perf_hooks";
 import { fileURLToPath } from "node:url";
 import { Attribute, Battle } from "../packages/core/dist/index.js";
-import { gameData, playerState } from "../packages/mock-data/dist/index.js";
+import {
+  createTablet,
+  gameData,
+  playerState,
+} from "../packages/mock-data/dist/index.js";
 
 // Run via pnpm benchmark:fireball, or after building:
 // node scripts/benchmark-fireball.mjs --counts=0,100,500,1000,2000
 //   --flight-frames=1,5,10 --frames=1000 --warmup=300 --rounds=5
 //   --output=/tmp/fireball-benchmark.json
-// One stationary enemy casts at a stationary player through the normal
-// SkillTrigger. Real fireball damage, ignite, scheduler and logs are included.
+// A stationary player equips a fireball tablet and casts through SkillTrigger.
+// Three stationary enemies share position 60: initial flight takes flightFrames,
+// followed by two one-frame bounces. Counts refer to initial casts, not segments.
+// Real fireball damage, ignite, scheduler and logs are included.
 // Each round uses a fresh process; no forced GC or retained BattleLog history.
 const options = Object.fromEntries(
   process.argv.slice(2).map((argument) => {
@@ -53,30 +59,32 @@ function createBattle(count, flightFrames) {
     },
     playerDefinition: {
       ...gameData.playerDefinition,
+      skills: {
+        fireball: {
+          uuid: "benchmark-fireball",
+          skill: "fireball",
+          castRate: count,
+          params: {
+            damage: 100,
+            range: 120,
+            projectileSpeed: 60 / flightFrames,
+            bounce: 3,
+            // maxFrame: Math.max(100, flightFrames + 1),
+            maxFrame: flightFrames + 1,
+          },
+        },
+      },
       baseStatus: {
         attributes: Attribute.createDictByRaw({ maxHp: 1e15, speed: 0 }),
         triggers: {},
       },
     },
     unitDefinitions: {
-      BenchmarkCaster: {
-        kind: "BenchmarkCaster",
-        name: "Benchmark caster",
+      BenchmarkTarget: {
+        kind: "BenchmarkTarget",
+        name: "Benchmark target",
         status: { attributes: { maxHp: 1e15, speed: 0 } },
-        skills: {
-          onUpdate: [
-            {
-              skill: "fireball",
-              uuid: "benchmark-fireball",
-              castRate: count,
-              params: {
-                damage: 100,
-                range: 120,
-                projectileSpeed: 60 / flightFrames,
-              },
-            },
-          ],
-        },
+        skills: {},
       },
     },
     mapDefinitions: {
@@ -90,64 +98,99 @@ function createBattle(count, flightFrames) {
             mapSize: 0,
             value: 1,
             weight: 1,
-            enemies: [{ kind: "BenchmarkCaster", count: { min: 1, max: 1 } }],
+            enemies: [{ kind: "BenchmarkTarget", count: { min: 3, max: 3 } }],
           },
         ],
       },
     },
   };
-  return new Battle(
-    data,
-    { level: [1, 1], seed: 42, map: "benchmark" },
-    {
-      ...structuredClone(playerState),
-      tablets: playerState.tablets.map(() => null),
-    },
-  );
+  const state = {
+    ...structuredClone(playerState),
+    tablets: playerState.tablets.map(() => null),
+  };
+  state.tablets[0] = createTablet("fireball", 0);
+  return {
+    battle: new Battle(
+      data,
+      { level: [1, 1], seed: 42, map: "benchmark" },
+      state,
+    ),
+    state,
+  };
 }
-function verify(log, count, flightFrames, previousHp) {
+function verify(
+  log,
+  count,
+  flightFrames,
+  emissionFrames,
+  previousHp,
+  totalHits,
+) {
   assert.equal(log.status, "Running");
-  assert.equal(log.units.length, 2);
+  assert.equal(log.units.length, 4);
   assert.ok(log.units.every((unit) => unit.hp > 0));
-  assert.equal(log.units.find((unit) => unit.kind === "Player").position, 0);
-  assert.equal(
-    log.units.find((unit) => unit.kind === "BenchmarkCaster").position,
-    60,
-  );
-  let effects = 0;
-  let damage = 0;
-  for (const event of log.events) {
-    if (event.kind === "Effect") {
-      assert.equal(event.effect, "fireball");
-      effects++;
-    }
-    if (event.kind === "Damage") damage++;
+  const player = log.units.find((unit) => unit.kind === "Player");
+  assert.equal(player.position, 0);
+  assert.equal(player.hp, 1e15);
+  const targets = log.units.filter((unit) => unit.kind === "BenchmarkTarget");
+  assert.equal(targets.length, 3);
+  const delays = [flightFrames, flightFrames + 1, flightFrames + 2];
+  const hitsAt = (delay) =>
+    log.frame > delay && log.frame <= emissionFrames + delay ? count : 0;
+  const expectedHits = delays.reduce((sum, delay) => sum + hitsAt(delay), 0);
+  const expectedIgnite = delays.reduce((sum, delay) => {
+    const first = Math.max(log.frame - 20, delay + 1);
+    const last = Math.min(log.frame - 1, emissionFrames + delay);
+    return sum + count * Math.max(0, last - first + 1);
+  }, 0);
+  let actualHits = 0;
+  let actualIgnite = 0;
+  for (const target of targets) {
+    assert.equal(target.position, 60);
+    // Damage=100 makes each ignite stack exactly 1, avoiding rounding at high HP.
+    const ignite = target.status.attributes["buff.ignite"] ?? 0;
+    const damage = (previousHp.get(target.id) ?? 1e15) - target.hp;
+    const hits = (damage - ignite) / 100;
+    assert.ok(Number.isSafeInteger(hits) && hits >= 0);
+    actualHits += hits;
+    actualIgnite += ignite;
+    totalHits.set(target.id, (totalHits.get(target.id) ?? 0) + hits);
+    previousHp.set(target.id, target.hp);
+    const damageEvents = log.events.filter(
+      (event) => event.kind === "Damage" && event.dst === target.id,
+    ).length;
+    assert.equal(
+      damageEvents,
+      Math.min(
+        hits + (ignite > 0 ? 1 : 0),
+        gameData.config.event.maxEventPerUnit.damage,
+      ),
+    );
   }
   assert.equal(
-    effects,
-    Math.min(count, gameData.config.event.maxEventPerUnit.effect),
-    `Incorrect fireball event count at frame ${log.frame}`,
+    actualHits,
+    expectedHits,
+    `Incorrect impacts at frame ${log.frame}`,
   );
-  const hits = log.frame > flightFrames ? count : 0;
-  const ignite = count > 0 && log.frame > flightFrames + 1 ? 1 : 0;
   assert.equal(
-    damage,
-    Math.min(hits + ignite, gameData.config.event.maxEventPerUnit.damage),
-    `Incorrect impact/ignite event count at frame ${log.frame}`,
+    actualIgnite,
+    expectedIgnite,
+    `Incorrect ignite at frame ${log.frame}`,
   );
-  // Damage=100 makes each ignite stack exactly 1, avoiding rounding at high HP.
-  // HP and buff levels validate real impacts even when event logs are capped.
-  const target = log.units.find((unit) => unit.kind === "Player");
-  const igniteDamage =
-    count * Math.min(20, Math.max(0, log.frame - flightFrames - 1));
-  assert.equal(target.status.attributes["buff.ignite"] ?? 0, igniteDamage);
+  const initialCasts = log.frame <= emissionFrames ? count : 0;
+  const submissions = initialCasts + hitsAt(delays[0]) + hitsAt(delays[1]);
+  const effects = log.events.filter((event) => event.kind === "Effect");
   assert.equal(
-    previousHp - target.hp,
-    hits * 100 + igniteDamage,
-    `Incorrect actual damage at frame ${log.frame}`,
+    effects.length,
+    Math.min(submissions, gameData.config.event.maxEventPerUnit.effect),
   );
-  return target.hp;
+  for (const event of effects) {
+    assert.equal(event.effect, "fireball");
+    assert.equal(event.source, player.id);
+    assert.ok(targets.some((unit) => unit.id === event.payload.to));
+  }
 }
+
 function summarize(samples) {
   const sorted = [...samples].sort((a, b) => a - b);
   const percentile = (p) =>
@@ -164,10 +207,12 @@ function summarize(samples) {
 }
 if (options.worker) {
   const { count, flightFrames, frames, warmup } = JSON.parse(options.worker);
-  const battle = createBattle(count, flightFrames);
-  let previousHp = 1e15;
+  const { battle, state } = createBattle(count, flightFrames);
+  const emissionFrames = warmup + frames;
+  const previousHp = new Map();
+  const totalHits = new Map();
   const validate = (log) => {
-    previousHp = verify(log, count, flightFrames, previousHp);
+    verify(log, count, flightFrames, emissionFrames, previousHp, totalHits);
   };
   // Fill both the in-flight task population and the 20-frame ignite window.
   for (let frame = 0; frame < warmup; frame++) validate(battle.executeFrame());
@@ -179,9 +224,13 @@ if (options.worker) {
     // Validation and output are outside the timed region.
     validate(log);
   }
-  // Verify impacts from the final measured launches as well.
-  for (let frame = 0; frame < flightFrames; frame++)
+  // Unequip the tablet and drain the last chains and their ignite stacks.
+  battle.changeState({ ...state, tablets: state.tablets.map(() => null) });
+  for (let frame = 0; frame < flightFrames + 23; frame++)
     validate(battle.executeFrame());
+  assert.equal(totalHits.size, 3);
+  for (const hits of totalHits.values())
+    assert.equal(hits, emissionFrames * count);
   process.stdout.write(JSON.stringify(samples));
 } else {
   const counts = list(options.counts ?? "0,100,500,1000,2000", 0);
@@ -190,7 +239,7 @@ if (options.worker) {
   const frames = integer(options.frames ?? 1000);
   const warmup = Math.max(
     integer(options.warmup ?? 300, 0),
-    Math.max(...flights) + 21,
+    Math.max(...flights) + 23,
   );
   const rounds = integer(options.rounds ?? 5);
   const scenarios = counts.flatMap((count) =>
@@ -215,6 +264,11 @@ if (options.worker) {
       warmup,
       rounds,
       timeUnit: "ms",
+      caster: "Player",
+      extraBounces: 2,
+      targets: 3,
+      targetPositions: [60, 60, 60],
+      flightFramesMeaning: "initial flight; each bounce takes one frame",
       eventCaps: gameData.config.event.maxEventPerUnit,
     },
     results: [],
@@ -244,7 +298,8 @@ if (options.worker) {
     }
     const result = {
       ...scenario,
-      steadyInFlight: scenario.count * scenario.flightFrames,
+      steadyInFlight: scenario.count * (scenario.flightFrames + 2),
+      steadyHitsPerFrame: scenario.count * 3,
       ...summarize(samples),
       roundStats,
       samples,
