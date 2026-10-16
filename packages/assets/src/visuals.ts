@@ -11,6 +11,7 @@ export type EffectVisual =
 export type SkillIcon = {
   icon: string;
   rarityIcons?: Record<string, string>;
+  background?: string;
 };
 export type AffixVisual = { icon?: string; category?: string };
 export type VisualMappings = {

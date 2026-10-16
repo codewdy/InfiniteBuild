@@ -1,5 +1,5 @@
 import type { EffectVisual } from "./visuals.js";
-import type { Texture } from "pixi.js";
+import type { Container, Texture } from "pixi.js";
 export type CharacterAnimation =
   "idle" | "walk" | "cast" | "attack" | "hit" | "death";
 export type CharacterClip = {
@@ -33,6 +33,7 @@ export type SettlementAssets = {
   >;
 };
 export type BattlefieldAssets = {
+  createSkillIcon: (skill: string, rarity?: string) => Container;
   progressFrame: Texture;
   playbackIcons: Record<"pause" | "resume", Texture>;
   backgrounds: Record<string, Texture>;

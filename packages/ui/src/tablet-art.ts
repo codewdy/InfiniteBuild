@@ -77,14 +77,15 @@ export function createTabletArt(
     art.addChild(center);
     return art;
   }
-  const center = new Sprite(
+  const center =
     tablet.kind === "tablet-skill"
-      ? assets.skillIcon(tablet.skill, tablet.rarity)
-      : assets.icons[
-          tablet.rarity === "rare" ? "passive-rare" : "passive-magic"
-        ],
-  );
-  center.anchor.set(0.5);
+      ? assets.createSkillIcon(tablet.skill, tablet.rarity)
+      : new Sprite(
+          assets.icons[
+            tablet.rarity === "rare" ? "passive-rare" : "passive-magic"
+          ],
+        );
+  if (center instanceof Sprite) center.anchor.set(0.5);
   center.position.set(size / 2);
   center.width = center.height = size * 0.7;
   art.addChild(center);

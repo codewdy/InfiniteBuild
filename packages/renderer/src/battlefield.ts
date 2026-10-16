@@ -11,6 +11,7 @@ import {
   Rectangle,
   Sprite,
   Text,
+  type Texture,
 } from "pixi.js";
 import { MonsterInfo } from "./monster-info.js";
 import { BattleResultOverlay } from "./battle-result.js";
@@ -85,12 +86,13 @@ export class Battlefield {
       this.monsterInfo.hide();
     }
   };
+  private readonly skillBarTextures = new Map<string, Texture>();
   private readonly skillBars: {
     progress: number;
     castRate: number;
     root: Container;
-    icon: Sprite;
-    shade: Sprite;
+    icon: Container;
+    shade: Container;
     mask: Graphics;
   }[] = [];
   private readonly clip = new Graphics();
@@ -416,6 +418,9 @@ export class Battlefield {
     this.observer.disconnect();
     window.removeEventListener("keydown", this.onInfoKeyDown);
     this.clearTransition();
+    this.clearSkillBars();
+    for (const texture of this.skillBarTextures.values()) texture.destroy(true);
+    this.skillBarTextures.clear();
     this.app.destroy(false, { children: true });
   }
 
@@ -472,9 +477,21 @@ export class Battlefield {
     for (const event of log.events) {
       if (event.kind !== "PlayerSkillProgress") continue;
       const progress = Math.max(0, Math.min(1, event.progress));
-      const texture =
-        this.assets.skillTablets[event.skill] ?? this.assets.defaultSkillIcon;
       const root = new Container();
+      let texture = this.skillBarTextures.get(event.skill);
+      if (!texture) {
+        const artwork = this.assets.createSkillIcon(event.skill);
+        texture = this.app.renderer.generateTexture({
+          target: artwork,
+          frame: new Rectangle(-50, -50, 100, 100),
+          resolution: 2,
+          clearColor: [0, 0, 0, 0],
+          textureSourceOptions: { scaleMode: "nearest" },
+        });
+        artwork.destroy({ children: true });
+        this.skillBarTextures.set(event.skill, texture);
+      }
+      // Share the composed texture so the shade follows its exact alpha silhouette.
       const icon = new Sprite({ texture, roundPixels: true });
       const shade = new Sprite({
         texture,
@@ -482,9 +499,9 @@ export class Battlefield {
         alpha: 0.68,
         roundPixels: true,
       });
-      const mask = new Graphics();
       icon.anchor.set(0.5);
       shade.anchor.set(0.5);
+      const mask = new Graphics();
       shade.mask = mask;
       const name =
         this.config.skillDefinitions?.[event.skill]?.name ?? "未知技能";

@@ -32,7 +32,19 @@ export const playerState: PlayerState = {
     { loot: { kind: "tablet-skill", rarity: "magic", level: 1 }, count: 3 },
     { loot: { kind: "tablet-skill", rarity: "rare", level: 1 }, count: 3 },
   ],
-  inventory: [createTablet("fireball", TabletMap.idSize)],
+  inventory: [
+    createTablet("fireball", TabletMap.idSize),
+    ...(["fireball", "nova", "chainLightning"] as const).flatMap(
+      (skill, skillIndex) =>
+        (["normal", "magic", "rare"] as const).map((rarity, rarityIndex) => ({
+          ...createTablet(
+            skill,
+            TabletMap.idSize + 1 + skillIndex * 3 + rarityIndex,
+          ),
+          rarity,
+        })),
+    ),
+  ],
   tutorial: { completed: [] },
   config: { autoAdvanceLevel: false, minimumEnemyCount: 2 },
   level: 1,

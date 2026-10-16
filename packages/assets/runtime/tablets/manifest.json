@@ -25,7 +25,11 @@
     "support-diagonalPair-rare": "support-diagonalPair-rare",
     "support-diagonal-magic": "support-diagonal-magic",
     "support-diagonal-rare": "support-diagonal-rare",
-    "chainLightning": "tablet-chain-lightning"
+    "chainLightning": "tablet-chain-lightning",
+    "skill-stone": "skill-stone",
+    "skill-fireball": "skill-fireball",
+    "skill-nova": "skill-nova",
+    "skill-chain-lightning": "skill-chain-lightning"
   },
   "settlement": {
     "emblems": {
@@ -215,6 +219,30 @@
       "frame": [0, 0, 1254, 1254],
       "size": [1254, 1254],
       "alignment": "center"
+    },
+    "skill-stone": {
+      "image": "tablets/skill-stone-classic.png",
+      "frame": [0, 0, 1254, 1254],
+      "size": [1254, 1254],
+      "alignment": "center"
+    },
+    "skill-fireball": {
+      "image": "tablets/skill-fireball-bold.png",
+      "frame": [0, 0, 1254, 1254],
+      "size": [1254, 1254],
+      "alignment": "center"
+    },
+    "skill-nova": {
+      "image": "tablets/skill-nova-bold.png",
+      "frame": [0, 0, 1254, 1254],
+      "size": [1254, 1254],
+      "alignment": "center"
+    },
+    "skill-chain-lightning": {
+      "image": "tablets/skill-chain-lightning-bold.png",
+      "frame": [0, 0, 1254, 1254],
+      "size": [1254, 1254],
+      "alignment": "center"
     }
   },
   "defaultSkillIcon": "passive",
@@ -249,21 +277,16 @@
       "icon": "passive"
     },
     "fireball": {
-      "icon": "fireball",
-      "rarityIcons": {
-        "magic": "fireball-magic",
-        "rare": "fireball-rare"
-      }
+      "icon": "skill-fireball",
+      "background": "skill-stone"
     },
     "nova": {
-      "icon": "nova",
-      "rarityIcons": {
-        "magic": "nova-magic",
-        "rare": "nova-rare"
-      }
+      "icon": "skill-nova",
+      "background": "skill-stone"
     },
     "chainLightning": {
-      "icon": "chainLightning"
+      "icon": "skill-chain-lightning",
+      "background": "skill-stone"
     }
   }
 }

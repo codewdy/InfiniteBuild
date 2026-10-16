@@ -21,6 +21,8 @@ export function checkVisuals(manifest, { skills, affixes, renderers }) {
   frame(manifest.defaultAffixIcon, "defaultAffixIcon");
   for (const [id, visual] of Object.entries(skillIcons)) {
     icon(visual.icon, `skill ${id}`);
+    if (visual.background !== undefined)
+      icon(visual.background, `skill ${id} background`);
     for (const value of Object.values(visual.rarityIcons ?? {}))
       icon(value, `skill ${id} rarity`);
     if (!skills.includes(id))

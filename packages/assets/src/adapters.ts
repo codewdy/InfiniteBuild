@@ -1,3 +1,4 @@
+import { loadTabletArt } from "./tablet-art.js";
 import { resolveAffixFrame, resolveSkillIcon } from "./visuals.js";
 import type { BattleManifest } from "./manifest.js";
 import type { Texture } from "pixi.js";
@@ -14,6 +15,7 @@ import type {
 export async function loadBattlefieldAssets(): Promise<BattlefieldAssets> {
   const { manifest: data, textures } = await loadGroup("battle");
   const manifest = data as BattleManifest;
+  const tabletArt = await loadTabletArt();
   const texture = (name: string): Texture => {
     const result = textures[name];
     if (!result) throw new Error(`Missing battle texture: ${name}`);
@@ -30,6 +32,7 @@ export async function loadBattlefieldAssets(): Promise<BattlefieldAssets> {
     };
   };
   return {
+    createSkillIcon: tabletArt.createSkillIcon,
     progressFrame: texture(manifest.progressFrame),
     playbackIcons: {
       pause: texture(manifest.playbackIcons.pause),
