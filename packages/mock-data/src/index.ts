@@ -26,32 +26,13 @@ export { passiveAffixes, supportSkillAffixes } from "./affixes.js";
 export const playerState: PlayerState = {
   currentMapLevel: [1, 1],
   highestUnlockedMapLevel: [1, 1],
-  // Three skill rarities for comparing artwork and claiming loot.
-  pendingLoot: [
-    { loot: { kind: "tablet-skill", rarity: "normal", level: 1 }, count: 3 },
-    { loot: { kind: "tablet-skill", rarity: "magic", level: 1 }, count: 3 },
-    { loot: { kind: "tablet-skill", rarity: "rare", level: 1 }, count: 3 },
-  ],
-  inventory: [
-    createTablet("fireball", TabletMap.idSize),
-    ...(["fireball", "nova", "chainLightning"] as const).flatMap(
-      (skill, skillIndex) =>
-        (["normal", "magic", "rare"] as const).map((rarity, rarityIndex) => ({
-          ...createTablet(
-            skill,
-            TabletMap.idSize + 1 + skillIndex * 3 + rarityIndex,
-          ),
-          rarity,
-        })),
-    ),
-  ],
+  pendingLoot: [],
+  inventory: [createTablet("fireball", TabletMap.idSize)],
   tutorial: { completed: [] },
   config: { autoAdvanceLevel: false, minimumEnemyCount: 2 },
   level: 1,
   xp: 0,
-  tablets: Array.from({ length: TabletMap.idSize }, (_, slot) =>
-    slot === 1 ? createTablet("chainLightning", slot) : null,
-  ),
+  tablets: Array.from({ length: TabletMap.idSize }, () => null),
 };
 
 const battlefieldVisionRange = 20;
