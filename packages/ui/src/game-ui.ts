@@ -20,7 +20,7 @@ import { describeTablet, TabletTooltipView } from "./tablet-tooltip.js";
 import { createTabletArt, loadTabletArt } from "./tablet-art.js";
 import type { TabletArt } from "./tablet-art.js";
 import { Container, Graphics, Point, Rectangle, Sprite, Text } from "pixi.js";
-import { loadDrawerAssets } from "@infinite-build/assets";
+import { loadDrawerAssets, loadGroup } from "@infinite-build/assets";
 import type { DrawerAssets } from "@infinite-build/assets";
 import { TabletMap, TabletSpec } from "@infinite-build/core";
 import type { PlayerState } from "@infinite-build/core";
@@ -165,6 +165,8 @@ export class GameUI {
     const [art, backgrounds] = await Promise.all([
       loadTabletArt(),
       loadDrawerAssets(),
+      // Start battle downloads alongside UI assets; Battlefield reuses this promise.
+      loadGroup("battle"),
     ]);
     const battlefield = await Battlefield.create(canvas, {
       vision: options.gameData.config.map.visionRange,

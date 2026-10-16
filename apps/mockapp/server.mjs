@@ -4,6 +4,10 @@ import { spawn } from "node:child_process";
 import { resolve, extname, dirname } from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
+import { gzip } from "node:zlib";
+
+const compress = promisify(gzip);
 
 const base = fileURLToPath(new URL(".", import.meta.url));
 const workspace = resolve(base, "../..");
@@ -170,13 +174,48 @@ const server = createServer(async (request, response) => {
       response.writeHead(404).end("Not found");
       return;
     }
-    const body = await readFile(filename);
+    const info = await stat(filename);
+    const etag = `W/"${info.size.toString(16)}-${info.mtimeMs.toString(16)}"`;
+    const extension = extname(filename);
+    const compressible = [".html", ".css", ".js", ".mjs", ".json"].includes(
+      extension,
+    );
+    const headers = {
+      "Content-Type": contentTypes[extension],
+      // Store locally, but revalidate so edits and hot reload never use stale files.
+      "Cache-Control": "no-cache",
+      ETag: etag,
+      ...(compressible ? { Vary: "Accept-Encoding" } : {}),
+    };
+    if (
+      request.headers["if-none-match"]
+        ?.split(",")
+        .some((value) => value.trim() === etag || value.trim() === "*")
+    ) {
+      response.writeHead(304, headers).end();
+      return;
+    }
+    let body = await readFile(filename);
+    const acceptsGzip = (request.headers["accept-encoding"] ?? "")
+      .split(",")
+      .some((entry) => {
+        const [encoding, ...parameters] = entry.trim().split(";");
+        const quality = parameters.find((value) =>
+          value.trim().startsWith("q="),
+        );
+        return (
+          encoding === "gzip" &&
+          (!quality || Number(quality.trim().slice(2)) > 0)
+        );
+      });
+    if (compressible && acceptsGzip && body.length >= 1024) {
+      body = await compress(body);
+      headers["Content-Encoding"] = "gzip";
+    }
+    headers["Content-Length"] = body.length;
     response
-      .writeHead(200, {
-        "Content-Type": contentTypes[extname(filename)],
-        "Cache-Control": "no-store",
-      })
-      .end(body);
+      .writeHead(200, headers)
+      .end(request.method === "HEAD" ? undefined : body);
   } catch {
     response.writeHead(404).end("Not found");
   }
