@@ -16,7 +16,7 @@ import {
 //   --flight-frames=1,5,10 --frames=1000 --warmup=300 --rounds=5
 //   --output=/tmp/fireball-benchmark.json
 // A stationary player equips a fireball tablet and casts through SkillTrigger.
-// Three stationary enemies share position 60: initial flight takes flightFrames,
+// Three stationary enemies share position (60, 0): initial flight takes flightFrames,
 // followed by two one-frame bounces. Counts refer to initial casts, not segments.
 // Real fireball damage, ignite, scheduler and logs are included.
 // Each round uses a fresh process; no forced GC or retained BattleLog history.
@@ -54,7 +54,8 @@ function createBattle(count, flightFrames) {
   const data = {
     ...gameData,
     config: {
-      map: { spawnMinimumSize: 60, visionRange: 120 },
+      // Zero height keeps all targets at y=0 for deterministic flight times.
+      map: { spawnMinimumSize: 60, visionRange: { x: 120, y: 0 } },
       event: gameData.config.event,
     },
     playerDefinition: {
@@ -128,7 +129,7 @@ function verify(
   assert.equal(log.units.length, 4);
   assert.ok(log.units.every((unit) => unit.hp > 0));
   const player = log.units.find((unit) => unit.kind === "Player");
-  assert.equal(player.position, 0);
+  assert.deepEqual(player.position, { x: 0, y: 0 });
   assert.equal(player.hp, 1e15);
   const targets = log.units.filter((unit) => unit.kind === "BenchmarkTarget");
   assert.equal(targets.length, 3);
@@ -144,7 +145,7 @@ function verify(
   let actualHits = 0;
   let actualIgnite = 0;
   for (const target of targets) {
-    assert.equal(target.position, 60);
+    assert.deepEqual(target.position, { x: 60, y: 0 });
     // Damage=100 makes each ignite stack exactly 1, avoiding rounding at high HP.
     const ignite = target.status.attributes["buff.ignite"] ?? 0;
     const damage = (previousHp.get(target.id) ?? 1e15) - target.hp;
@@ -265,7 +266,7 @@ if (options.worker) {
       caster: "Player",
       extraBounces: 2,
       targets: 3,
-      targetPositions: [60, 60, 60],
+      targetPositions: Array.from({ length: 3 }, () => ({ x: 60, y: 0 })),
       flightFramesMeaning: "initial flight; each bounce takes one frame",
       eventCaps: gameData.config.event.maxEventPerUnit,
     },

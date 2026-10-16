@@ -1,3 +1,4 @@
+import { Position } from "@infinite-build/core";
 import { Sprite } from "pixi.js";
 import type { EffectFactory } from "./types.js";
 
@@ -8,12 +9,7 @@ export const createTargetStrike: EffectFactory = (
   frames,
 ) => {
   const { from, to } = event.payload;
-  if (
-    typeof from !== "number" ||
-    !Number.isFinite(from) ||
-    typeof to !== "number" ||
-    !Number.isSafeInteger(to)
-  )
+  if (!Position.is(from) || typeof to !== "number" || !Number.isSafeInteger(to))
     return;
   const target =
     context.log.units.find((unit) => unit.id === to) ??
@@ -26,13 +22,13 @@ export const createTargetStrike: EffectFactory = (
     sprite,
     start: context.log.frame,
     duration,
-    update(t, { x, targetPosition: position }) {
+    update(t, { x, y, targetPosition: position }) {
       targetPosition = position(to) ?? targetPosition;
       sprite.texture =
         frames[Math.min(frames.length - 1, Math.floor(t * frames.length))]!;
       sprite.position.set(
         Math.round(x(targetPosition)),
-        Math.round(context.unitY(to, target.kind)),
+        Math.round(y(targetPosition)),
       );
       sprite.rotation =
         x(targetPosition) >= x(from) ? -Math.PI / 4 : Math.PI / 4;

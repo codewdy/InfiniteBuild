@@ -1,3 +1,4 @@
+export { Position } from "./battle/position.js";
 export { Game } from "./game.js";
 export { Battle } from "./battle/battle.js";
 export { TaskScheduler } from "./battle/task-scheduler.js";

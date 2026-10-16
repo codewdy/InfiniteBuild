@@ -1,3 +1,4 @@
+import { Position } from "@infinite-build/core";
 import { BattleTransition } from "./battlefield/transition.js";
 import { BattleSkillEffects } from "./battlefield/skill-effects.js";
 import { BattleDamageText } from "./battlefield/damage-text.js";
@@ -54,8 +55,8 @@ export class Battlefield {
   private skillFrameOffset = 0;
   private skillTimelineAt = 0;
   private skillProgressPlaying = false;
-  private origin = 0;
-  private fromOrigin = 0;
+  private origin: Position = { x: 0, y: 0 };
+  private fromOrigin: Position = { x: 0, y: 0 };
   private destroyed = false;
   private animationTime = 0;
   private animationUpdatedAt = performance.now();
@@ -192,7 +193,7 @@ export class Battlefield {
     }
     const previous = this.log;
     const progress = this.progress(now);
-    this.fromOrigin += (this.origin - this.fromOrigin) * progress;
+    this.fromOrigin = Position.lerp(this.fromOrigin, this.origin, progress);
     this.origin =
       log.units.find((unit) => unit.kind === "Player")?.position ?? this.origin;
     this.units.update(log, progress, this.animationTime);
@@ -218,8 +219,7 @@ export class Battlefield {
         this.skillEffects.playEffect(event, log, previous);
       if (event.kind === "Damage") {
         const target = this.units.get(event.dst);
-        if (target)
-          this.damageText.addDamage(event, target.position, target.kind, now);
+        if (target) this.damageText.addDamage(event, target.position, now);
       }
     }
   }
@@ -247,7 +247,7 @@ export class Battlefield {
     this.skillProgressPlaying = false;
     this.animationTime = this.animateUntil = 0;
     this.animationUpdatedAt = performance.now();
-    this.origin = this.fromOrigin = 0;
+    this.origin = this.fromOrigin = { x: 0, y: 0 };
   }
 
   destroy(): void {
@@ -325,20 +325,17 @@ export class Battlefield {
     this.monsterInfo.layout(this.width, this.height);
     if (!this.log) return;
     const progress = this.progress(now);
-    const origin = this.fromOrigin + (this.origin - this.fromOrigin) * progress;
+    const origin = Position.lerp(this.fromOrigin, this.origin, progress);
     const width = this.width;
     const height = this.height;
     const left = Math.min(48, width * 0.1);
     const right = width - left;
-    const x = (position: number) =>
-      left +
-      ((position - origin + 2) / (this.config.vision + 4)) * (right - left);
-    this.background.draw(
-      origin,
-      width,
-      height,
-      (right - left) / (this.config.vision + 4),
-    );
+    const scaleX = (right - left) / (this.config.vision.x + 4);
+    const scaleY = (height * 0.6) / this.config.vision.y;
+    const x = (position: Position) =>
+      left + (position.x - origin.x + 2) * scaleX;
+    const y = (position: Position) => height * 0.55 + position.y * scaleY;
+    this.background.draw(origin.x, width, height, scaleX);
     this.clip.clear().rect(0, 0, width, height).fill(0xffffff);
     this.skillLayer.draw(width, height, this.skillSubframe(now));
     this.battleProgress.draw(
@@ -351,7 +348,7 @@ export class Battlefield {
     this.units.draw(
       progress,
       x,
-      height,
+      y,
       (height / REFERENCE_HEIGHT) * UNIT_SIZE_FACTOR,
       this.animationTime,
       this.options.playing,
@@ -361,7 +358,8 @@ export class Battlefield {
       this.log.frame + this.subframe(now),
       progress,
       x,
+      y,
     );
-    this.damageText.draw(x, height, now);
+    this.damageText.draw(x, y, height, now);
   }
 }

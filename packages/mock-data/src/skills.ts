@@ -1,5 +1,11 @@
 import { z } from "zod";
-import { GameData, hit, Projectile, Skill } from "@infinite-build/core";
+import {
+  GameData,
+  Position,
+  hit,
+  Projectile,
+  Skill,
+} from "@infinite-build/core";
 import { ignite } from "./buffs.js";
 
 export const attack = GameData.defineSkill({
@@ -13,9 +19,8 @@ export const attack = GameData.defineSkill({
     let target: typeof self | undefined;
     let nearestDistance = Infinity;
     for (const unit of ctx.units) {
-      if (unit.faction === self.faction || unit.isDead || unit.hp <= 0)
-        continue;
-      const distance = Math.abs(unit.position - self.position);
+      if (unit.faction === self.faction || unit.isDead) continue;
+      const distance = Position.distance(unit.position, self.position);
       if (distance <= skill.params.range && distance < nearestDistance) {
         target = unit;
         nearestDistance = distance;
@@ -49,8 +54,7 @@ export const selfDestruct = GameData.defineSkill({
       if (
         unit.faction === self.faction ||
         unit.isDead ||
-        unit.hp <= 0 ||
-        Math.abs(unit.position - self.position) > radius
+        Position.distance(unit.position, self.position) > radius
       )
         continue;
       hit(ctx, self, unit, damage);
@@ -146,9 +150,8 @@ export const nova = GameData.defineSkill({
         if (
           unit.faction === self.faction ||
           unit.isDead ||
-          unit.hp <= 0 ||
           hitUnits.has(unit.id) ||
-          Math.abs(unit.position - center) > waveRadius
+          Position.distance(unit.position, center) > waveRadius
         )
           continue;
         hitUnits.add(unit.id);

@@ -1,7 +1,7 @@
 export type Config = {
   map: {
     spawnMinimumSize: number;
-    visionRange: number;
+    visionRange: { x: number; y: number };
   };
   event: {
     maxEventPerUnit: {

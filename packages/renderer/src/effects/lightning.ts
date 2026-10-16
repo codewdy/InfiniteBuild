@@ -23,11 +23,11 @@ export const createLightning: EffectFactory = (event, context, duration) => {
     sprite,
     start: context.log.frame,
     duration,
-    update(t, { x, targetPosition }) {
+    update(t, { x, y, targetPosition }) {
       const startX = x(targetPosition(from) ?? origin.position);
-      const startY = context.unitY(from, origin.kind);
+      const startY = y(targetPosition(from) ?? origin.position);
       const endX = x(targetPosition(to) ?? target.position);
-      const endY = context.unitY(to, target.kind);
+      const endY = y(targetPosition(to) ?? target.position);
       const dx = endX - startX;
       const dy = endY - startY;
       const length = Math.hypot(dx, dy) || 1;

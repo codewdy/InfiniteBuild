@@ -109,7 +109,7 @@ export class Battle {
         id: unit.id,
         kind: unit.kind,
         name: unit.name,
-        position: unit.position,
+        position: { ...unit.position },
         hp: unit.hp,
         status: {
           attributes: { ...unit.rawStatus.attributes },
@@ -129,12 +129,12 @@ export class Battle {
   }
   checkBattleStatus(): void {
     if (this.ctx.status !== "Running") return;
-    if (this.ctx.player.hp <= 0) {
+    if (this.ctx.player.isDead) {
       this.ctx.status = "Defeat";
       return;
     }
     for (const unit of this.ctx.units) {
-      if (unit.faction === "Enemy" && unit.hp > 0) return;
+      if (unit.faction === "Enemy" && !unit.isDead) return;
     }
     if (this.ctx.pendingSpawns.some((unit) => unit.faction === "Enemy")) return;
     this.ctx.status = "Victory";

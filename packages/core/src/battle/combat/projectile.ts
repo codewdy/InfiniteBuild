@@ -1,3 +1,4 @@
+import { Position } from "../position.js";
 import type { BattleContext } from "../battle.js";
 import { TaskScheduler } from "../task-scheduler.js";
 import type { UnitList } from "../unit-list.js";
@@ -24,7 +25,7 @@ export namespace Projectile {
   ): UnitList {
     const position = arg.from.position;
     return arg.ctx.units
-      .inPositionRange(position - arg.range, position + arg.range)
+      .inPositionRange(position, arg.range)
       .filter(
         (unit) =>
           unit.faction !== arg.source.faction &&
@@ -51,20 +52,21 @@ export namespace Projectile {
   }
   function* run(state: State): TaskScheduler.Routine {
     let position = state.from.position;
-    const direction = Math.sign(state.to.position - position);
+
     const duration = state.range / (state.speed ?? 1) + 2;
     for (let i: number = 0; i < duration; i++) {
       yield* TaskScheduler.waitFrames(1);
       if (state.to.isDead) return;
-      if (direction == 0) {
+      const distance = Position.distance(position, state.to.position);
+      if (distance <= state.speed!) {
         hit(state);
         return;
       }
-      position += direction * state.speed!;
-      if (Math.sign(state.to.position - position) != direction) {
-        hit(state);
-        return;
-      }
+      position = Position.translate(
+        position,
+        Position.direction(position, state.to.position),
+        state.speed!,
+      );
     }
   }
   function submit(state: State) {

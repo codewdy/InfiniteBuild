@@ -1,3 +1,4 @@
+import { Position } from "@infinite-build/core";
 import {
   Container,
   Graphics,
@@ -13,7 +14,6 @@ import type {
 } from "@infinite-build/assets";
 import type { BattleEvent, BattleLog } from "@infinite-build/core";
 import { createText } from "./text.js";
-import { unitY } from "./layout.js";
 type Unit = BattleLog["units"][number];
 type View = {
   root: Container;
@@ -28,8 +28,8 @@ type View = {
   shadow: Graphics;
   health: Graphics;
   label: Text;
-  from: number;
-  position: number;
+  from: Position;
+  position: Position;
   kind: string;
   hitAt: number;
   deadAt?: number;
@@ -83,8 +83,8 @@ export class BattlefieldUnits {
       const targetId = event.payload.to;
       const target =
         typeof targetId === "number" ? this.views.get(targetId) : undefined;
-      if (target && target.position !== source.position) {
-        source.facing = Math.sign(target.position - source.position);
+      if (target && target.position.x !== source.position.x) {
+        source.facing = Math.sign(target.position.x - source.position.x);
       }
     }
   }
@@ -101,16 +101,14 @@ export class BattlefieldUnits {
         view = this.createUnit(unit, animationTime);
         this.views.set(unit.id, view);
       }
-      view.from += (view.position - view.from) * progress;
-      const displacement = unit.position - view.position;
-      const walking = Math.abs(displacement) > 0.001;
-      if (walking) view.facing = Math.sign(displacement);
+      view.from = Position.lerp(view.from, view.position, progress);
+      const displacement = unit.position.x - view.position.x;
+      const walking = Position.distance(unit.position, view.position) > 0.001;
+      if (walking && displacement !== 0) view.facing = Math.sign(displacement);
       if (walking && !view.walking) view.walkAt = animationTime;
       if (walking) view.walkUntil = animationTime + 200;
       view.walking = walking;
       view.position = unit.position;
-      if (unit.hp <= 0 && view.deadAt === undefined)
-        view.deadAt = animationTime;
       view.label.text = unit.name;
       view.health.clear().rect(-19, -40, 38, 4).fill(0x25324b);
       const ratio = Math.max(
@@ -130,18 +128,15 @@ export class BattlefieldUnits {
   }
   draw(
     progress: number,
-    x: (position: number) => number,
-    height: number,
+    x: (position: Position) => number,
+    y: (position: Position) => number,
     unitScale: number,
     time: number,
     playing: boolean,
   ): void {
     for (const [id, view] of this.views) {
-      const position = view.from + (view.position - view.from) * progress;
-      view.root.position.set(
-        Math.round(x(position)),
-        Math.round(unitY(id, view.kind, height)),
-      );
+      const position = Position.lerp(view.from, view.position, progress);
+      view.root.position.set(Math.round(x(position)), Math.round(y(position)));
       this.drawUnit(view, id, unitScale, time, playing);
     }
   }

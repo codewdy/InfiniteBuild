@@ -1,3 +1,4 @@
+import type { Position } from "../position.js";
 import { SkillTrigger, type UnitSkills } from "./skill-trigger.js";
 import type { BattleContext } from "../battle.js";
 import { Status } from "./status.js";
@@ -16,7 +17,7 @@ export abstract class Unit {
   kind!: string;
   name!: string;
   faction!: Faction;
-  position!: number;
+  position!: Position;
   skills: UnitSkills = {};
   skillTrigger = new SkillTrigger();
   buffs: BuffManager = new BuffManager();

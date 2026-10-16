@@ -1,3 +1,4 @@
+import { Position } from "../position.js";
 import { Unit } from "./unit.js";
 import { move, moveBySkillRange } from "./movement.js";
 import type { BattleContext } from "../battle.js";
@@ -12,7 +13,7 @@ export class PlayerUnit extends Unit {
     this.kind = "Player";
     this.name = "玩家";
     this.faction = "Ally";
-    this.position = 0;
+    this.position = { x: 0, y: 0 };
   }
   onStateChanged(ctx: BattleContext): void {
     this.combatProfile = derivePlayerCombatProfile(
@@ -25,18 +26,28 @@ export class PlayerUnit extends Unit {
     return this.combatProfile!.status;
   }
   override onMove(ctx: BattleContext): void {
-    if ((this.rawStatus.attributes.speed ?? 0) <= 0) {
+    if (this.isDead || (this.rawStatus.attributes.speed ?? 0) <= 0) {
       return;
     }
     const { minimumEnemyCount } = this.combatProfile!.config;
     let enemyCount = 0;
     for (const unit of ctx.units) {
-      if (unit.faction !== this.faction && ctx.allSpawns.has(unit)) {
+      if (
+        unit.faction !== this.faction &&
+        !unit.isDead &&
+        ctx.allSpawns.has(unit)
+      ) {
         enemyCount += 1;
       }
     }
     if (enemyCount < minimumEnemyCount && ctx.pendingSpawns.length > 0) {
-      move(ctx, this, 1, this.rawStatus.attributes.speed ?? 0);
+      const target = ctx.pendingSpawns.reduce((nearest, unit) =>
+        Position.distance(this.position, unit.position) <
+        Position.distance(this.position, nearest.position)
+          ? unit
+          : nearest,
+      );
+      move(ctx, this, { x: 1, y: 0 }, this.rawStatus.attributes.speed ?? 0);
       return;
     }
     moveBySkillRange(ctx, this);

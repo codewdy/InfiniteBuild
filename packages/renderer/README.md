@@ -5,9 +5,12 @@ PixiJS battle presentation for InfiniteBuild. The package consumes core `BattleL
 ```ts
 import { Battlefield } from "@infinite-build/renderer";
 
-const battlefield = await Battlefield.create(canvas);
-battlefield.update(log, {
-  vision: 20,
+const battlefield = await Battlefield.create(canvas, {
+  vision: { x: 20, y: 8 },
+});
+battlefield.update({
+  log,
+  background: "grassland",
   frameDuration: 200,
   playing: true,
 });

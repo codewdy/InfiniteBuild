@@ -1,3 +1,4 @@
+import { Position } from "./position.js";
 import type { Unit, Faction } from "./combat/unit.js";
 import type { RandomGenerator } from "../random-generator.js";
 export class UnitList implements Iterable<Unit> {
@@ -24,9 +25,11 @@ export class UnitList implements Iterable<Unit> {
     return new UnitList(this.rng, this.units.filter(predicate));
   }
 
-  /** Includes units at both range boundaries. */
-  inPositionRange(min: number, max: number): UnitList {
-    return this.filter((unit) => unit.position >= min && unit.position <= max);
+  /** Includes units on the boundary of the circular range. */
+  inPositionRange(center: Position, radius: number): UnitList {
+    return this.filter(
+      (unit) => Position.distance(unit.position, center) <= radius,
+    );
   }
 
   ofFaction(faction: Faction): UnitList {

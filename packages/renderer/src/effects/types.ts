@@ -1,11 +1,13 @@
+import type { Position } from "@infinite-build/core";
 import type { BattleEvent, BattleLog } from "@infinite-build/core";
 import type { Container, Texture } from "pixi.js";
 import type { BattlefieldAssets } from "@infinite-build/assets";
 
 export type EffectDrawContext = {
   elapsedFrames: number;
-  x: (position: number) => number;
-  targetPosition: (id: number) => number | undefined;
+  x: (position: Position) => number;
+  y: (position: Position) => number;
+  targetPosition: (id: number) => Position | undefined;
 };
 
 export type SkillEffect = {
@@ -20,9 +22,7 @@ export type EffectCreateContext = {
   assets: BattlefieldAssets;
   log: BattleLog;
   previous?: BattleLog;
-  sourceY: number;
   unitScale: number;
-  unitY: (id: number, kind: string) => number;
 };
 
 export type EffectFactory = (

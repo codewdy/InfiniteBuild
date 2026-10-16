@@ -1,3 +1,4 @@
+import type { Position } from "../position.js";
 import type { UnitSkills } from "./skill-trigger.js";
 import { Unit, type Faction } from "./unit.js";
 import { moveBySkillRange } from "./movement.js";
@@ -16,14 +17,14 @@ export class RegularUnit extends Unit {
   private definition: UnitDefinition;
   constructor(
     definition: UnitDefinition,
-    position: number,
+    position: Position,
     faction: Faction,
     rng: RandomGenerator,
   ) {
     super();
     this.kind = definition.kind;
     this.name = definition.name;
-    this.position = position;
+    this.position = { ...position };
     this.faction = faction;
     this.definition = definition;
     this.skills = structuredClone(definition.skills);

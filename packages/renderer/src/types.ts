@@ -1,5 +1,6 @@
 import type {
   BattleLog,
+  Config,
   MapLevel,
   UnitDefinition,
   Skill,
@@ -7,7 +8,7 @@ import type {
 
 /** Fixed definitions and interaction callbacks, supplied once at creation. */
 export type BattlefieldOptions = {
-  vision: number;
+  vision: Config["map"]["visionRange"];
   onTogglePlaying?: () => void;
   unitDefinitions?: Readonly<Record<string, UnitDefinition>>;
   skillDefinitions?: Readonly<Record<string, Skill.Definition>>;

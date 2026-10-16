@@ -1,3 +1,4 @@
+import { Position } from "../position.js";
 import type { BattleContext } from "../battle.js";
 import type { Unit } from "./unit.js";
 
@@ -6,7 +7,7 @@ export function spawnUnits(ctx: BattleContext): void {
   const visionRange = gameData.config.map.visionRange;
   const pendingSpawns: Unit[] = [];
   for (const unit of ctx.pendingSpawns) {
-    if (Math.abs(unit.position - player.position) <= visionRange) {
+    if (unit.position.x <= player.position.x + visionRange.x) {
       units.add(unit);
     } else {
       pendingSpawns.push(unit);
@@ -18,32 +19,42 @@ export function spawnUnits(ctx: BattleContext): void {
 export function move(
   ctx: BattleContext,
   unit: Unit,
-  direction: number,
+  direction: Position,
   distance: number,
 ): void {
-  unit.position += direction * distance;
+  if (unit.isDead || distance <= 0) return;
+  direction = Position.normalize(direction);
+  if (direction.x === 0 && direction.y === 0) return;
+  unit.position = Position.translate(unit.position, direction, distance);
   ctx.events.addMove({ unit: unit.id, direction, distance });
 }
 
 export function fixPosition(ctx: BattleContext): void {
-  const min = ctx.player.position;
-  const max = min + ctx.gameData.config.map.visionRange;
+  const { visionRange } = ctx.gameData.config.map;
+  const minX = ctx.player.position.x;
+  const maxX = minX + visionRange.x;
+  const halfHeight = visionRange.y / 2;
   for (const unit of ctx.units) {
-    unit.position = Math.max(min, Math.min(max, unit.position));
+    unit.position = {
+      x: Math.max(minX, Math.min(maxX, unit.position.x)),
+      y: Math.max(0 - halfHeight, Math.min(halfHeight, unit.position.y)),
+    };
   }
 }
 
 export function moveBySkillRange(ctx: BattleContext, unit: Unit): void {
-  const direction = unit.faction === "Ally" ? 1 : -1;
+  if (unit.isDead) return;
+  let nearestTarget: Unit | undefined;
   let nearestDistance = Infinity;
   for (const target of ctx.units) {
-    if (target.faction === unit.faction) continue;
-    const distance = (target.position - unit.position) * direction;
-    if (distance >= 0 && distance < nearestDistance) {
+    if (target.faction === unit.faction || target.isDead) continue;
+    const distance = Position.distance(unit.position, target.position);
+    if (distance < nearestDistance) {
       nearestDistance = distance;
+      nearestTarget = target;
     }
   }
-  if (nearestDistance === Infinity) return;
+  if (!nearestTarget) return;
 
   let targetingRange: number | undefined;
   for (const skills of Object.values(unit.skillTrigger.skills)) {
@@ -60,6 +71,11 @@ export function moveBySkillRange(ctx: BattleContext, unit: Unit): void {
     Math.max(0, nearestDistance - (targetingRange ?? 0)),
   );
   if (distanceToMove > 0) {
-    move(ctx, unit, direction, distanceToMove);
+    move(
+      ctx,
+      unit,
+      Position.direction(unit.position, nearestTarget.position),
+      distanceToMove,
+    );
   }
 }

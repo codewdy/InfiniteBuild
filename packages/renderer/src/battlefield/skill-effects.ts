@@ -1,10 +1,11 @@
+import { Position } from "@infinite-build/core";
 import { Container } from "pixi.js";
 import type { BattlefieldAssets } from "@infinite-build/assets";
 import type { BattleEvent, BattleLog } from "@infinite-build/core";
 import { createSkillEffect } from "../effects/index.js";
 import type { SkillEffect } from "../effects/index.js";
 import type { BattlefieldUnits } from "./units.js";
-import { REFERENCE_HEIGHT, UNIT_SIZE_FACTOR, unitY } from "./layout.js";
+import { REFERENCE_HEIGHT, UNIT_SIZE_FACTOR } from "./layout.js";
 
 export class BattleSkillEffects extends Container {
   private activeEffects: SkillEffect[] = [];
@@ -18,10 +19,6 @@ export class BattleSkillEffects extends Container {
 
   private get unitScale(): number {
     return (this.getHeight() / REFERENCE_HEIGHT) * UNIT_SIZE_FACTOR;
-  }
-
-  private unitY(id: number, kind: string): number {
-    return unitY(id, kind, this.getHeight());
   }
 
   reset(): void {
@@ -42,20 +39,14 @@ export class BattleSkillEffects extends Container {
     log: BattleLog,
     previous?: BattleLog,
   ): void {
-    const source = this.units.get(event.source);
-    const unitY = (id: number, kind: string) => this.unitY(id, kind);
     const effects = this;
     const effect = createSkillEffect(event, {
       assets: this.assets,
       log,
       previous,
-      get sourceY() {
-        return unitY(event.source, source?.kind ?? "Player");
-      },
       get unitScale() {
         return effects.unitScale;
       },
-      unitY,
     });
     if (!effect) return;
     this.addChild(effect.sprite);
@@ -66,7 +57,8 @@ export class BattleSkillEffects extends Container {
     log: BattleLog,
     effectFrame: number,
     progress: number,
-    x: (position: number) => number,
+    x: (position: Position) => number,
+    y: (position: Position) => number,
   ): void {
     const activeUnitIds = new Set(log.units.map((unit) => unit.id));
     this.activeEffects = this.activeEffects.filter((effect) => {
@@ -79,10 +71,11 @@ export class BattleSkillEffects extends Container {
       const finished = effect.update(t, {
         elapsedFrames,
         x,
+        y,
         targetPosition: (id) => {
           const target = this.units.get(id);
           return target && activeUnitIds.has(id)
-            ? target.from + (target.position - target.from) * progress
+            ? Position.lerp(target.from, target.position, progress)
             : undefined;
         },
       });

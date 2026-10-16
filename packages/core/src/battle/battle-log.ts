@@ -1,3 +1,4 @@
+import type { Position } from "./position.js";
 import type { Status } from "./combat/status.js";
 
 export namespace BattleEvent {
@@ -9,7 +10,7 @@ export namespace BattleEvent {
   export type Move = {
     kind: "Move";
     unit: number;
-    direction: number;
+    direction: Position;
     distance: number;
   };
   export type PlayerSkillProgress = {
@@ -43,7 +44,7 @@ export type BattleLog = {
     id: number;
     kind: string;
     name: string;
-    position: number;
+    position: Position;
     hp: number;
     status: {
       attributes: Status.RawStatus["attributes"];

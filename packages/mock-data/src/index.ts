@@ -89,7 +89,13 @@ export const gameData: GameData = {
     },
   },
   config: {
-    map: { spawnMinimumSize: 5, visionRange: battlefieldVisionRange },
+    map: {
+      spawnMinimumSize: 5,
+      visionRange: {
+        x: battlefieldVisionRange,
+        y: battlefieldVisionRange / 2.5,
+      },
+    },
     event: { maxEventPerUnit: { damage: 10, effect: 10 } },
   },
   skillDefinitions,
