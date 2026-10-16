@@ -188,6 +188,13 @@ export class GameApp {
 
   private advance(): void {
     if (this.destroyed || !this.started || this.tutorialPending) return;
+    if (this.log.status !== "Running") {
+      this.replaceBattle(
+        this.game.startLevel(this.nextBattleLevel(this.log.status)),
+      );
+      this.publish();
+      return;
+    }
     this.log = this.battle.executeFrame();
     if (this.log.status !== "Running") {
       const outcome = this.log.status;
@@ -197,8 +204,6 @@ export class GameApp {
         frame: this.log.frame,
       });
       if (levelTutorialPending(this.player)) this.stopTimer();
-      else
-        this.replaceBattle(this.game.startLevel(this.nextBattleLevel(outcome)));
       this.view.showBattleResult(this.result(settlement, outcome));
     }
     this.publish();

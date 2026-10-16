@@ -59,6 +59,7 @@ export class Battlefield {
   private fromOrigin: Position = { x: 0, y: 0 };
   private destroyed = false;
   private animationTime = 0;
+  private frameAnimationTime = 0;
   private animationUpdatedAt = performance.now();
   private animateUntil = 0;
 
@@ -186,7 +187,7 @@ export class Battlefield {
         this.skillProgressPlaying = options.playing;
       }
       this.timelineAt = now;
-      if (this.options.playing && !options.playing)
+      if (this.options.playing && !options.playing && log.status === "Running")
         this.animateUntil = this.animationTime;
       this.options = options;
       return;
@@ -198,6 +199,7 @@ export class Battlefield {
       log.units.find((unit) => unit.kind === "Player")?.position ?? this.origin;
     this.units.update(log, progress, this.animationTime);
     this.log = log;
+    this.frameAnimationTime = this.animationTime;
     this.updatedAt = now;
     this.timelineAt = now;
     this.frameOffset = 0;
@@ -351,11 +353,14 @@ export class Battlefield {
       y,
       (height / REFERENCE_HEIGHT) * UNIT_SIZE_FACTOR,
       this.animationTime,
-      this.options.playing,
+      this.options.playing && this.log.status === "Running",
     );
     this.skillEffects.draw(
       this.log,
-      this.log.frame + this.subframe(now),
+      this.log.frame +
+        (this.log.status === "Running"
+          ? this.subframe(now)
+          : (this.animationTime - this.frameAnimationTime) / 200),
       progress,
       x,
       y,

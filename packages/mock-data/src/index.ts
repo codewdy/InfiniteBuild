@@ -135,7 +135,7 @@ export const gameData: GameData = {
       name: "草原",
       background: "grassland",
       xp: 100,
-      totalValue: 60,
+      totalValue: 5,
       spawner: [
         {
           mapSize: 5,
