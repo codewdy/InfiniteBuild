@@ -2,8 +2,8 @@ import { TabletMap, type PlayerState } from "@infinite-build/core";
 import { createTablet, playerState } from "@infinite-build/mock-data";
 
 export const testPlayerState: PlayerState = {
-  currentMapLevel: [1, 1],
-  highestUnlockedMapLevel: [1, 1],
+  currentMapLevel: [1, 2],
+  highestUnlockedMapLevel: [1, 2],
   // Three skill rarities for comparing artwork and claiming loot.
   pendingLoot: [
     { loot: { kind: "tablet-skill", rarity: "normal", level: 1 }, count: 3 },
@@ -23,7 +23,7 @@ export const testPlayerState: PlayerState = {
         })),
     ),
   ],
-  tutorial: { completed: [] },
+  tutorial: { completed: ["equip-skill-tablet", "select-level-1-2"] },
   config: { autoAdvanceLevel: false, minimumEnemyCount: 2 },
   level: 1,
   xp: 0,

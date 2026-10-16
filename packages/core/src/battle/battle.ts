@@ -85,7 +85,6 @@ export class Battle {
       this.ctx.playerState = structuredClone(state);
       this.ctx.player.onStateChanged(this.ctx);
     }
-    spawnUnits(this.ctx);
     for (const unit of this.ctx.units) {
       updateStatus(this.ctx, unit);
     }
@@ -96,6 +95,7 @@ export class Battle {
     for (const unit of this.ctx.units) {
       unit.onUpdate(this.ctx);
     }
+    spawnUnits(this.ctx);
     fixPosition(this.ctx);
     resolveDeath(this.ctx);
     this.checkBattleStatus();
