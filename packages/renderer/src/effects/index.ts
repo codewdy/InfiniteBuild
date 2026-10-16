@@ -25,7 +25,7 @@ export function createSkillEffect(
 ): SkillEffect | undefined {
   const visual = context.assets.effectVisuals[event.effect];
   if (!visual) return;
-  // Projectiles can end on arrival, but never outlive their simulation task.
+  // Projectile flight is bounded by the simulation; factories may add a fade.
   const duration =
     visual.renderer === "lightning"
       ? 3
