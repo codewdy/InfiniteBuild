@@ -332,14 +332,22 @@ export class Battlefield {
     const height = this.height;
     const left = Math.min(48, width * 0.1);
     const right = width - left;
+    const top = Math.min(48, height * 0.1);
+    const bottom = height - top;
     const vision = this.config.vision;
-    const scaleX = (right - left) / (vision.left + vision.right + 4);
-    const scaleY = (height * 0.6) / (vision.top + vision.bottom || 1);
+    const visionWidth = vision.left + vision.right + 4;
+    const visionHeight = vision.top + vision.bottom + 4;
+    const scale = Math.min(
+      (right - left) / visionWidth,
+      (bottom - top) / visionHeight,
+    );
+    const offsetX = left + (right - left - visionWidth * scale) / 2;
+    const offsetY = top + (bottom - top - visionHeight * scale) / 2;
     const x = (position: Position) =>
-      left + (position.x - origin.x + vision.left + 2) * scaleX;
+      offsetX + (position.x - origin.x + vision.left + 2) * scale;
     const y = (position: Position) =>
-      height * 0.55 + (position.y + (vision.top - vision.bottom) / 2) * scaleY;
-    this.background.draw(origin.x, width, height, scaleX);
+      offsetY + (position.y + vision.top + 2) * scale;
+    this.background.draw(origin.x, width, height, scale);
     this.clip.clear().rect(0, 0, width, height).fill(0xffffff);
     this.skillLayer.draw(width, height, this.skillSubframe(now));
     this.battleProgress.draw(
