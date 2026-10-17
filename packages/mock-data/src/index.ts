@@ -92,8 +92,10 @@ export const gameData: GameData = {
     map: {
       spawnMinimumSize: 5,
       visionRange: {
-        x: battlefieldVisionRange,
-        y: battlefieldVisionRange / 2.5,
+        left: battlefieldVisionRange / 10,
+        right: battlefieldVisionRange,
+        top: battlefieldVisionRange / 5,
+        bottom: battlefieldVisionRange / 5,
       },
     },
     event: { maxEventPerUnit: { damage: 10, effect: 10 } },

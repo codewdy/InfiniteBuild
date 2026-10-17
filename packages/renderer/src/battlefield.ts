@@ -332,11 +332,13 @@ export class Battlefield {
     const height = this.height;
     const left = Math.min(48, width * 0.1);
     const right = width - left;
-    const scaleX = (right - left) / (this.config.vision.x + 4);
-    const scaleY = (height * 0.6) / this.config.vision.y;
+    const vision = this.config.vision;
+    const scaleX = (right - left) / (vision.left + vision.right + 4);
+    const scaleY = (height * 0.6) / (vision.top + vision.bottom || 1);
     const x = (position: Position) =>
-      left + (position.x - origin.x + 2) * scaleX;
-    const y = (position: Position) => height * 0.55 + position.y * scaleY;
+      left + (position.x - origin.x + vision.left + 2) * scaleX;
+    const y = (position: Position) =>
+      height * 0.55 + (position.y + (vision.top - vision.bottom) / 2) * scaleY;
     this.background.draw(origin.x, width, height, scaleX);
     this.clip.clear().rect(0, 0, width, height).fill(0xffffff);
     this.skillLayer.draw(width, height, this.skillSubframe(now));

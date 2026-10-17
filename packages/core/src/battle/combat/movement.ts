@@ -7,7 +7,7 @@ export function spawnUnits(ctx: BattleContext): void {
   const visionRange = gameData.config.map.visionRange;
   const pendingSpawns: Unit[] = [];
   for (const unit of ctx.pendingSpawns) {
-    if (unit.position.x <= player.position.x + visionRange.x) {
+    if (unit.position.x <= player.position.x + visionRange.right) {
       units.add(unit);
     } else {
       pendingSpawns.push(unit);
@@ -31,13 +31,15 @@ export function move(
 
 export function fixPosition(ctx: BattleContext): void {
   const { visionRange } = ctx.gameData.config.map;
-  const minX = ctx.player.position.x;
-  const maxX = minX + visionRange.x;
-  const halfHeight = visionRange.y / 2;
+  const minX = ctx.player.position.x - visionRange.left;
+  const maxX = ctx.player.position.x + visionRange.right;
   for (const unit of ctx.units) {
     unit.position = {
       x: Math.max(minX, Math.min(maxX, unit.position.x)),
-      y: Math.max(0 - halfHeight, Math.min(halfHeight, unit.position.y)),
+      y: Math.max(
+        -visionRange.top,
+        Math.min(visionRange.bottom, unit.position.y),
+      ),
     };
   }
 }

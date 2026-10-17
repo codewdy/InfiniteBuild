@@ -36,7 +36,7 @@ export function spawn(
   rng: RandomGenerator,
 ): Unit[] {
   const definition = gameData.mapDefinitions[map]!;
-  const halfHeight = gameData.config.map.visionRange.y / 2;
+  const { top, bottom } = gameData.config.map.visionRange;
   let position = gameData.config.map.spawnMinimumSize;
   const spawners = definition.spawner.filter((spawner) => spawner.weight > 0);
   const totalWeight = spawners.reduce(
@@ -69,7 +69,7 @@ export function spawn(
             unitDefinition,
             {
               x: rng.truncatedNorm(position, end),
-              y: rng.uniform(0 - halfHeight, halfHeight),
+              y: rng.uniform(-top, bottom),
             },
             "Enemy",
             rng,
