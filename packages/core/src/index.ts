@@ -2,7 +2,12 @@ export { Position } from "./battle/position.js";
 export { Game } from "./game.js";
 export { Battle } from "./battle/battle.js";
 export { TaskScheduler } from "./battle/task-scheduler.js";
-export { spawnUnits, move, fixPosition } from "./battle/combat/movement.js";
+export {
+  spawnUnits,
+  move,
+  resolveCollisions,
+  fixPosition,
+} from "./battle/combat/movement.js";
 export { hit, damage } from "./battle/combat/damage.js";
 export { updateStatus, resolveDeath } from "./battle/combat/unit-status.js";
 export type { BattleSpec } from "./battle/battle.js";

@@ -16,6 +16,7 @@ export class PlayerUnit extends Unit {
     this.position = { x: 0, y: 0 };
   }
   onStateChanged(ctx: BattleContext): void {
+    this.collisionRadius = ctx.gameData.playerDefinition.collisionRadius;
     this.combatProfile = derivePlayerCombatProfile(
       ctx.gameData,
       ctx.playerState,

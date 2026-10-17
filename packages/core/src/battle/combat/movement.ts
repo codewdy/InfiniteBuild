@@ -29,7 +29,48 @@ export function move(
   ctx.events.addMove({ unit: unit.id, direction, distance });
 }
 
+export function resolveCollisions(ctx: BattleContext): void {
+  const units = [...ctx.units].filter((unit) => !unit.isDead);
+  const displacements = units.map(() => ({ x: 0, y: 0 }));
+
+  // Accumulate every pair against the original positions before moving anyone.
+  for (let i = 0; i < units.length; i++) {
+    const a = units[i]!;
+    for (let j = i + 1; j < units.length; j++) {
+      const b = units[j]!;
+      const distance = Position.distance(a.position, b.position);
+      const overlap = a.collisionRadius + b.collisionRadius - distance;
+      if (overlap <= 0) continue;
+
+      // Coincident centers need a stable direction to separate.
+      const direction =
+        distance === 0
+          ? { x: b === ctx.player ? -1 : 1, y: 0 }
+          : Position.direction(a.position, b.position);
+      const aDistance =
+        a === ctx.player ? 0 : overlap * (b === ctx.player ? 1 : 0.5);
+      const bDistance =
+        b === ctx.player ? 0 : overlap * (a === ctx.player ? 1 : 0.5);
+      displacements[i]!.x -= direction.x * aDistance;
+      displacements[i]!.y -= direction.y * aDistance;
+      displacements[j]!.x += direction.x * bDistance;
+      displacements[j]!.y += direction.y * bDistance;
+    }
+  }
+
+  for (let i = 0; i < units.length; i++) {
+    const displacement = displacements[i]!;
+    const unit = units[i]!;
+    unit.position = {
+      x: unit.position.x + displacement.x,
+      y: unit.position.y + displacement.y,
+    };
+  }
+}
+
 export function fixPosition(ctx: BattleContext): void {
+  resolveCollisions(ctx);
+
   const { visionRange } = ctx.gameData.config.map;
   const minX = ctx.player.position.x - visionRange.left;
   const maxX = ctx.player.position.x + visionRange.right;
@@ -68,9 +109,11 @@ export function moveBySkillRange(ctx: BattleContext, unit: Unit): void {
     }
   }
 
+  if (targetingRange === undefined) return;
+
   const distanceToMove = Math.min(
     unit.rawStatus.attributes.speed ?? 0,
-    Math.max(0, nearestDistance - (targetingRange ?? 0)),
+    Math.max(0, nearestDistance - targetingRange),
   );
   if (distanceToMove > 0) {
     move(

@@ -9,6 +9,7 @@ import type { RandomGenerator } from "../../random-generator.js";
 export type UnitDefinition = {
   kind: string;
   name: string;
+  collisionRadius: number;
   status: Status.StatusConfig;
   skills: UnitSkills;
 };
@@ -24,6 +25,7 @@ export class RegularUnit extends Unit {
     super();
     this.kind = definition.kind;
     this.name = definition.name;
+    this.collisionRadius = definition.collisionRadius;
     this.position = { ...position };
     this.faction = faction;
     this.definition = definition;

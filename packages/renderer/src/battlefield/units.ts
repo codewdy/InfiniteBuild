@@ -95,6 +95,12 @@ export class BattlefieldUnits {
     this.views.clear();
   }
   update(log: BattleLog, progress: number, animationTime: number): void {
+    const movements = new Map<number, BattleEvent.Move>();
+    for (const event of log.events) {
+      if (event.kind === "Move" && event.distance > 0) {
+        movements.set(event.unit, event);
+      }
+    }
     for (const unit of log.units) {
       let view = this.views.get(unit.id);
       if (!view) {
@@ -102,9 +108,11 @@ export class BattlefieldUnits {
         this.views.set(unit.id, view);
       }
       view.from = Position.lerp(view.from, view.position, progress);
-      const displacement = unit.position.x - view.position.x;
-      const walking = Position.distance(unit.position, view.position) > 0.001;
-      if (walking && displacement !== 0) view.facing = Math.sign(displacement);
+      const movement = movements.get(unit.id);
+      const walking = movement !== undefined;
+      if (movement && movement.direction.x !== 0) {
+        view.facing = Math.sign(movement.direction.x);
+      }
       if (walking && !view.walking) view.walkAt = animationTime;
       if (walking) view.walkUntil = animationTime + 200;
       view.walking = walking;

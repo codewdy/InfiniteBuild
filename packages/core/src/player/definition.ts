@@ -5,6 +5,7 @@ import type { PlayerState } from "./state.js";
 import type { TabletDefinition } from "./tablet/definition.js";
 
 export type PlayerDefinition = {
+  collisionRadius: number;
   baseStatus: Status;
   skills: Record<string, UnitSkill>;
   tablet: TabletDefinition;

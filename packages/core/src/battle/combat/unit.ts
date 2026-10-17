@@ -18,6 +18,7 @@ export abstract class Unit {
   name!: string;
   faction!: Faction;
   position!: Position;
+  collisionRadius!: number;
   skills: UnitSkills = {};
   skillTrigger = new SkillTrigger();
   buffs: BuffManager = new BuffManager();

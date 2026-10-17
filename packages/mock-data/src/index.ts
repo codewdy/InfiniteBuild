@@ -45,6 +45,7 @@ export const gameData: GameData = {
     },
   },
   playerDefinition: {
+    collisionRadius: 0.5,
     tablet: tabletDefinition,
     defaultState: playerState,
     inventoryCapacity: 20,
@@ -105,6 +106,7 @@ export const gameData: GameData = {
   unitDefinitions: {
     Slime: {
       kind: "Slime",
+      collisionRadius: 0.5,
       name: "史莱姆",
       status: { attributes: { maxHp: 20, attack: 5, defense: 0, speed: 0.5 } },
       skills: {
@@ -119,6 +121,7 @@ export const gameData: GameData = {
     },
     Goblin: {
       kind: "Goblin",
+      collisionRadius: 0.5,
       name: "哥布林",
       status: { attributes: { maxHp: 30, attack: 5, defense: 0, speed: 1 } },
       skills: {

@@ -84,6 +84,7 @@ function createBattle(count, flightFrames) {
     unitDefinitions: {
       BenchmarkTarget: {
         kind: "BenchmarkTarget",
+        collisionRadius: 0.5,
         name: "Benchmark target",
         status: { attributes: { maxHp: 1e15, speed: 0 } },
         skills: {},
