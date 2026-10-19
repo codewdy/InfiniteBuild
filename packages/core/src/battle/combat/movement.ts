@@ -1,11 +1,12 @@
 import { Position } from "../position.js";
 import type { BattleContext } from "../battle.js";
 import type { Unit } from "./unit.js";
+import type { SpawnUnit } from "../spawn.js";
 
 export function spawnUnits(ctx: BattleContext): void {
   const { player, units, gameData } = ctx;
   const visionRange = gameData.config.map.visionRange;
-  const pendingSpawns: Unit[] = [];
+  const pendingSpawns: SpawnUnit[] = [];
   for (const unit of ctx.pendingSpawns) {
     if (unit.position.x <= player.position.x + visionRange.right) {
       units.add(unit);

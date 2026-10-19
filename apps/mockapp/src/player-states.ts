@@ -24,7 +24,7 @@ export const testPlayerState: PlayerState = {
     ),
   ],
   tutorial: { completed: ["equip-skill-tablet", "select-level-1-2"] },
-  config: { autoAdvanceLevel: false, minimumEnemyCount: 2 },
+  config: { autoAdvanceLevel: false },
   level: 1,
   xp: 0,
   tablets: Array.from({ length: TabletMap.idSize }, (_, slot) =>

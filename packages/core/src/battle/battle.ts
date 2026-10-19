@@ -1,6 +1,6 @@
 import { BuffManager } from "./combat/buff.js";
 import { RandomGenerator } from "../random-generator.js";
-import { spawn, type MapLevel } from "./spawn.js";
+import { spawn, type MapLevel, type SpawnUnit } from "./spawn.js";
 import { UnitManager } from "./unit-list.js";
 import type { Unit } from "./combat/unit.js";
 import { TaskScheduler } from "./task-scheduler.js";
@@ -26,7 +26,7 @@ export type BattleContext = {
   status: BattleStatus;
   player: PlayerUnit;
   units: UnitManager;
-  pendingSpawns: Unit[];
+  pendingSpawns: SpawnUnit[];
   allSpawns: Set<Unit>;
   taskScheduler: TaskScheduler;
   events: EventManager;

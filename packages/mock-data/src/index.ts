@@ -29,7 +29,7 @@ export const playerState: PlayerState = {
   pendingLoot: [],
   inventory: [createTablet("fireball", TabletMap.idSize)],
   tutorial: { completed: [] },
-  config: { autoAdvanceLevel: false, minimumEnemyCount: 2 },
+  config: { autoAdvanceLevel: false },
   level: 1,
   xp: 0,
   tablets: Array.from({ length: TabletMap.idSize }, () => null),
@@ -91,7 +91,6 @@ export const gameData: GameData = {
   },
   config: {
     map: {
-      spawnMinimumSize: 5,
       visionRange: {
         left: battlefieldVisionRange / 10,
         right: battlefieldVisionRange,
@@ -140,13 +139,13 @@ export const gameData: GameData = {
       name: "草原",
       background: "grassland",
       xp: 100,
-      totalValue: 5,
+      totalValue: 10,
       spawner: [
         {
-          mapSize: 5,
+          mapSize: 10,
           value: 1,
           weight: 1,
-          enemies: [{ kind: "Slime", count: { min: 1, max: 3 } }],
+          enemies: [{ kind: "Slime", count: { min: 4, max: 7 } }],
         },
       ],
     },
@@ -157,7 +156,7 @@ export const gameData: GameData = {
       totalValue: 1,
       spawner: [
         {
-          mapSize: 5,
+          mapSize: 10,
           value: 1,
           weight: 1,
           enemies: [{ kind: "Slime", count: { min: 5, max: 5 } }],

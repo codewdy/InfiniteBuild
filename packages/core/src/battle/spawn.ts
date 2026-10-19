@@ -30,55 +30,49 @@ export type MapDefinition = {
   xp: number;
 };
 
+export type SpawnUnit = Unit & { groupId: number };
+
 export function spawn(
   gameData: GameData,
   map: string,
   rng: RandomGenerator,
-): Unit[] {
+): SpawnUnit[] {
   const definition = gameData.mapDefinitions[map]!;
-  const { top, bottom } = gameData.config.map.visionRange;
-  let position = gameData.config.map.spawnMinimumSize;
+  const { right, top, bottom } = gameData.config.map.visionRange;
+  let position = -1;
   const spawners = definition.spawner.filter((spawner) => spawner.weight > 0);
-  const totalWeight = spawners.reduce(
-    (sum, spawner) => sum + spawner.weight,
-    0,
-  );
+  const weights = spawners.map((spawner) => spawner.weight);
 
-  const units: Unit[] = [];
+  const units: SpawnUnit[] = [];
+  let groupId = 0;
   let value = 0;
   while (value < definition.totalValue) {
-    let roll = Math.max(0, Math.min(totalWeight, rng.uniform(0, totalWeight)));
-    // If rounding leaves roll at the upper edge or a positive remainder,
-    // fall back to the last positive-weight spawner.
-    let selected = spawners[spawners.length - 1]!;
-    for (const spawner of spawners) {
-      if (roll < spawner.weight) {
-        selected = spawner;
-        break;
-      }
-      roll -= spawner.weight;
-    }
-
+    const selected = spawners[rng.weightedIndex(weights)]!;
+    if (groupId == 0) position = right - selected.mapSize;
     const end = position + selected.mapSize;
     for (const enemy of selected.enemies) {
       const count = rng.randInt(enemy.count.min, enemy.count.max);
       const unitDefinition = gameData.unitDefinitions[enemy.kind]!;
       for (let i = 0; i < count; i++) {
         units.push(
-          new RegularUnit(
-            unitDefinition,
-            {
-              x: rng.truncatedNorm(position, end),
-              y: rng.uniform(-top, bottom),
-            },
-            "Enemy",
-            rng,
+          Object.assign(
+            new RegularUnit(
+              unitDefinition,
+              {
+                x: rng.truncatedNorm(position, end),
+                y: rng.truncatedNorm(-top, bottom),
+              },
+              "Enemy",
+              rng,
+            ),
+            { groupId },
           ),
         );
       }
     }
     position = end;
     value += selected.value;
+    groupId += 1;
   }
   return units;
 }

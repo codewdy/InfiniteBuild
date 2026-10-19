@@ -95,8 +95,8 @@ export class RandomGenerator {
 
   /**
    * Samples a normal distribution with mean at the range midpoint and
-   * sigma = (max - min) / 4. Values beyond ±2 sigma are clamped to the
-   * boundaries (approximately 2.275% probability at each boundary).
+   * sigma = (max - min) / 6. Values beyond ±3 sigma are clamped to the
+   * boundaries (approximately 0.135% probability at each boundary).
    */
   truncatedNorm(min: number, max: number): number {
     this.validateRange(min, max);
@@ -106,10 +106,10 @@ export class RandomGenerator {
     const standardNormal =
       Math.sqrt(-2 * Math.log(1 - this.rand())) *
       Math.cos(2 * Math.PI * this.rand());
-    if (standardNormal <= -2) return min;
-    if (standardNormal >= 2) return max;
+    if (standardNormal <= -3) return min;
+    if (standardNormal >= 3) return max;
 
-    const weight = 0.5 + standardNormal / 4;
+    const weight = 0.5 + standardNormal / 6;
     return Math.max(min, Math.min(max, min * (1 - weight) + max * weight));
   }
 

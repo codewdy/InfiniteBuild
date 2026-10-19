@@ -1,4 +1,3 @@
-import { Position } from "../position.js";
 import { Unit } from "./unit.js";
 import { move, moveBySkillRange } from "./movement.js";
 import type { BattleContext } from "../battle.js";
@@ -8,6 +7,7 @@ import type { PlayerCombatProfile } from "../../player/state.js";
 
 export class PlayerUnit extends Unit {
   combatProfile?: PlayerCombatProfile;
+  private advancingGroupId: number | undefined;
   constructor() {
     super();
     this.kind = "Player";
@@ -30,25 +30,48 @@ export class PlayerUnit extends Unit {
     if (this.isDead || (this.rawStatus.attributes.speed ?? 0) <= 0) {
       return;
     }
-    const { minimumEnemyCount } = this.combatProfile!.config;
-    let enemyCount = 0;
-    for (const unit of ctx.units) {
-      if (
-        unit.faction !== this.faction &&
-        !unit.isDead &&
-        ctx.allSpawns.has(unit)
-      ) {
-        enemyCount += 1;
+    const pendingEnemies = ctx.pendingSpawns.filter(
+      (unit) => unit.faction !== this.faction && !unit.isDead,
+    );
+    if (
+      this.advancingGroupId !== undefined &&
+      !pendingEnemies.some((unit) => unit.groupId === this.advancingGroupId)
+    ) {
+      this.advancingGroupId = undefined;
+    }
+
+    if (this.advancingGroupId === undefined) {
+      const hasEnemies = [...ctx.units].some(
+        (unit) => unit.faction !== this.faction && !unit.isDead,
+      );
+      if (!hasEnemies && pendingEnemies.length > 0) {
+        this.advancingGroupId = pendingEnemies.reduce(
+          (groupId, unit) => Math.min(groupId, unit.groupId),
+          pendingEnemies[0]!.groupId,
+        );
       }
     }
-    if (enemyCount < minimumEnemyCount && ctx.pendingSpawns.length > 0) {
-      const target = ctx.pendingSpawns.reduce((nearest, unit) =>
-        Position.distance(this.position, unit.position) <
-        Position.distance(this.position, nearest.position)
-          ? unit
-          : nearest,
+
+    if (this.advancingGroupId !== undefined) {
+      const group = pendingEnemies.filter(
+        (unit) => unit.groupId === this.advancingGroupId,
       );
-      move(ctx, this, { x: 1, y: 0 }, this.rawStatus.attributes.speed ?? 0);
+      const distance = group.reduce(
+        (remaining, unit) =>
+          Math.max(
+            remaining,
+            unit.position.x -
+              this.position.x -
+              ctx.gameData.config.map.visionRange.right,
+          ),
+        0,
+      );
+      move(
+        ctx,
+        this,
+        { x: 1, y: 0 },
+        Math.min(this.rawStatus.attributes.speed ?? 0, distance),
+      );
       return;
     }
     moveBySkillRange(ctx, this);

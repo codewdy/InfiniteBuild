@@ -30,7 +30,6 @@ export type PlayerState = {
   };
   config: {
     autoAdvanceLevel: boolean;
-    minimumEnemyCount: number;
   };
 };
 

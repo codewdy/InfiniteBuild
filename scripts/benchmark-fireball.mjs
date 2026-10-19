@@ -56,8 +56,7 @@ function createBattle(count, flightFrames) {
     config: {
       // Zero height keeps all targets at y=0 for deterministic flight times.
       map: {
-        spawnMinimumSize: 60,
-        visionRange: { left: 0, right: 120, top: 0, bottom: 0 },
+        visionRange: { left: 0, right: 60, top: 0, bottom: 0 },
       },
       event: gameData.config.event,
     },
