@@ -76,8 +76,7 @@ export const fireball = GameData.defineSkill({
     `向射程 ${range} 内随机一个敌人发射火球，每帧飞行 ${projectileSpeed} 个距离单位，命中造成 ${damage} 点伤害并施加点燃，最多弹射 ${bounce - 1} 次。`,
   *cast(ctx, self, skill) {
     const { damage, projectileSpeed, bounce = 1, range } = skill.params;
-    yield* Skill.ready();
-    Projectile.fire({
+    const projectiles = Projectile.prepare({
       ctx,
       effect: "fireball",
       source: self,
@@ -90,6 +89,9 @@ export const fireball = GameData.defineSkill({
         unit.applyBuff(ignite.id, damage * 0.01, 20);
       },
     });
+    if (projectiles.length === 0) return;
+    yield* Skill.ready();
+    Projectile.fire(projectiles);
   },
 });
 
@@ -105,8 +107,7 @@ export const chainLightning = GameData.defineSkill({
     `向射程 ${range} 内随机一个敌人释放闪电，额外弹射 3 次，在同一帧对最多 4 个不同敌人各造成 ${damage} 点伤害。`,
   *cast(ctx, self, skill) {
     const { damage, range } = skill.params;
-    yield* Skill.ready();
-    Projectile.fire({
+    const projectiles = Projectile.prepare({
       ctx,
       source: self,
       from: self,
@@ -115,6 +116,9 @@ export const chainLightning = GameData.defineSkill({
       bounce: 4,
       onHit: (unit) => hit(ctx, self, unit, damage),
     });
+    if (projectiles.length === 0) return;
+    yield* Skill.ready();
+    Projectile.fire(projectiles);
   },
 });
 

@@ -87,14 +87,17 @@ export namespace Projectile {
     }
     state.ctx.taskScheduler.start(run(state));
   }
-  export function fire(arg: Arg): void {
-    if (arg.source.isDead || arg.from.isDead) return;
-    for (const target of searchTarget(arg, 1)) {
-      submit({
-        ...arg,
-        to: target,
-        hitUnit: [],
-      });
+  export function fire(states: State[]): void {
+    for (const state of states) {
+      submit(state);
     }
+  }
+  export function prepare(arg: Arg): State[] {
+    if (arg.source.isDead) return [];
+    return Array.from(searchTarget(arg, 1), (target) => ({
+      ...arg,
+      to: target,
+      hitUnit: [],
+    }));
   }
 }
